@@ -8,7 +8,7 @@ export interface Certification {
   credentialId?: string;
   /** Public page where anyone can verify it. */
   href?: string;
-  /** Picture of the certificate in public/images/certifications, e.g. "/images/certifications/google-ads.webp" (4:3). */
+  /** Picture of the certificate in public/images/certifications, e.g. "/images/certifications/google-ads.webp" (3:2). */
   image?: string;
   imageAlt?: string;
 }
