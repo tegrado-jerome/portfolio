@@ -4,12 +4,23 @@
 import { site, socials } from "../data/site";
 import { projects } from "../data/projects";
 import { awards } from "../data/awards";
+import { certifications } from "../data/certifications";
 import { isSet, onlySet } from "../data/placeholders";
 
 const home = new URL("/", Astro.site).href;
 const abs = (path: string) => new URL(path, Astro.site).href;
 const personId = `${home}#person`;
 const awardNames = awards.filter((a) => isSet(a.title)).map((a) => onlySet([a.title, a.issuer, a.year]).join(", "));
+const credentials = certifications
+  .filter((c) => isSet(c.name))
+  .map((c) => ({
+    "@type": "EducationalOccupationalCredential",
+    name: c.name,
+    credentialCategory: "certificate",
+    ...(isSet(c.issuer) && { recognizedBy: { "@type": "Organization", name: c.issuer } }),
+    ...(isSet(c.year) && { dateCreated: c.year }),
+    ...(isSet(c.href) && { url: c.href }),
+  }));
 
 const person = {
   "@type": "Person",
@@ -21,6 +32,7 @@ const person = {
   ...(isSet(site.email) && { email: `mailto:${site.email}` }),
   ...(isSet(site.portrait) && { image: abs(site.portrait) }),
   ...(awardNames.length && { award: awardNames }),
+  ...(credentials.length && { hasCredential: credentials }),
   ...(onlySet(socials.map((s) => s.href)).length && { sameAs: onlySet(socials.map((s) => s.href)) }),
 };
 

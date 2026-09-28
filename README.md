@@ -23,6 +23,7 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 | `projects.ts` | Selected work: cover, category, year, title, description and tools per project |
 | `skills.ts` | Skills by category: a category list beside a turning wheel of logos (in `public/images/skills` or a Font Awesome icon); empty list hides the section |
 | `awards.ts` | Awards and honours (year, award, issuer, optional proof link); empty list hides the section |
+| `certifications.ts` | Certifications (name, issuer, year, credential ID, verify link); empty list hides the section |
 | `testimonials.ts` | "Kind words" quotes — real ones only; empty list hides the section |
 | `assistant.ts` | Facts the AI chat may use about you |
 

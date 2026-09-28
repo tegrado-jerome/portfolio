@@ -11,6 +11,7 @@ const commands: Command[] = [
   { label: "Selected Work", group: "Go to", action: "goto", value: "work" },
   { label: "Skills", group: "Go to", action: "goto", value: "skills" },
   { label: "Awards", group: "Go to", action: "goto", value: "awards" },
+  { label: "Certifications", group: "Go to", action: "goto", value: "certifications" },
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
   { label: "Chat with me", group: "Action", action: "chat", value: "" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),

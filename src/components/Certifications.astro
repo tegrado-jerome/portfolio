@@ -1,0 +1,13 @@
+---
+import { certifications } from "../data/certifications";
+import CredentialLog from "./CredentialLog.astro";
+
+const entries = certifications.map((c) => ({
+  title: c.name,
+  year: c.year,
+  href: c.href,
+  lines: [c.issuer, c.credentialId ? `ID ${c.credentialId}` : ""],
+}));
+---
+
+<CredentialLog id="certifications" title="Certifications" entries={entries} />

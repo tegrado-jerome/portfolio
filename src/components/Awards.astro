@@ -1,58 +1,13 @@
 ---
-// Awards printed as a terminal log (matching the hero prompt bar and the ~/ section paths):
-// one ✓ line per award.
 import { awards } from "../data/awards";
-import SectionHead from "./SectionHead.astro";
+import CredentialLog from "./CredentialLog.astro";
+
+const entries = awards.map((a) => ({
+  title: a.title,
+  year: a.year,
+  href: a.href,
+  lines: [a.issuer, ...(a.detail ? a.detail.split(" · ") : [])],
+}));
 ---
 
-{
-  awards.length > 0 && (
-    <section id="awards" class="shell section" aria-labelledby="awards-title">
-      <div class="pane" data-pane="awards">
-      <SectionHead id="awards-title" title="Awards" meta={`${awards.length} total`} />
-      <!-- One award per block: the ✓ year and title on the first line, then each detail on its own
-           indented line, so long details list neatly instead of wrapping into a crowded paragraph. -->
-      <div class="log font-mono text-small sm:text-body">
-        <ul class="flex flex-col gap-5">
-          {awards.map((a, i) => (
-            <li data-reveal style={`--i:${i}`} class="line grid grid-cols-[auto_auto_minmax(0,1fr)] gap-x-[1.2ch] py-1">
-              <span class="text-online" aria-hidden="true">✓</span>
-              <span class="text-ink tabular-nums">{a.year}</span>
-              <span>
-                {a.href ? (
-                  <a href={a.href} target="_blank" rel="noopener noreferrer" class="link-strong">
-                    {a.title}
-                  </a>
-                ) : (
-                  <span class="text-ink">{a.title}</span>
-                )}
-              </span>
-              <span class="col-span-2 col-start-2 mt-1 block text-small leading-[1.7] text-muted">
-                {[a.issuer, ...(a.detail ? a.detail.split(" · ") : [])].map((part) => (
-                  <span class="block pl-[2ch] -indent-[2ch]">
-                    <span aria-hidden="true">└ </span>
-                    {part}
-                  </span>
-                ))}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      </div>
-    </section>
-  )
-}
-
-<style>
-  /* Hovering a line highlights it like a selected row in a terminal. */
-  .line {
-    margin-inline: -8px;
-    padding-inline: 8px;
-    border-radius: 3px;
-    transition: background-color 0.2s ease;
-  }
-  .line:hover {
-    background: color-mix(in srgb, var(--color-ink) 5%, transparent);
-  }
-</style>
+<CredentialLog id="awards" title="Awards" entries={entries} />

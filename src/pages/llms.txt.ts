@@ -6,6 +6,7 @@ import { experience } from "../data/experience";
 import { projects } from "../data/projects";
 import { skillGroups } from "../data/skills";
 import { awards } from "../data/awards";
+import { certifications } from "../data/certifications";
 import { isSet, onlySet } from "../data/placeholders";
 
 export const GET: APIRoute = ({ site: siteUrl }) => {
@@ -43,6 +44,13 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
   if (honours.length) {
     lines.push("## Awards", "");
     honours.forEach((a) => lines.push(`- ${onlySet([a.title, a.detail, a.issuer, a.year]).join(", ")}`));
+    lines.push("");
+  }
+
+  const certs = certifications.filter((c) => isSet(c.name));
+  if (certs.length) {
+    lines.push("## Certifications", "");
+    certs.forEach((c) => lines.push(`- ${onlySet([c.name, c.issuer, c.year]).join(", ")}`));
     lines.push("");
   }
 

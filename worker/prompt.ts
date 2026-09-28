@@ -6,6 +6,7 @@ import { projects } from "../src/data/projects";
 import { assistant } from "../src/data/assistant";
 import { skillGroups } from "../src/data/skills";
 import { awards } from "../src/data/awards";
+import { certifications } from "../src/data/certifications";
 import { isSet, onlySet } from "../src/data/placeholders";
 
 /** Random marker; if it ever appears in a reply, the reply is leaking the system prompt. */
@@ -30,6 +31,10 @@ function knowledge() {
 
   for (const a of awards.filter((a) => isSet(a.title))) {
     lines.push(`Award: ${onlySet([a.title, a.detail, a.issuer, a.year]).join(", ")}`);
+  }
+
+  for (const c of certifications.filter((c) => isSet(c.name))) {
+    lines.push(`Certification: ${onlySet([c.name, c.issuer, c.year]).join(", ")}`);
   }
 
   if (isSet(site.email)) lines.push(`Email: ${site.email}`);
