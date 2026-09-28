@@ -287,6 +287,32 @@ import Icon from "./Icon.astro";
     }
   }
 
+  // Scrolling over the open sheet moves only the chat, never the page behind it.
+  // Only the log and the composer scroll; at their ends (or anywhere else on the sheet) the gesture stops.
+  function canScroll(target: EventTarget | null, deltaY: number) {
+    const el = (target as Element | null)?.closest<HTMLElement>("[data-chat-log], textarea");
+    if (!el) return false;
+    return deltaY < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+  }
+  let touchY = 0;
+  sheet.addEventListener(
+    "wheel",
+    (e) => {
+      if (!canScroll(e.target, e.deltaY)) e.preventDefault();
+    },
+    { passive: false },
+  );
+  sheet.addEventListener("touchstart", (e) => (touchY = e.touches[0].clientY), { passive: true });
+  sheet.addEventListener(
+    "touchmove",
+    (e) => {
+      const y = e.touches[0].clientY;
+      if (!canScroll(e.target, touchY - y)) e.preventDefault();
+      touchY = y;
+    },
+    { passive: false },
+  );
+
   openers.forEach((b) => b.addEventListener("click", () => setOpen(!sheet.hasAttribute("data-open"))));
   sheet.querySelector("[data-chat-close]")!.addEventListener("click", () => setOpen(false));
   sheet.addEventListener("keydown", (e) => {
