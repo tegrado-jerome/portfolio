@@ -19,6 +19,12 @@ export const site = {
   // Optional: a resume link shown in the header. Leave empty to hide it.
   resume: "",
 
+  // Status line above your name. Leave either empty to hide it.
+  now: {
+    status: "[WHAT YOU'RE WORKING ON NOW]",
+    availability: "[AVAILABILITY, E.G. OPEN TO PROJECTS FROM <MONTH>]",
+  },
+
   // Full-screen loading intro.
   preloader: {
     label: "Portfolio — Jerome Tegrado",

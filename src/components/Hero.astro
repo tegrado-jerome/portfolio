@@ -5,6 +5,17 @@ import { site } from "../data/site";
 <section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
+      {
+        (site.now.status || site.now.availability) && (
+          <p data-reveal class="mb-[clamp(20px,3vw,28px)] flex items-start gap-2.5 text-[13px] text-ink-soft">
+            <span class="now-dot relative mt-[6px] size-[7px] shrink-0 rounded-full bg-accent" aria-hidden="true" />
+            <span>
+              <span class="eyebrow mr-1.5 text-[11px] text-ink">Now</span>
+              {[site.now.status, site.now.availability].filter(Boolean).join(" · ")}
+            </span>
+          </p>
+        )
+      }
       <h1
         id="hero-title"
         data-reveal
@@ -48,6 +59,25 @@ import { site } from "../data/site";
 </section>
 
 <style>
+  /* A slow ping around the "Now" dot — a live-status signal, not decoration. */
+  @media (prefers-reduced-motion: no-preference) {
+    .now-dot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: inherit;
+      animation: now-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+  }
+  @keyframes now-ping {
+    75%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
   /* Each word rises out of its own mask as the preloader lifts. */
   .hero-word {
     display: inline-block;
