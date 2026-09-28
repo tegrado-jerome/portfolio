@@ -3,10 +3,7 @@ import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import { site } from "../data/site";
 import Icon from "./Icon.astro";
 
-const links = [
-  { label: "Work", href: "#work" },
-  { label: "Contact", href: "#contact" },
-];
+const cta = "Let's Talk";
 ---
 
 <header
@@ -14,44 +11,30 @@ const links = [
   class="sticky top-0 z-40 bg-paper/45 backdrop-blur-lg backdrop-saturate-150 transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(.4,0,.2,1)] [&.is-hidden]:-translate-y-full [&.is-scrolled]:shadow-[0_1px_0_var(--color-line)]"
 >
   <div class="flex items-center justify-between px-5 py-4 sm:px-[clamp(20px,10vw,200px)] sm:py-5">
-    <a href="/" data-to-top class="group flex items-center gap-3" aria-label={`${site.name} — home`}>
-      <span
-        class="grid size-10 place-items-center rounded-full border border-ink font-serif text-[19px] leading-none tracking-tight transition-colors duration-300 group-hover:bg-ink group-hover:text-paper"
-        aria-hidden="true">JT</span
-      >
+    <a href="/" data-to-top class="group flex items-center gap-3" aria-label={`${site.name}, home`}>
+      <span class="logo size-11 bg-current text-ink transition-colors duration-300 group-hover:text-accent" aria-hidden="true"></span>
       <span class="eyebrow hidden sm:inline">{site.name}</span>
     </a>
 
-    <nav aria-label="Primary" class="ml-auto">
-      <ul class="flex items-center gap-5 sm:gap-9">
-        {
-          links.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                data-nav-link
-                aria-label={link.label}
-                class="roll eyebrow -my-3 inline-block py-3 text-muted transition-colors duration-150 ease-in-out hover:text-ink aria-[current=true]:text-ink"
-              >
-                <span class="roll-word" aria-hidden="true">
-                  {[...link.label].map((char, i) => (
-                    <span style={`--i:${i}`}>{char}</span>
-                  ))}
-                </span>
-              </a>
-            </li>
-          ))
-        }
-        {
-          site.resume && (
-            <li>
-              <a href={site.resume} target="_blank" rel="noopener" class="eyebrow text-muted transition-colors hover:text-ink">
-                Resume
-              </a>
-            </li>
-          )
-        }
-      </ul>
+    <nav aria-label="Primary" class="ml-auto flex items-center gap-5">
+      {
+        site.resume && (
+          <a href={site.resume} target="_blank" rel="noopener" class="eyebrow text-muted transition-colors hover:text-ink max-sm:hidden">
+            Resume
+          </a>
+        )
+      }
+      <a
+        href="#contact"
+        aria-label={cta}
+        class="roll eyebrow rounded-full border border-ink px-4 py-2 text-[11px] text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+      >
+        <span class="roll-word" aria-hidden="true">
+          {[...cta].map((char, i) => (
+            <span style={`--i:${i}`}>{char}</span>
+          ))}
+        </span>
+      </a>
     </nav>
 
     <!-- JS-only controls stay hidden without scripting. -->
@@ -77,6 +60,12 @@ const links = [
 </header>
 
 <style>
+  /* The logo image is used as a mask, so it takes the current text colour in both themes. */
+  .logo {
+    display: block;
+    mask: url("/logo.png") center / contain no-repeat;
+  }
+
   /* Letters roll up to a copy of themselves on hover (bleibtgleich.dev, art-yakushev.com). */
   .roll-word {
     display: inline-flex;
@@ -137,21 +126,4 @@ const links = [
   );
   // Keep the header visible while keyboard users tab through it.
   header.addEventListener("focusin", () => header.classList.remove("is-hidden"));
-
-  const links = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
-  const sections = [...links]
-    .map((a) => document.querySelector<HTMLElement>(a.hash))
-    .filter((el): el is HTMLElement => el !== null);
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        links.forEach((a) =>
-          a.hash === `#${entry.target.id}` ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current"),
-        );
-      }
-    },
-    { rootMargin: "-45% 0px -50% 0px" },
-  );
-  sections.forEach((s) => io.observe(s));
 </script>
