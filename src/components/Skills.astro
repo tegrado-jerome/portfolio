@@ -1,0 +1,45 @@
+---
+// Logo tiles, each with the tool's own logo above its name (after the "What I do" skills grid the user picked).
+import { skills } from "../data/skills";
+import Icon from "./Icon.astro";
+---
+
+{
+  skills.length > 0 && (
+    <section id="skills" class="shell py-[clamp(56px,8vw,110px)]" aria-labelledby="skills-title">
+      <h2 id="skills-title" data-reveal class="eyebrow mb-[clamp(28px,4vw,48px)] text-[11px] text-muted">
+        Skills
+      </h2>
+      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4">
+        {skills.map((s, i) => (
+          <li data-reveal style={`--i:${i}`}>
+            <div class="tile flex aspect-[5/4] flex-col items-center justify-center gap-4 rounded-xl border border-line p-4 text-center">
+              {typeof s.logo === "string" ? (
+                <img src={s.logo} alt="" width="48" height="48" loading="lazy" class="size-11 object-contain" />
+              ) : (
+                <Icon icon={s.logo} class="text-[44px] text-accent" />
+              )}
+              <span class="eyebrow text-[10px] text-ink">{s.name}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .tile {
+    background: color-mix(in srgb, var(--color-paper) 45%, white);
+    transition:
+      translate 0.4s var(--ease-out-soft),
+      border-color 0.4s var(--ease-out-soft);
+  }
+  :global([data-theme="dark"]) .tile {
+    background: color-mix(in srgb, var(--color-paper) 90%, white);
+  }
+  .tile:hover {
+    translate: 0 -4px;
+    border-color: var(--color-ink);
+  }
+</style>

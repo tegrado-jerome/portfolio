@@ -4,6 +4,7 @@ import { site, socials } from "../src/data/site";
 import { experience } from "../src/data/experience";
 import { projects } from "../src/data/projects";
 import { assistant } from "../src/data/assistant";
+import { skills } from "../src/data/skills";
 import { isSet, onlySet } from "../src/data/placeholders";
 
 /** Random marker; if it ever appears in a reply, the reply is leaking the system prompt. */
@@ -21,6 +22,8 @@ function knowledge() {
     const details = onlySet([p.description, p.category, p.year, onlySet(p.technologies).join(", "), p.href]);
     lines.push(`Project: ${p.title}${details.length ? `: ${details.join(" | ")}` : ""}`);
   }
+  const skillNames = onlySet(skills.map((s) => s.name));
+  if (skillNames.length) lines.push(`Skills and tools: ${skillNames.join(", ")}`);
 
   if (isSet(site.email)) lines.push(`Email: ${site.email}`);
   for (const s of socials.filter((s) => isSet(s.href))) lines.push(`${s.label}: ${s.href}`);
