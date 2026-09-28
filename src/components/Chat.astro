@@ -13,7 +13,7 @@ import Icon from "./Icon.astro";
   aria-controls="chat"
   aria-expanded="false"
   aria-label="Chat with me"
-  class="chat-fab group fixed right-4 bottom-4 z-30 hidden size-14 rounded-full border-2 border-paper bg-ink shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] place-items-center in-[.js]:grid sm:right-6 sm:bottom-6"
+  class="chat-fab is-tucked group fixed right-4 bottom-4 z-30 hidden size-14 rounded-full border-2 border-paper bg-ink shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] place-items-center in-[.js]:grid sm:right-6 sm:bottom-6"
 >
   {
     site.chatAvatar ? (
@@ -539,12 +539,15 @@ import Icon from "./Icon.astro";
   });
   document.addEventListener("chat:open", () => setOpen(true));
   // Questions asked from elsewhere on the page (the hero prompt bar) open the chat and send.
-  // Tuck the round button away while the hero prompt bar is visible.
+  // Tuck the round button away while the hero prompt bar is visible. It starts tucked so it doesn't flash on load;
+  // pages without the prompt bar show it right away.
   const heroAsk = document.querySelector("[data-hero-ask]");
   if (heroAsk) {
     new IntersectionObserver(([entry]) => {
       openers.forEach((b) => b.classList.toggle("is-tucked", entry.isIntersecting));
     }).observe(heroAsk);
+  } else {
+    openers.forEach((b) => b.classList.remove("is-tucked"));
   }
   document.addEventListener("chat:ask", (e) => {
     setOpen(true);
