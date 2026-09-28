@@ -23,7 +23,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta name="theme-color" content="#faf8f4" />
+    <meta name="theme-color" content="#f2f3ee" />
+    <link rel="author" href="/humans.txt" />
 
     <meta property="og:type" content="profile" />
     <meta property="og:locale" content="en_US" />
@@ -45,17 +46,44 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     />
 
     <script is:inline>
-      document.documentElement.classList.add("js");
+      // Runs before first paint so the saved or system theme never flashes.
+      (function () {
+        var root = document.documentElement;
+        root.classList.add("js");
+        var theme;
+        try {
+          theme = localStorage.getItem("theme");
+        } catch (e) {}
+        if (!theme && matchMedia("(prefers-color-scheme: dark)").matches) theme = "night";
+        if (theme === "ink" || theme === "night") {
+          root.dataset.theme = theme;
+          document.querySelector('meta[name="theme-color"]').content = theme === "ink" ? "#ffffff" : "#0b1320";
+        }
+      })();
     </script>
     <slot name="head" />
   </head>
   <body>
+    <!--
+      Hello, source reader.
+      Built with Astro, Tailwind CSS and a little vanilla TypeScript — no frameworks.
+      Colophon: /humans.txt · For AI assistants: /llms.txt · Press ⌘K / Ctrl+K to explore.
+    -->
     <a
       href="#main"
       class="eyebrow sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-ink focus:px-4 focus:py-3 focus:text-paper"
       >Skip to content</a
     >
     <slot />
+
+    <script>
+      // A note for anyone who opens DevTools.
+      console.log(
+        "%cJerome Tegrado%c\nCurious how it's built? See /humans.txt, or press ⌘K / Ctrl+K.",
+        "font: 28px 'Instrument Serif', Georgia, serif",
+        "font: 12px 'Hanken Grotesk', system-ui, sans-serif; color: #5b6577",
+      );
+    </script>
 
     <script>
       // "Back to top" links point at "/" — on the home page, scroll up instead of reloading,

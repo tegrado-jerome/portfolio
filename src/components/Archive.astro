@@ -10,7 +10,7 @@ const cards = ["right", "middle", "left"] as const;
 
 {
   archive.show && (
-    <section class="shell pt-[clamp(30px,5vw,60px)] pb-[clamp(60px,8vw,110px)]" aria-labelledby="archive-title">
+    <section id="archive" class="shell pt-[clamp(30px,5vw,60px)] pb-[clamp(60px,8vw,110px)]" aria-labelledby="archive-title">
       <div class="mb-[clamp(50px,8vw,100px)] h-px bg-line" aria-hidden="true" />
       <div class="archive-grid grid items-center gap-[clamp(24px,5vw,60px)] max-md:justify-items-start">
         <h2 id="archive-title" data-reveal class="font-serif text-[clamp(42px,5vw,72px)] leading-none font-normal">
@@ -79,7 +79,7 @@ const cards = ["right", "middle", "left"] as const;
     top: 22px;
     width: 313px;
     height: 278px;
-    background: #2c2d31;
+    background: var(--color-ink);
     border-radius: 22px;
     box-shadow: 0 0 22px 4px rgb(0 0 0 / 0.15);
   }
@@ -108,10 +108,10 @@ const cards = ["right", "middle", "left"] as const;
     background: var(--color-ph);
   }
   .folder__ph[data-tone="1"] {
-    background: #ddd7cc;
+    background: color-mix(in srgb, var(--color-ph), var(--color-ink) 8%);
   }
   .folder__ph[data-tone="2"] {
-    background: #f3efe8;
+    background: color-mix(in srgb, var(--color-ph), var(--color-paper) 60%);
   }
 
   .folder__card--right {

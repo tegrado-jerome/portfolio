@@ -1,5 +1,7 @@
 ---
+import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import { site } from "../data/site";
+import Icon from "./Icon.astro";
 
 const links = [
   { label: "Work", href: "#work" },
@@ -21,7 +23,7 @@ const links = [
       <span class="eyebrow hidden tracking-[0.2em] sm:inline">{site.name}</span>
     </a>
 
-    <nav aria-label="Primary">
+    <nav aria-label="Primary" class="ml-auto">
       <ul class="flex items-center gap-5 sm:gap-9">
         {
           links.map((link) => (
@@ -47,11 +49,47 @@ const links = [
         }
       </ul>
     </nav>
+
+    <!-- JS-only controls stay hidden without scripting. -->
+    <div class="ml-5 hidden items-center gap-1 in-[.js]:flex sm:ml-7">
+      <button
+        type="button"
+        data-theme-toggle
+        class="eyebrow -my-2 inline-flex items-center gap-2 px-2 py-3 text-muted transition-colors hover:text-ink"
+      >
+        <Icon icon={faCircleHalfStroke} class="text-[13px]" />
+        <span data-theme-label class="hidden lg:inline">Paper</span>
+      </button>
+      <button
+        type="button"
+        data-palette-open
+        class="eyebrow -my-2 hidden items-center rounded-[3px] border border-line px-2 py-1 text-[11px] text-muted transition-colors hover:border-ink hover:text-ink lg:inline-flex"
+        aria-label="Open command menu"
+      >
+        <kbd data-shortcut class="font-sans">Ctrl K</kbd>
+      </button>
+    </div>
   </div>
 </header>
 
 <script>
+  import { currentTheme, nextTheme, setTheme } from "../scripts/theme";
+
   const header = document.getElementById("site-header")!;
+
+  // Theme toggle cycles Paper → Ink → Night.
+  const toggle = header.querySelector<HTMLButtonElement>("[data-theme-toggle]")!;
+  const toggleLabel = toggle.querySelector("[data-theme-label]")!;
+  const title = (theme: string) => theme[0].toUpperCase() + theme.slice(1);
+  const syncToggle = () => {
+    toggleLabel.textContent = title(currentTheme());
+    toggle.setAttribute("aria-label", `Theme: ${title(currentTheme())}. Switch to ${title(nextTheme())}`);
+  };
+  toggle.addEventListener("click", () => setTheme(nextTheme()));
+  document.addEventListener("themechange", syncToggle);
+  syncToggle();
+
+  if (/Mac|iPhone|iPad/.test(navigator.userAgent)) header.querySelector("[data-shortcut]")!.textContent = "⌘K";
 
   // Hide on scroll down, show on scroll up.
   let last = window.scrollY;
