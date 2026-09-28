@@ -1,9 +1,8 @@
 ---
-// TUI title bar (lazygit / btop): the app name with its status on the left, bracketed commands on the right.
+// TUI title bar (lazygit / btop): the logo and app name on the left, bracketed commands on the right.
 import { faCircleHalfStroke, faAt } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site } from "../data/site";
 import Icon from "./Icon.astro";
-import OnlineStatus from "./OnlineStatus.astro";
 ---
 
 <header
@@ -14,7 +13,6 @@ import OnlineStatus from "./OnlineStatus.astro";
     <a href="/" data-to-top class="group flex items-center gap-3 text-small" aria-label={`${site.name}, home`}>
       <span class="logo size-8 bg-current text-ink transition-colors duration-200 group-hover:text-accent" aria-hidden="true"></span>
       <span class="hidden text-ink sm:inline" aria-hidden="true"><span class="text-accent">~/</span>jerome-tegrado</span>
-      <OnlineStatus label="Online" hideLabel />
     </a>
 
     <!-- Bracketed commands, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
