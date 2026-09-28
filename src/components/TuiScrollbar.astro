@@ -1,5 +1,5 @@
 ---
-// The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░ track with a █ thumb in the mono font,
+// The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
 // matching the boot screen's progress bar. Mouse devices only; touch screens keep their own thin native bar.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
 ---
@@ -28,8 +28,7 @@
       bottom: 6px;
       z-index: 36;
       display: block;
-      width: 10px;
-      font: 10px/10px var(--font-mono);
+      width: 8px;
       user-select: none;
     }
   }
@@ -39,27 +38,26 @@
       bottom: 38px;
     }
   }
+  /* Drawn in CSS rather than with ░ █ glyphs, which the web font doesn't have: a 2px dither for the track,
+     solid rows with a 1px gap for the thumb. */
   .track {
     position: absolute;
     inset: 0;
-    overflow: hidden;
-    color: var(--color-line);
-    white-space: pre;
+    background: repeating-conic-gradient(var(--color-muted) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+    opacity: 0.5;
     cursor: pointer;
   }
   .bar {
     position: absolute;
     left: 0;
     width: 100%;
-    overflow: hidden;
-    color: var(--color-muted);
-    white-space: pre;
+    background: repeating-linear-gradient(var(--color-bar) 0 9px, transparent 9px 10px);
     cursor: grab;
-    transition: color 0.2s ease;
+    --color-bar: var(--color-muted);
   }
   .tui-scroll:hover .bar,
   .bar.is-dragging {
-    color: var(--color-ink);
+    --color-bar: var(--color-ink);
   }
   .bar.is-dragging {
     cursor: grabbing;
@@ -71,19 +69,17 @@
   if (root && matchMedia("(hover: hover) and (pointer: fine)").matches) {
     const track = root.querySelector<HTMLElement>("[data-track]")!;
     const thumb = root.querySelector<HTMLElement>("[data-thumb]")!;
-    const LINE = 10; // px per glyph row
+    const LINE = 10; // px per block row
     let thumbRows = 0;
     let trackRows = 0;
 
     const doc = document.documentElement;
     const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
 
-    // Rebuild the glyph columns to fit the current height; the thumb is sized to how much of the page is visible.
+    // The thumb is sized in whole rows to how much of the page is visible.
     function layout() {
       trackRows = Math.floor(root!.clientHeight / LINE);
-      track.textContent = "░\n".repeat(trackRows);
       thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
-      thumb.textContent = "█\n".repeat(thumbRows);
       thumb.style.height = `${thumbRows * LINE}px`;
       root!.style.visibility = doc.scrollHeight > innerHeight + 1 ? "visible" : "hidden";
       position();
