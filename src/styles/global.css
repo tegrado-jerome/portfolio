@@ -33,6 +33,11 @@
 }
 
 @layer base {
+  /* Thin, palette-coloured scrollbars (page, chat log, command menu) that stay native and usable. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-ink) 30%, transparent) transparent;
+  }
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
