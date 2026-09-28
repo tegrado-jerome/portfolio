@@ -1,43 +1,44 @@
 ---
-// Full-screen boot screen (a TUI boot log, like terminal-style portfolios): boot lines tick off with [ ok ]
-// over a text progress bar, then the screen slides up. Only shown when JS runs.
+// Full-screen boot log (a Linux boot / Hyper-style terminal): timestamped lines tick off with "ok" at the top left,
+// the path and a block progress bar sit on the bottom line, then the screen slides up. Only shown when JS runs.
 const steps = [
   "loading portfolio",
-  "mounting ~/skills",
   "mounting ~/selected-work",
+  "mounting ~/skills",
   "mounting ~/awards",
   "starting ai chat",
   "status: online",
 ];
-const CELLS = 24;
+const CELLS = 12;
 ---
 
 <div id="preloader" class="preloader" role="status" aria-label="Loading">
-  <div class="boot">
-    <p class="boot-title"><span>~/</span>jerome-tegrado</p>
-    <ol class="boot-log">
-      {
-        steps.map((step) => (
-          <li>
-            <span class="ok">[ ok ]</span> {step}
-          </li>
-        ))
-      }
-    </ol>
-    <p class="boot-bar" aria-hidden="true">
-      [<span id="preBar">{"░".repeat(CELLS)}</span>] <span id="preCount">0</span>%
-    </p>
-  </div>
+  <ol class="boot-log">
+    {
+      steps.map((step) => (
+        <li>
+          <span class="time">[0.000]</span> <span class="ok">ok</span> {step}
+        </li>
+      ))
+    }
+  </ol>
+  <p class="boot-foot">
+    <span><span class="path">~/</span>jerome-tegrado</span>
+    <span class="progress" aria-hidden="true">
+      <span id="preBar" class="blocks">{Array.from({ length: CELLS }, () => <i />)}</span>
+      <span class="pct"><span id="preCount">0</span>%</span>
+    </span>
+  </p>
 </div>
 
-<script is:inline define:vars={{ CELLS }}>
+<script is:inline>
   (function () {
     var root = document.documentElement;
     var pre = document.getElementById("preloader");
     var countEl = document.getElementById("preCount");
-    var barEl = document.getElementById("preBar");
     if (!pre) return;
     var lines = pre.querySelectorAll(".boot-log li");
+    var cells = pre.querySelectorAll("#preBar i");
 
     function done() {
       root.classList.remove("is-preloading");
@@ -61,8 +62,9 @@ const CELLS = 24;
 
     root.classList.add("is-preloading");
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var duration = reduce ? 400 : 1200;
+    var duration = reduce ? 400 : 3000;
     var start = null;
+    var shown = 0;
 
     function finish() {
       pre.classList.add("is-done");
@@ -75,13 +77,17 @@ const CELLS = 24;
     function tick(now) {
       if (start === null) start = now;
       var t = Math.min((now - start) / duration, 1);
-      var pct = Math.round((1 - Math.pow(1 - t, 3)) * 100); // easeOutCubic
-      var filled = Math.round((pct / 100) * CELLS);
+      var pct = Math.round((1 - Math.pow(1 - t, 2)) * 100); // easeOutQuad: steady, slowing a little at the end
+      var filled = Math.round((pct / 100) * cells.length);
       countEl.textContent = pct;
-      barEl.textContent = "█".repeat(filled) + "░".repeat(CELLS - filled);
-      // Each boot line ticks off as the bar passes its share.
-      for (var i = 0; i < lines.length; i++) {
-        if (pct >= ((i + 1) / (lines.length + 1)) * 100) lines[i].classList.add("is-on");
+      for (var c = 0; c < cells.length; c++) cells[c].className = c < filled ? "on" : "";
+      // The lines appear at even times across the boot, stamped with the real time since it began.
+      // The cursor sits at the end of the newest line.
+      while (shown < lines.length && t >= (shown + 1) / (lines.length + 1)) {
+        if (shown > 0) lines[shown - 1].classList.remove("is-last");
+        lines[shown].querySelector(".time").textContent = "[" + ((now - start) / 1000).toFixed(3) + "]";
+        lines[shown].classList.add("is-on", "is-last");
+        shown++;
       }
       if (t < 1) requestAnimationFrame(tick);
       else setTimeout(finish, reduce ? 60 : 320);
@@ -96,12 +102,14 @@ const CELLS = 24;
     position: fixed;
     inset: 0;
     z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(22px, 4vw, 48px);
     background: var(--color-night);
     color: #e6e9ee;
     font-family: var(--font-mono);
+    font-size: var(--text-small);
+    line-height: 1.95;
     transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
     will-change: transform;
   }
@@ -115,49 +123,66 @@ const CELLS = 24;
     overflow: hidden;
   }
 
-  /* A pane like the site's, in the night palette: title on the top border. */
-  /* Sized to its lines, so the log sits centred with even space on both sides. */
-  .boot {
-    position: relative;
-    width: fit-content;
-    max-width: 100%;
-    padding: 28px 22px 20px;
-    border: 1px solid rgb(255 255 255 / 0.55);
-    border-radius: 2px;
-    font-size: var(--text-body);
-    line-height: 1.9;
-  }
-  .boot-title {
-    position: absolute;
-    top: -0.8em;
-    left: 12px;
-    padding-inline: 8px;
-    background: var(--color-night);
-    font-size: var(--text-small);
-    line-height: 1.6;
-  }
-  .boot-title span {
-    color: #8fb0e0;
-  }
   .boot-log li {
     opacity: 0;
-    transform: translateY(4px);
-    transition:
-      opacity 0.25s ease,
-      transform 0.25s ease;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
   }
   .boot-log li.is-on {
     opacity: 1;
-    transform: none;
+  }
+  .time,
+  .pct {
+    color: rgb(230 233 238 / 0.45);
+    font-variant-numeric: tabular-nums;
   }
   .ok {
     color: #5cc493;
   }
-  .boot-bar {
-    margin-top: 10px;
-    color: rgb(255 255 255 / 0.85);
+  .path {
+    color: #8fb0e0;
+  }
+  /* A block cursor after the newest line. */
+  .boot-log li.is-last::after {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: -0.18em;
+    background: currentColor;
+  }
+
+  /* The bottom line: the path on the left, the block bar and % on the right. The blocks are drawn in CSS since
+     the web font has no block glyphs. */
+  .boot-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     white-space: nowrap;
-    font-variant-numeric: tabular-nums;
+  }
+  .progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .blocks {
+    display: inline-flex;
+    gap: 2px;
+  }
+  .blocks i {
+    /* A touch narrower on the smallest phones, so the bottom line stays on one line. */
+    width: clamp(4px, 1.6vw, 6px);
+    height: 12px;
+    background: rgb(230 233 238 / 0.14);
+  }
+  .blocks i.on {
+    background: #e6e9ee;
+  }
+  .pct {
+    min-width: 4ch;
+    text-align: right;
   }
 
   @media (prefers-reduced-motion: reduce) {
