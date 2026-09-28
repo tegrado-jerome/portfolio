@@ -1,6 +1,6 @@
 ---
-// The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
-// matching the boot screen's progress bar. The same on every device and browser.
+// The page scrollbar drawn as a terminal block (btop / lazygit): a █-style thumb on an invisible track, matching the
+// boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
 ---
 
@@ -38,13 +38,11 @@
       bottom: 38px;
     }
   }
-  /* Drawn in CSS rather than with ░ █ glyphs, which the web font doesn't have: a 2px dither for the track,
-     solid rows with a 1px gap for the thumb. */
+  /* Only the thumb shows. The track is invisible but still takes clicks. The thumb is drawn in CSS rather than
+     with █ glyphs, which the web font doesn't have: solid rows with a 1px gap. */
   .track {
     position: absolute;
     inset: 0;
-    background: repeating-conic-gradient(var(--color-muted) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
-    opacity: 0.3;
     cursor: pointer;
   }
   .bar {
