@@ -67,4 +67,22 @@ const MediaTag = href ? "a" : "div";
   .media[data-locked]:hover .lock {
     opacity: 1;
   }
+
+  /* Covers unveil upward with a slight zoom-out as they scroll in (gianlucagradogna.com, olhalazarieva.com). */
+  :global(.js) .media {
+    clip-path: inset(100% 0 0 0);
+    transition:
+      clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 0.2s ease;
+  }
+  :global(.js) .media > :not(.lock) {
+    transform: scale(1.12);
+    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  :global(.js) .project:global(.is-visible) .media {
+    clip-path: inset(0);
+  }
+  :global(.js) .project:global(.is-visible) .media > :not(.lock) {
+    transform: none;
+  }
 </style>
