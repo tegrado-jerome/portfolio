@@ -2,49 +2,46 @@
 import { site } from "../data/site";
 ---
 
-<section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
-  <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
-    <div class="max-w-[640px]">
-      <h1
-        id="hero-title"
-        data-reveal
-        class="hero-title mb-[clamp(20px,3vw,32px)] font-serif text-[clamp(52px,7.5vw,96px)] leading-[0.92] font-normal tracking-[-0.01em]"
-      >
-        {
-          site.name.split(" ").map((word, i) => (
-            <>
-              <span class="hero-word" style={`--w:${i}`}>
-                <span>{word}</span>
-              </span>{" "}
-            </>
-          ))
-        }
-      </h1>
-      <p data-reveal style="--i:1" class="mb-6 text-[15px] text-ink">{site.headline}</p>
-      <p data-reveal style="--i:2" class="text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
-    </div>
+<!-- Centered name and intro, with the portrait as a wide band below (after pacomepertant.com). -->
+<section id="top" class="shell pt-[clamp(48px,8vw,110px)] text-center" aria-labelledby="hero-title">
+  <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-[11px] text-muted">{site.headline}</p>
+  <h1
+    id="hero-title"
+    data-reveal
+    class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-[clamp(52px,8.5vw,128px)] leading-[0.9] font-normal tracking-[-0.02em]"
+  >
+    {
+      site.name.split(" ").map((word, i) => (
+        <>
+          <span class="hero-word" style={`--w:${i}`}>
+            <span>{word}</span>
+          </span>{" "}
+        </>
+      ))
+    }
+  </h1>
+  <p data-reveal style="--i:1" class="mx-auto max-w-[52ch] text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
 
-    <figure
-      id="portrait"
-      data-reveal
-      style="--i:2"
-      class="group relative m-0 aspect-[4/5] w-full max-w-[260px] overflow-hidden rounded-[2px] bg-ph max-md:max-w-[220px]"
-    >
-      {
-        site.portrait ? (
-          <img
-            src={site.portrait}
-            alt={`Portrait of ${site.name}`}
-            width="520"
-            height="650"
-            class="size-full object-cover object-top grayscale transition-[filter] duration-[450ms] ease-[ease] group-hover:grayscale-0"
-          />
-        ) : (
-          <figcaption class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</figcaption>
-        )
-      }
-    </figure>
-  </div>
+  <figure
+    id="portrait"
+    data-reveal
+    style="--i:2"
+    class="group relative m-0 mt-[clamp(32px,5vw,64px)] aspect-[4/3] w-full overflow-hidden rounded-[2px] bg-ph sm:aspect-[16/7]"
+  >
+    {
+      site.portrait ? (
+        <img
+          src={site.portrait}
+          alt={`Portrait of ${site.name}`}
+          width="1600"
+          height="700"
+          class="size-full object-cover object-[center_25%] grayscale transition-[filter] duration-[450ms] ease-[ease] group-hover:grayscale-0"
+        />
+      ) : (
+        <figcaption class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</figcaption>
+      )
+    }
+  </figure>
 </section>
 
 <style>
@@ -52,9 +49,9 @@ import { site } from "../data/site";
     display: inline-block;
     overflow: hidden;
     vertical-align: top;
-    /* room for descenders inside the mask */
-    padding-bottom: 0.1em;
-    margin-bottom: -0.1em;
+    /* room for tall capitals and descenders inside the mask */
+    padding-block: 0.12em;
+    margin-block: -0.12em;
   }
   .hero-word > span {
     display: inline-block;
