@@ -12,7 +12,7 @@ import Timeline from "./Timeline.astro";
   <!-- The main TUI pane: its title and status sit on the top border. The photo keeps its size and place. -->
   <div class="pane" data-pane="jerome-tegrado">
   <div class="absolute inset-x-0 top-0 flex justify-between gap-4 text-small" aria-hidden="true">
-    <span class="text-ink"><span class="text-accent">~/</span>jerome-tegrado</span>
+    <span class="text-ink" data-scramble><span class="text-accent">~/</span>jerome-tegrado</span>
     <span class="flex items-center gap-2 text-muted"><span class="size-1.5 rounded-full bg-online"></span>online</span>
   </div>
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
@@ -21,6 +21,7 @@ import Timeline from "./Timeline.astro";
       <h1
         id="hero-title"
         data-reveal
+        data-scramble
         class="hero-title mb-[clamp(12px,1.6vw,18px)] text-display font-medium tracking-[-0.045em]"
       >
         {

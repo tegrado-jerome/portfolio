@@ -147,5 +147,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         start();
       }
     </script>
+
+    <script>
+      import { initScramble } from "../scripts/scramble";
+      initScramble();
+    </script>
   </body>
 </html>

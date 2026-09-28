@@ -105,7 +105,7 @@
   line-height: var(--text-label--line-height);
   font-weight: 400;
   letter-spacing: 0.01em;
-  text-transform: lowercase;
+  /* Text keeps its own case, so acronyms like GWA and TUP stay right. */
 }
 
 /* The same space before every section, so the gap between any two sections is identical
@@ -178,11 +178,11 @@
 /* Scroll reveal — only active when JS has run, so content is never hidden without it */
 .js [data-reveal] {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(8px);
   transition:
-    opacity 0.9s var(--ease-out-soft),
-    transform 0.9s var(--ease-out-soft);
-  transition-delay: calc(var(--i, 0) * 90ms);
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 60ms);
 }
 .js [data-reveal].is-visible {
   opacity: 1;

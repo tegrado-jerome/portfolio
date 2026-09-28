@@ -14,7 +14,7 @@ const path = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 <div class="absolute inset-x-0 top-0 flex justify-between gap-4 text-small">
   <h2 id={id} class="font-normal text-ink">
     <span class="sr-only">{title}</span>
-    <span aria-hidden="true"><span class="text-accent">~/</span>{path}</span>
+    <span aria-hidden="true" data-scramble><span class="text-accent">~/</span>{path}</span>
   </h2>
   {meta && <span class="text-muted">{meta}</span>}
 </div>
