@@ -13,11 +13,14 @@ interface LensOptions {
   /** Image to sample. */
   image: HTMLImageElement;
   className?: string;
+  /** Without a mouse, drift the lens across the image on its own while it's on screen. */
+  autoplay?: boolean;
 }
 
-export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, className = "" }: LensOptions) {
+export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, className = "", autoplay = false }: LensOptions) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const hasMouse = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!hasMouse && !autoplay) return;
 
   const canvas = document.createElement("canvas");
   canvas.className = `ascii-lens ${className}`;
@@ -41,7 +44,10 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     octx.drawImage(img, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
     const d = octx.getImageData(0, 0, cols, rows).data;
     const out = new Float32Array(cols * rows);
-    for (let i = 0; i < out.length; i++) out[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+    for (let i = 0; i < out.length; i++) {
+      // transparent areas of a cut-out get no glyphs
+      out[i] = d[i * 4 + 3] < 128 ? -1 : 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+    }
     return out;
   }
 
@@ -82,12 +88,37 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
         const px = cx * cell, py = ry * cell;
         const dist = Math.hypot(px + cell / 2 - mx, py + cell / 2 - my);
         if (dist > radius) continue;
+        if (bright[ry * cols + cx] < 0) continue;
         const ch = RAMP[Math.floor(((255 - bright[ry * cols + cx]) / 255) * (RAMP.length - 1))];
         if (ch === " ") continue;
         ctx.fillStyle = `rgba(255,255,255,${((1 - dist / radius) * alpha).toFixed(3)})`;
         ctx.fillText(ch, px, py);
       }
     }
+  }
+
+  window.addEventListener("resize", () => (ready = false));
+  image.addEventListener("load", () => (ready = false));
+
+  if (!hasMouse) {
+    let visible = false;
+    const drift = (t: number) => {
+      if (!visible) return;
+      if (!ready) ready = build();
+      if (ready) {
+        const s = t / 1000;
+        mx = W * (0.5 + 0.32 * Math.sin(s * 0.7));
+        my = H * (0.45 + 0.3 * Math.sin(s * 1.1));
+        draw();
+      }
+      requestAnimationFrame(drift);
+    };
+    new IntersectionObserver(([entry]) => {
+      const wasVisible = visible;
+      visible = entry.isIntersecting;
+      if (visible && !wasVisible) requestAnimationFrame(drift);
+    }).observe(host);
+    return;
   }
 
   host.addEventListener("pointermove", (e) => {
@@ -102,6 +133,4 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     mx = -1;
     if (W && H) ctx.clearRect(0, 0, W, H);
   });
-  window.addEventListener("resize", () => (ready = false));
-  image.addEventListener("load", () => (ready = false));
 }
