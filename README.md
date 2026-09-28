@@ -18,10 +18,10 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 
 | File | What it holds |
 |---|---|
-| `site.ts` | Name, headline, intro, portrait, email, socials, preloader, footer, time zone |
-| `experience.ts` | Timeline entries and their icons |
-| `projects.ts` | Selected work (the first project is featured full-width) |
-| `skills.ts` | Skills by category: a tab per category with a turning wheel of logos (in `public/images/skills` or a Font Awesome icon); empty list hides the section |
+| `site.ts` | Name, headline, intro, portrait, honour caption, email, resume, chat photo, socials |
+| `experience.ts` | Journey timeline entries (shown in the hero) and their icons |
+| `projects.ts` | Selected work: cover, category, year, title, description and tools per project |
+| `skills.ts` | Skills by category: a category list beside a turning wheel of logos (in `public/images/skills` or a Font Awesome icon); empty list hides the section |
 | `awards.ts` | Awards and honours (year, award, issuer, optional proof link); empty list hides the section |
 | `testimonials.ts` | "Kind words" quotes — real ones only; empty list hides the section |
 | `assistant.ts` | Facts the AI chat may use about you |
@@ -47,6 +47,11 @@ The model is set by `GEMINI_MODEL` in `wrangler.jsonc`. Guardrails (system promp
 - `/sitemap-index.xml`, `/robots.txt` (AI crawlers allowed) and `/llms.txt`
 
 Placeholder values are never emitted in structured data or `llms.txt`.
+
+## Branches
+
+- `main`: the live design, a terminal UI (TUI).
+- `design/editorial`: the earlier editorial design (serif, photo footer), kept for reference.
 
 ## Commit convention
 

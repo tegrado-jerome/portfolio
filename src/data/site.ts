@@ -11,16 +11,8 @@ export const site = {
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.jpg",
   email: "tegradojeromebrent@gmail.com",
-  // Resume link shown in the hero (a PDF in public/ or a Google Drive link).
+  // Resume link shown in the footer (a PDF in public/ or a Google Drive link).
   resume: "[RESUME URL]",
-
-  // Full-screen loading intro.
-  preloader: {
-    label: "Portfolio of Jerome Tegrado",
-    title: "[PRELOADER TAGLINE]",
-    // Background photo behind the intro.
-    image: "/images/loading.jpg",
-  },
 
   // Honor shown over the hero portrait. Remove to hide the caption.
   honor: {
@@ -33,12 +25,6 @@ export const site = {
   // Your photo for the round chat button, e.g. "/images/avatar.jpg" (a square photo in public/images).
   // Leave empty to show the JT logo instead.
   chatAvatar: "/images/chat-avatar.jpg",
-
-  // Photo the page fades into at the bottom.
-  footerImage: "/images/footer.jpg",
-
-  // Optional: your IANA time zone (e.g. "Europe/London") to show a live local-time clock in the footer.
-  timezone: "",
 
   // Optional 1200×630 social preview image in public/images, e.g. "/images/og.jpg".
   ogImage: "",
