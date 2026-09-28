@@ -31,15 +31,6 @@ export const site = {
   // Optional wide photo for the footer, e.g. "/footer.jpg" (black & white works best).
   footerImage: "",
 
-  // The "folder" section. Set `show: false` to remove it.
-  archive: {
-    show: true,
-    title: "Archive",
-    description: "[ONE-LINE DESCRIPTION OF WHAT'S INSIDE]",
-    href: "#", // [ARCHIVE LINK]
-    // Up to three images that pop out of the folder on hover, e.g. "/archive/1.jpg".
-    images: ["", "", ""],
-  },
 };
 
 export const socials = [

@@ -9,7 +9,6 @@ type Command = { label: string; group: string; action: string; value: string };
 const commands: Command[] = [
   { label: "Home", group: "Go to", action: "goto", value: "top" },
   { label: "Selected Work", group: "Go to", action: "goto", value: "work" },
-  ...(site.archive.show ? [{ label: site.archive.title, group: "Go to", action: "goto", value: "archive" }] : []),
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
   { label: "Chat with me (AI)", group: "Action", action: "chat", value: "" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),

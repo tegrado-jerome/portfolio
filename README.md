@@ -18,7 +18,7 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 
 | File | What it holds |
 |---|---|
-| `site.ts` | Name, headline, intro, portrait, email, socials, preloader, footer, archive, time zone |
+| `site.ts` | Name, headline, intro, portrait, email, socials, preloader, footer, time zone |
 | `experience.ts` | Timeline entries and their icons |
 | `projects.ts` | Selected work (the first project is featured full-width) |
 | `testimonials.ts` | "Kind words" quotes — real ones only; empty list hides the section |
