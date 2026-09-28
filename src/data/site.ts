@@ -32,7 +32,7 @@ export const site = {
   ogImage: "/images/og.jpg",
 
   // Google Search Console: the "content" value of its HTML-tag verification, e.g. "abc123...". Empty = no tag.
-  gscVerification: "",
+  gscVerification: "yzVljoblX-g-awcer0JQPb9rMiGpC3tReC5j21b52Z4",
   // Google Analytics 4 measurement ID, e.g. "G-XXXXXXX". Empty = no analytics.
   gaId: "G-BS752S4BCT",
 };
