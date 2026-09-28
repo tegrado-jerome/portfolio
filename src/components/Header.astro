@@ -16,10 +16,26 @@ const cta = "Let's Talk";
       <span class="eyebrow hidden sm:inline">{site.name}</span>
     </a>
 
-    <nav aria-label="Primary" class="ml-auto flex items-center gap-5">
+    <!-- Utilities first, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
+    <nav aria-label="Primary" class="ml-auto flex items-center gap-2 sm:gap-3">
+      <button
+        type="button"
+        data-palette-open
+        class="eyebrow hidden h-9 items-center rounded-full border border-line px-3 text-[11px] text-muted transition-colors hover:border-ink hover:text-ink lg:in-[.js]:inline-flex"
+        aria-label="Open command menu"
+      >
+        <kbd data-shortcut class="font-mono">Ctrl K</kbd>
+      </button>
+      <button
+        type="button"
+        data-theme-toggle
+        class="hidden size-9 place-items-center rounded-full border border-line text-muted transition-colors hover:border-ink hover:text-ink in-[.js]:grid"
+      >
+        <Icon icon={faCircleHalfStroke} class="text-[14px]" />
+      </button>
       {
         site.resume && (
-          <a href={site.resume} target="_blank" rel="noopener" class="eyebrow text-muted transition-colors hover:text-ink max-sm:hidden">
+          <a href={site.resume} target="_blank" rel="noopener" class="eyebrow px-2 text-[11px] text-muted transition-colors hover:text-ink max-sm:hidden">
             Resume
           </a>
         )
@@ -27,7 +43,7 @@ const cta = "Let's Talk";
       <a
         href="#contact"
         aria-label={cta}
-        class="roll eyebrow rounded-full border border-ink px-4 py-2 text-[11px] text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+        class="roll eyebrow inline-flex h-9 items-center rounded-full bg-ink px-4 text-[11px] text-paper transition-colors duration-200 hover:bg-accent"
       >
         <span class="roll-word" aria-hidden="true">
           {[...cta].map((char, i) => (
@@ -36,26 +52,6 @@ const cta = "Let's Talk";
         </span>
       </a>
     </nav>
-
-    <!-- JS-only controls stay hidden without scripting. -->
-    <div class="ml-5 hidden items-center gap-1 in-[.js]:flex sm:ml-7">
-      <button
-        type="button"
-        data-theme-toggle
-        class="eyebrow -my-2 inline-flex items-center gap-2 px-2 py-3 text-muted transition-colors hover:text-ink"
-      >
-        <Icon icon={faCircleHalfStroke} class="text-[13px]" />
-        <span data-theme-label class="hidden lg:inline">Light</span>
-      </button>
-      <button
-        type="button"
-        data-palette-open
-        class="eyebrow -my-2 hidden items-center rounded-[3px] border border-line px-2 py-1 text-[11px] text-muted transition-colors hover:border-ink hover:text-ink lg:inline-flex"
-        aria-label="Open command menu"
-      >
-        <kbd data-shortcut class="font-sans">Ctrl K</kbd>
-      </button>
-    </div>
   </div>
 </header>
 
@@ -91,11 +87,11 @@ const cta = "Let's Talk";
   const header = document.getElementById("site-header")!;
 
   const toggle = header.querySelector<HTMLButtonElement>("[data-theme-toggle]")!;
-  const toggleLabel = toggle.querySelector("[data-theme-label]")!;
   const title = (theme: string) => theme[0].toUpperCase() + theme.slice(1);
   const syncToggle = () => {
-    toggleLabel.textContent = title(currentTheme());
-    toggle.setAttribute("aria-label", `Theme: ${title(currentTheme())}. Switch to ${title(nextTheme())}`);
+    const label = `Theme: ${title(currentTheme())}. Switch to ${title(nextTheme())}`;
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
   };
   toggle.addEventListener("click", () => setTheme(nextTheme()));
   document.addEventListener("themechange", syncToggle);
