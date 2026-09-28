@@ -23,7 +23,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#16181b" />
 
     <meta property="og:type" content="profile" />
     <meta property="og:locale" content="en_US" />
@@ -53,10 +53,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         try {
           theme = localStorage.getItem("theme");
         } catch (e) {}
-        if (!theme && matchMedia("(prefers-color-scheme: dark)").matches) theme = "dark";
-        if (theme === "dark") {
-          root.dataset.theme = "dark";
-          document.querySelector('meta[name="theme-color"]').content = "#141414";
+        // Dark is the default; only a saved choice switches to light.
+        if (theme === "light") {
+          root.dataset.theme = "light";
+          document.querySelector('meta[name="theme-color"]').content = "#eeede8";
         }
       })();
     </script>

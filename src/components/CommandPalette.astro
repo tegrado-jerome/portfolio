@@ -12,8 +12,8 @@ const commands: Command[] = [
   ...(site.archive.show ? [{ label: site.archive.title, group: "Go to", action: "goto", value: "archive" }] : []),
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),
-  { label: "Light theme", group: "Theme", action: "theme", value: "light" },
   { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
+  { label: "Light theme", group: "Theme", action: "theme", value: "light" },
   ...socials.filter((s) => isSet(s.href)).map((s) => ({ label: s.label, group: "Link", action: "link", value: s.href })),
 ];
 ---
