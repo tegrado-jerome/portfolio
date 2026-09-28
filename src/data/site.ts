@@ -7,9 +7,9 @@ export const site = {
   description: "[SHORT SITE DESCRIPTION FOR SEARCH ENGINES AND SOCIAL PREVIEWS]",
   headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
   intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
-  // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
+  // Optional: put a photo in public/images and set e.g. "/images/portrait.jpg". Leave empty for a placeholder.
   // It shows in black & white and turns to colour (with an ASCII lens) on hover.
-  portrait: "/images/portrait.webp",
+  portrait: "/images/portrait.jpg",
   email: "[EMAIL]",
   // Optional: a resume link shown in the header. Leave empty to hide it.
   resume: "",

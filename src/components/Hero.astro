@@ -39,7 +39,7 @@ import { site } from "../data/site";
               alt={`Portrait of ${site.name}`}
               width="960"
               height="1200"
-              class="size-full origin-bottom object-cover grayscale transition-[filter,scale] duration-[600ms] ease-[cubic-bezier(.19,1,.22,1)] group-hover:scale-[1.04] group-hover:grayscale-0"
+              class="size-full object-cover grayscale transition-[filter] duration-150 group-hover:grayscale-0"
             />
           ) : (
             <span class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</span>
@@ -53,7 +53,7 @@ import { site } from "../data/site";
                 alt={site.honor.school}
                 width="40"
                 height="40"
-                class="size-7 shrink-0 grayscale transition-[filter] duration-[600ms] group-hover:grayscale-0"
+                class="size-7 shrink-0 grayscale transition-[filter] duration-150 group-hover:grayscale-0"
               />
               <span>
                 <span class="block font-serif text-[15px] leading-tight italic">{site.honor.title}</span>

@@ -44,10 +44,7 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     octx.drawImage(img, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
     const d = octx.getImageData(0, 0, cols, rows).data;
     const out = new Float32Array(cols * rows);
-    for (let i = 0; i < out.length; i++) {
-      // transparent areas of a cut-out get no glyphs
-      out[i] = d[i * 4 + 3] < 128 ? -1 : 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
-    }
+    for (let i = 0; i < out.length; i++) out[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
     return out;
   }
 
@@ -88,7 +85,6 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
         const px = cx * cell, py = ry * cell;
         const dist = Math.hypot(px + cell / 2 - mx, py + cell / 2 - my);
         if (dist > radius) continue;
-        if (bright[ry * cols + cx] < 0) continue;
         const ch = RAMP[Math.floor(((255 - bright[ry * cols + cx]) / 255) * (RAMP.length - 1))];
         if (ch === " ") continue;
         ctx.fillStyle = `rgba(255,255,255,${((1 - dist / radius) * alpha).toFixed(3)})`;
