@@ -52,7 +52,8 @@ const MediaTag = href ? "a" : "div";
     }
   </MediaTag>
 
-  <!-- Card order after Brittany Chiang / Rauno Freiberg: meta line, title, description, then the stack. -->
+  <!-- Card order after Brittany Chiang / Rauno Freiberg: meta line, title, description. The tools stay in the data
+       for structured data, llms.txt and the chat. -->
   <div class="pt-[18px]">
     <p class="mb-2 text-small text-muted tabular-nums">
       <span class="text-accent">{number}</span> · {project.category} · {project.year}
@@ -61,15 +62,6 @@ const MediaTag = href ? "a" : "div";
       {href ? <a href={href} {...linkAttrs} class="link-strong">{project.title}</a> : project.title}
     </h3>
     <p class="text-body text-ink-soft">{project.description}</p>
-    {
-      project.technologies.length > 0 && (
-        <ul class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-small text-muted" aria-label="Built with">
-          {project.technologies.map((t) => (
-            <li>[ {t} ]</li>
-          ))}
-        </ul>
-      )
-    }
   </div>
 </article>
 
