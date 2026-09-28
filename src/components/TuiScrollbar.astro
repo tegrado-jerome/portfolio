@@ -2,6 +2,7 @@
 // The page scrollbar drawn as a terminal block (btop / lazygit): a █-style thumb on an invisible track, matching the
 // boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
+// It shows while scrolling and fades out a second after.
 ---
 
 <div class="tui-scroll" data-tui-scroll aria-hidden="true">
@@ -54,10 +55,23 @@
     /* Dragging the thumb on a touch screen moves the bar, not the page. */
     touch-action: none;
     --color-bar: var(--color-ink);
+    /* Hidden at rest, like macOS and phone scrollbars: it only shows while the page scrolls or the thumb is dragged. */
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
-  .tui-scroll:hover .bar,
+  .tui-scroll.is-active .bar,
+  .bar.is-dragging {
+    opacity: 1;
+    transition-duration: 0.15s;
+  }
   .bar.is-dragging {
     --color-bar: var(--color-accent);
+  }
+  /* Hover only on mouse devices; on touch screens it would stick after a tap. */
+  @media (hover: hover) {
+    .tui-scroll:hover .bar {
+      --color-bar: var(--color-accent);
+    }
   }
   .bar.is-dragging {
     cursor: grabbing;
@@ -96,9 +110,13 @@
     }
 
     let queued = false;
+    let idle = 0;
     addEventListener(
       "scroll",
       () => {
+        root!.classList.add("is-active");
+        clearTimeout(idle);
+        idle = window.setTimeout(() => root!.classList.remove("is-active"), 1000);
         if (queued) return;
         queued = true;
         requestAnimationFrame(() => {
