@@ -26,6 +26,16 @@ Also set your real domain as `site` in `astro.config.mjs`. It's used for canonic
 
 Images go in `public/` and are referenced by path (e.g. `"/portrait.jpg"`).
 
+## Chat (AI version of Jerome)
+
+The "Chat with me" panel talks to `POST /api/chat`, served by the Cloudflare Worker in `worker/`. The Gemini API key never reaches the browser.
+
+1. Write facts about yourself in `src/data/assistant.ts`. The chat answers only from those facts and the site data; `[PLACEHOLDER]` lines are ignored.
+2. Local testing: copy `.dev.vars.example` to `.dev.vars`, add your key, run `npm run dev:worker` and open http://localhost:8787.
+3. Production: `npx wrangler secret put GEMINI_API_KEY`, set `ALLOWED_ORIGINS` in `wrangler.jsonc` to your domain, then `npm run deploy`.
+
+The model is set by `GEMINI_MODEL` in `wrangler.jsonc`. Guardrails (system prompt rules, input limits, per-IP rate limit, safety settings) live in `worker/`.
+
 ## SEO / AEO / GEO
 
 - Canonical, Open Graph and Twitter meta tags on every page
