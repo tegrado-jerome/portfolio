@@ -9,7 +9,7 @@ export const site = {
   intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.jpg". Leave empty for a placeholder.
   // It shows in black & white and turns to colour (with an ASCII lens) on hover.
-  portrait: "",
+  portrait: "/images/portrait.jpg",
   email: "[EMAIL]",
   // Optional: a resume link shown in the header. Leave empty to hide it.
   resume: "",
@@ -19,15 +19,15 @@ export const site = {
     label: "Portfolio of Jerome Tegrado",
     title: "[PRELOADER TAGLINE]",
     // Background photo behind the intro.
-    image: "/images/loading.png",
+    image: "/images/loading.jpg",
   },
 
   // Your photo for the round chat button, e.g. "/images/avatar.jpg" (a square photo in public/images).
   // Leave empty to show the JT logo instead.
-  chatAvatar: "",
+  chatAvatar: "/images/chat-avatar.jpg",
 
   // Photo the page fades into at the bottom.
-  footerImage: "/images/footer.png",
+  footerImage: "/images/footer.jpg",
 
   // Optional: your IANA time zone (e.g. "Europe/London") to show a live local-time clock in the footer.
   timezone: "",
