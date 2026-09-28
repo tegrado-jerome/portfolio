@@ -1,5 +1,5 @@
 ---
-// Awards as a hairline list: year, award, issuer. Hovering a row fades the others, like the journey line.
+// Awards as a hairline list: award, issuer, then the year on the right. Hovering a row fades the others, like the journey line.
 import { awards } from "../data/awards";
 import SectionHead from "./SectionHead.astro";
 ---
@@ -11,8 +11,7 @@ import SectionHead from "./SectionHead.astro";
       <ul class="awards border-t border-line">
         {awards.map((a, i) => (
           <li data-reveal style={`--i:${i}`} class="award border-b border-line">
-            <div class="grid gap-1 py-5 md:grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)] md:items-baseline md:gap-6">
-              <span class="eyebrow text-muted tabular-nums">{a.year}</span>
+            <div class="grid gap-1 py-5 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_96px] md:items-baseline md:gap-6">
               <p class="font-serif text-heading">
                 {a.href ? (
                   <a href={a.href} target="_blank" rel="noopener noreferrer" class="link-strong">
@@ -23,7 +22,8 @@ import SectionHead from "./SectionHead.astro";
                 )}
                 {a.detail && <span class="ml-2 align-middle font-sans text-small text-muted">{a.detail}</span>}
               </p>
-              <span class="text-small text-muted md:text-right">{a.issuer}</span>
+              <span class="text-small text-muted">{a.issuer}</span>
+              <span class="eyebrow text-muted tabular-nums md:text-right">{a.year}</span>
             </div>
           </li>
         ))}

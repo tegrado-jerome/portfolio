@@ -12,24 +12,24 @@ import SectionHead from "./SectionHead.astro";
         {testimonials.map((t, i) => (
           <figure data-reveal style={`--i:${i}`} class:list={["m-0", i % 2 === 1 && "md:mt-12"]}>
             <div class="note p-[clamp(22px,2.5vw,32px)]" style={`--tilt:${i % 2 ? 2 : -2.5}deg`}>
-              <p class="eyebrow mb-3 text-muted tabular-nums">
-                {String(i + 1).padStart(2, "0")} · {t.year}
-              </p>
+              {/* Quote first, then who said it, their role, and when. */}
               <blockquote class="m-0 font-serif text-heading">
                 <p>{t.quote}</p>
               </blockquote>
-              <figcaption class="mt-4 text-body font-medium">
-                {t.href ? (
-                  <a href={t.href} target="_blank" rel="noopener noreferrer" class="link-strong">
-                    {t.name}
-                  </a>
-                ) : (
-                  t.name
-                )}
-                <span class="text-small font-normal text-muted">
-                  {" "}
-                  · {t.role}, {t.company}
+              <figcaption class="mt-5">
+                <span class="block text-body font-medium">
+                  {t.href ? (
+                    <a href={t.href} target="_blank" rel="noopener noreferrer" class="link-strong">
+                      {t.name}
+                    </a>
+                  ) : (
+                    t.name
+                  )}
                 </span>
+                <span class="block text-small text-muted">
+                  {t.role}, {t.company}
+                </span>
+                <span class="eyebrow mt-2 block text-muted tabular-nums">{t.year}</span>
               </figcaption>
             </div>
           </figure>

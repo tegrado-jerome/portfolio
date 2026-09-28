@@ -4,15 +4,16 @@ import { site } from "../data/site";
 import Timeline from "./Timeline.astro";
 ---
 
-<!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app). -->
+<!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app).
+     On phones the portrait comes first, so visitors see who this is before the name. -->
 <section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
-      <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-muted">{site.headline}</p>
+      <!-- Name, then role, then intro, then the main action: the order real portfolios use. -->
       <h1
         id="hero-title"
         data-reveal
-        class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-display font-normal"
+        class="hero-title mb-[clamp(12px,1.6vw,18px)] font-serif text-display font-normal"
       >
         {
           site.name.split(" ").map((word, i) => (
@@ -24,6 +25,7 @@ import Timeline from "./Timeline.astro";
           ))
         }
       </h1>
+      <p data-reveal style="--i:1" class="eyebrow mb-[clamp(18px,2.5vw,28px)] text-muted">{site.headline}</p>
       <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft">{site.intro}</p>
 
       <!-- Ask-my-AI bar as a terminal line (after Warp / v0): a mono prompt with a blinking block cursor.
@@ -31,9 +33,8 @@ import Timeline from "./Timeline.astro";
       <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] in-[.js]:block">
         <form data-hero-ask class="ask term flex items-center gap-2 rounded-[4px] border border-line py-1.5 pr-1.5 pl-4 font-mono text-[16px]">
           <span class="inline-flex shrink-0 gap-[1ch] whitespace-nowrap" aria-hidden="true">
-            <span class="text-accent max-[380px]:hidden">jerome@ai</span>
-            <span class="text-muted max-[380px]:hidden">~</span>
-            <span class="text-ink">ask</span>
+            <span class="text-accent">jerome@ai</span>
+            <span class="text-muted">~</span>
           </span>
           <span class="relative flex min-w-0 flex-1 items-center">
             <label for="hero-ask" class="sr-only">Ask my AI about my work</label>
@@ -74,7 +75,7 @@ import Timeline from "./Timeline.astro";
     </div>
 
     <!-- Crop marks frame the photo and spread out on hover. -->
-    <div data-reveal style="--i:2" class="portrait group relative w-full max-md:mx-auto max-md:max-w-[220px]">
+    <div data-reveal style="--i:2" class="portrait group relative w-full max-md:order-first max-md:mx-auto max-md:max-w-[220px]">
       <span class="mark top-0 left-0 border-t border-l" aria-hidden="true"></span>
       <span class="mark top-0 right-0 border-t border-r" aria-hidden="true"></span>
       <span class="mark bottom-0 left-0 border-b border-l" aria-hidden="true"></span>
@@ -105,7 +106,15 @@ import Timeline from "./Timeline.astro";
               />
               <span>
                 <span class="block font-serif text-body leading-tight">{site.honor.title}</span>
-                <span class="eyebrow block text-white/80">{site.honor.detail}</span>
+                {/* Each "·" part stays whole; on narrow photos they stack instead of breaking mid-phrase. */}
+                <span class="eyebrow block text-white/80">
+                  {site.honor.detail.split(" · ").map((part, i) => (
+                    <span class="whitespace-nowrap max-md:block">
+                      {i > 0 && <span class="max-md:hidden"> · </span>}
+                      {part}
+                    </span>
+                  ))}
+                </span>
               </span>
             </figcaption>
           )

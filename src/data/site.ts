@@ -25,7 +25,8 @@ export const site = {
   // Honor shown over the hero portrait. Remove to hide the caption.
   honor: {
     title: "Magna Cum Laude",
-    detail: "TUP Manila · 1.36",
+    detail: "GWA 1.36",
+    rank: "Rank 14 of 2,800+ · Batch 2026",
     school: "Technological University of the Philippines",
     logo: "/images/tup-seal.png",
   },

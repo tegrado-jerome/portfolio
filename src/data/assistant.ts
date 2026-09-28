@@ -12,7 +12,8 @@ export const assistant = {
     "[YEARS OF EXPERIENCE AND MAIN SKILLS]",
     "[CURRENT COMPANY OR FREELANCE STATUS]",
     "[WHAT KIND OF WORK OR CLIENTS YOU'RE LOOKING FOR]",
-    "I graduated Magna Cum Laude (1.36) from the Technological University of the Philippines (TUP) Manila.",
+    "I graduated Magna Cum Laude (GWA 1.36) from the Technological University of the Philippines (TUP) Manila, Batch 2026.",
+    "I ranked 14th out of 2,800+ students in my batch.",
     "[LINKEDIN PROFILE URL]",
   ],
 };
