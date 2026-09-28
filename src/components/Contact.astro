@@ -1,0 +1,103 @@
+---
+import { faArrowRight, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { site, socials } from "../data/site";
+import Icon from "./Icon.astro";
+import { isSet } from "../lib/content";
+
+const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
+const arrow = "-rotate-45 text-[13px] text-muted transition-[transform,color] duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent";
+---
+
+<section id="contact" class="shell pt-[clamp(72px,11vw,160px)] pb-[clamp(56px,8vw,110px)]" aria-labelledby="contact-title">
+  <div class="mb-[clamp(32px,5vw,56px)] h-px bg-line" aria-hidden="true"></div>
+  <h2
+    id="contact-title"
+    data-reveal
+    class="max-w-[12ch] font-serif text-[clamp(56px,10vw,144px)] leading-[0.9] font-normal tracking-[-0.015em]"
+  >
+    Let’s work <em class="text-accent">together.</em>
+  </h2>
+
+  <div
+    class="mt-[clamp(32px,5vw,56px)] grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end md:gap-[clamp(24px,4vw,64px)]"
+  >
+    <p data-reveal style="--i:1" class="max-w-[46ch] text-[15px] leading-[1.75] text-ink-soft">{site.contactMessage}</p>
+
+    <ul data-reveal style="--i:2" class="flex flex-col divide-y divide-line border-y border-line">
+      <li class="flex items-center justify-between gap-4">
+        <a href={emailHref} class="group flex min-w-0 flex-1 items-center justify-between gap-4 py-4">
+          <span class="eyebrow inline-flex items-center gap-2.5 text-[11px] text-muted">
+            <Icon icon={faEnvelope} class="text-[13px] text-ink" />
+            Email
+          </span>
+          <span class="brush truncate text-[15px]">{site.email}</span>
+        </a>
+        {
+          isSet(site.email) && (
+            <button type="button" data-copy={site.email} class="copy eyebrow -my-2 py-2 pl-2 text-[11px] text-muted transition-colors hover:text-ink">
+              <span class="grid overflow-hidden">
+                <span class="copy__label">Copy</span>
+                <span class="copy__label" aria-hidden="true">
+                  Copied
+                </span>
+              </span>
+            </button>
+          )
+        }
+        <span class="sr-only" aria-live="polite" data-copy-status></span>
+      </li>
+      {
+        socials.map((s) => (
+          <li>
+            <a href={s.href} target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between gap-4 py-4">
+              <span class="eyebrow inline-flex items-center gap-2.5 text-[11px] text-muted">
+                <Icon icon={s.icon} class="text-[13px] text-ink" />
+                {s.label}
+              </span>
+              <Icon icon={faArrowRight} class={arrow} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Both labels share one cell; clicking slides "Copied" up into view. */
+  .copy__label {
+    grid-area: 1 / 1;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .copy__label + .copy__label {
+    transform: translateY(110%);
+  }
+  .copy.is-copied .copy__label {
+    transform: translateY(-110%);
+  }
+  .copy.is-copied .copy__label + .copy__label {
+    transform: none;
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) => {
+    const status = button.parentElement!.querySelector("[data-copy-status]")!;
+    let timer = 0;
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy!);
+      } catch {
+        return; // clipboard blocked — the mailto link next to it still works
+      }
+      button.classList.add("is-copied");
+      status.textContent = "Email address copied";
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        button.classList.remove("is-copied");
+        status.textContent = "";
+      }, 2000);
+    });
+  });
+</script>

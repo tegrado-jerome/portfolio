@@ -1,0 +1,104 @@
+---
+import { faPenNib } from "@fortawesome/free-solid-svg-icons";
+import { site, socials } from "../data/site";
+import Icon from "./Icon.astro";
+
+const year = new Date().getFullYear();
+const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact";
+---
+
+<footer
+  id="site-footer"
+  class="relative flex min-h-[clamp(380px,44vw,600px)] items-end overflow-hidden bg-night bg-cover bg-center px-5 py-[clamp(32px,4vw,60px)] text-paper sm:px-[clamp(20px,11vw,200px)]"
+  style={site.footerImage
+    ? `background-image: linear-gradient(180deg, rgb(20 20 20 / 0.1), rgb(20 20 20 / 0.45)), url("${site.footerImage}")`
+    : undefined}
+  data-image={site.footerImage || undefined}
+>
+  {
+    site.footerImage ? (
+      // The page fades into the photo instead of meeting it at a hard edge.
+      <div class="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[55%] bg-linear-to-b from-paper to-transparent" aria-hidden="true" />
+    ) : (
+      <p
+        class="pointer-events-none absolute inset-x-0 top-[clamp(40px,7vw,100px)] z-0 text-center font-serif text-[14vw] leading-none whitespace-nowrap text-paper/[0.08] select-none"
+        aria-hidden="true"
+      >
+        {site.name}
+      </p>
+    )
+  }
+
+  <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,54px)]">
+    <div class="flex items-center justify-between gap-6">
+      <a href="/" data-to-top class="grid size-[46px] place-items-center rounded-full border border-paper font-serif text-[21px] leading-none transition-colors hover:bg-paper hover:text-night" aria-label="Back to top">
+        <span aria-hidden="true">JT</span>
+      </a>
+      <a href={emailHref} class="group inline-flex items-center gap-2.5 text-[14px] font-medium tracking-[0.12em] text-white uppercase">
+        <Icon icon={faPenNib} class="text-[14px] transition-transform duration-300 group-hover:rotate-12" />
+        <span class="brush">Pen a note</span>
+      </a>
+    </div>
+    <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <ul class="flex gap-[34px]">
+        {
+          socials.map((s) => (
+            <li>
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="eyebrow inline-flex items-center gap-2 tracking-[0.14em] text-white/70 transition-colors hover:text-white"
+              >
+                <Icon icon={s.icon} class="text-[13px]" />
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="flex items-center gap-6 text-[12px] tracking-[0.08em] text-white/70">
+        {
+          site.timezone && (
+            <p>
+              Local time <time data-clock={site.timezone} class="text-white tabular-nums" />
+            </p>
+          )
+        }
+        <p>© {year} {site.name}</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { asciiLens } from "../scripts/ascii-lens";
+
+  const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
+  if (clock) {
+    const format = new Intl.DateTimeFormat("en-GB", { timeZone: clock.dataset.clock, hour: "2-digit", minute: "2-digit" });
+    const tick = () => (clock.textContent = format.format(new Date()));
+    tick();
+    setInterval(tick, 30_000);
+  }
+
+  const footer = document.getElementById("site-footer");
+  if (footer) {
+    const src = footer.dataset.image;
+    const start = (image: HTMLImageElement | null) =>
+      asciiLens(footer, { cell: 9, radius: 92, alpha: 0.5, image, className: "z-[1] footer-lens" });
+    if (src) {
+      const img = new Image();
+      img.onload = () => start(img);
+      img.src = src;
+    } else {
+      start(null);
+    }
+  }
+</script>
+
+<style>
+  footer:hover > :global(.footer-lens) {
+    opacity: 0.5;
+  }
+</style>
