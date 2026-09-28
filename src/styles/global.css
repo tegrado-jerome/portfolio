@@ -133,7 +133,13 @@
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
-  &:hover,
+  /* Hover only with a real mouse: on touch screens a tap would leave the button stuck inverted. */
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-ink);
+      color: var(--color-paper);
+    }
+  }
   &:focus-visible {
     background: var(--color-ink);
     color: var(--color-paper);
