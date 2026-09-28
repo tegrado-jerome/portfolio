@@ -11,10 +11,10 @@ const { id, title, meta } = Astro.props;
 const path = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 ---
 
-<div class="absolute inset-x-6 -top-[0.8em] flex justify-between gap-4 text-small">
-  <h2 id={id} class="bg-paper px-2 font-normal text-ink">
+<div class="absolute inset-x-0 top-0 flex justify-between gap-4 text-small">
+  <h2 id={id} class="font-normal text-ink">
     <span class="sr-only">{title}</span>
     <span aria-hidden="true"><span class="text-accent">~/</span>{path}</span>
   </h2>
-  {meta && <span class="bg-paper px-2 text-muted">{meta}</span>}
+  {meta && <span class="text-muted">{meta}</span>}
 </div>

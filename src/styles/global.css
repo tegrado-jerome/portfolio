@@ -114,12 +114,11 @@
   padding-top: clamp(80px, 10vw, 160px);
 }
 
-/* A TUI section: no box, just a divider line with the title sitting on it, like a tmux / vim split
-   ("── ~/skills ──────── 4 categories ──"). See SectionHead. */
+/* A TUI section: no box and no divider, just its ~/path title above the content (see SectionHead).
+   Space separates sections, so the page isn't crowded with lines. */
 @utility pane {
   position: relative;
-  border-top: 1px solid var(--color-ink);
-  padding-top: clamp(48px, 6vw, 88px);
+  padding-top: clamp(40px, 5vw, 72px);
 }
 
 /* Bracketed TUI commands ("[ let's talk ↗ ]"): hover inverts them like a selected row. */

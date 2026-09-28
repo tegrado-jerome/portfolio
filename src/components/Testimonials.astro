@@ -42,13 +42,9 @@ import SectionHead from "./SectionHead.astro";
 }
 
 <style>
-  /* Straight hairline boxes inside the pane; hover darkens the border like a focused TUI box. */
+  /* No box: a soft surface, like a selected block in a terminal. */
   .note {
-    border: 1px solid var(--color-line);
     border-radius: 2px;
-    transition: border-color 0.2s ease;
-  }
-  .note:hover {
-    border-color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 4%, transparent);
   }
 </style>
