@@ -1,0 +1,42 @@
+---
+// A small always-on status: a green dot with a soft pulse and a label (after Vercel / Rauno Freiberg).
+// hideLabel keeps just the dot on screen; the label stays for screen readers.
+interface Props {
+  label: string;
+  hideLabel?: boolean;
+  class?: string;
+}
+
+const { label, hideLabel = false, class: className } = Astro.props;
+---
+
+<span class:list={["eyebrow inline-flex items-center gap-2 text-muted", className]}>
+  <span class="dot" aria-hidden="true"></span>
+  <span class:list={[hideLabel && "sr-only"]}>{label}</span>
+</span>
+
+<style>
+  .dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-online);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .dot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--color-online);
+      animation: ping 2s ease-out infinite;
+    }
+  }
+  @keyframes ping {
+    to {
+      scale: 2.6;
+      opacity: 0;
+    }
+  }
+</style>

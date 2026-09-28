@@ -2,6 +2,7 @@
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site } from "../data/site";
 import Icon from "./Icon.astro";
+import OnlineStatus from "./OnlineStatus.astro";
 
 const cta = "Let's Talk";
 ---
@@ -14,6 +15,7 @@ const cta = "Let's Talk";
     <a href="/" data-to-top class="group flex items-center gap-3" aria-label={`${site.name}, home`}>
       <span class="logo size-11 bg-current text-ink transition-colors duration-300 group-hover:text-accent" aria-hidden="true"></span>
       <span class="eyebrow hidden sm:inline">{site.name}</span>
+      <OnlineStatus label="Online" hideLabel class="-ml-1" />
     </a>
 
     <!-- Utilities first, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
