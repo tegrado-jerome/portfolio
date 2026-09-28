@@ -107,9 +107,11 @@ const CELLS = 24;
   }
 
   /* A pane like the site's, in the night palette: title on the top border. */
+  /* Sized to its lines, so the log sits centred with even space on both sides. */
   .boot {
     position: relative;
-    width: min(460px, 100%);
+    width: fit-content;
+    max-width: 100%;
     padding: 28px 22px 20px;
     border: 1px solid rgb(255 255 255 / 0.55);
     border-radius: 2px;
