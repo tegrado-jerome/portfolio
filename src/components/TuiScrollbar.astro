@@ -1,0 +1,142 @@
+---
+// The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░ track with a █ thumb in the mono font,
+// matching the boot screen's progress bar. Mouse devices only; touch screens keep their own thin native bar.
+// It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
+---
+
+<div class="tui-scroll" data-tui-scroll aria-hidden="true">
+  <div class="track" data-track></div>
+  <div class="bar" data-thumb></div>
+</div>
+
+<style>
+  .tui-scroll {
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    /* Hide the native page scrollbar only where this one replaces it. */
+    :global(html:has([data-tui-scroll])) {
+      scrollbar-width: none;
+    }
+    :global(html:has([data-tui-scroll])::-webkit-scrollbar) {
+      display: none;
+    }
+    :global(.js) .tui-scroll {
+      position: fixed;
+      top: 6px;
+      right: 3px;
+      bottom: 6px;
+      z-index: 36;
+      display: block;
+      width: 10px;
+      font: 10px/10px var(--font-mono);
+      user-select: none;
+    }
+  }
+  /* Stops above the status bar where that shows. */
+  @media (min-width: 1024px) {
+    :global(.js) .tui-scroll {
+      bottom: 38px;
+    }
+  }
+  .track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    color: var(--color-line);
+    white-space: pre;
+    cursor: pointer;
+  }
+  .bar {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    color: var(--color-muted);
+    white-space: pre;
+    cursor: grab;
+    transition: color 0.2s ease;
+  }
+  .tui-scroll:hover .bar,
+  .bar.is-dragging {
+    color: var(--color-ink);
+  }
+  .bar.is-dragging {
+    cursor: grabbing;
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-tui-scroll]");
+  if (root && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const track = root.querySelector<HTMLElement>("[data-track]")!;
+    const thumb = root.querySelector<HTMLElement>("[data-thumb]")!;
+    const LINE = 10; // px per glyph row
+    let thumbRows = 0;
+    let trackRows = 0;
+
+    const doc = document.documentElement;
+    const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
+
+    // Rebuild the glyph columns to fit the current height; the thumb is sized to how much of the page is visible.
+    function layout() {
+      trackRows = Math.floor(root!.clientHeight / LINE);
+      track.textContent = "░\n".repeat(trackRows);
+      thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
+      thumb.textContent = "█\n".repeat(thumbRows);
+      thumb.style.height = `${thumbRows * LINE}px`;
+      root!.style.visibility = doc.scrollHeight > innerHeight + 1 ? "visible" : "hidden";
+      position();
+    }
+    // Snap the thumb to whole rows, like a real terminal bar.
+    function position() {
+      const rows = Math.round((scrollY / maxScroll()) * (trackRows - thumbRows));
+      thumb.style.transform = `translateY(${rows * LINE}px)`;
+    }
+
+    let queued = false;
+    addEventListener(
+      "scroll",
+      () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          position();
+        });
+      },
+      { passive: true },
+    );
+    new ResizeObserver(layout).observe(document.body);
+    addEventListener("resize", layout);
+    layout();
+
+    // Click the track to jump there; drag the thumb to scroll.
+    track.addEventListener("pointerdown", (e) => {
+      const rect = root.getBoundingClientRect();
+      const ratio = (e.clientY - rect.top - (thumbRows * LINE) / 2) / (rect.height - thumbRows * LINE);
+      scrollTo({ top: Math.min(1, Math.max(0, ratio)) * maxScroll() });
+    });
+    let startY = 0;
+    let startScroll = 0;
+    thumb.addEventListener("pointerdown", (e) => {
+      startY = e.clientY;
+      startScroll = scrollY;
+      thumb.setPointerCapture(e.pointerId);
+      thumb.classList.add("is-dragging");
+      doc.style.scrollBehavior = "auto"; // follow the pointer exactly while dragging
+    });
+    thumb.addEventListener("pointermove", (e) => {
+      if (!thumb.hasPointerCapture(e.pointerId)) return;
+      const trackSpace = root.clientHeight - thumbRows * LINE;
+      scrollTo({ top: startScroll + ((e.clientY - startY) / trackSpace) * maxScroll() });
+    });
+    const stop = (e: PointerEvent) => {
+      if (thumb.hasPointerCapture(e.pointerId)) thumb.releasePointerCapture(e.pointerId);
+      thumb.classList.remove("is-dragging");
+      doc.style.removeProperty("scroll-behavior");
+    };
+    thumb.addEventListener("pointerup", stop);
+    thumb.addEventListener("pointercancel", stop);
+  }
+</script>

@@ -1,5 +1,5 @@
-// Awards and honours, newest first. Real ones only; a link to proof (certificate, announcement)
-// makes one credible. Remove all entries to hide the section.
+// Awards and honours, newest first, shown as photo cards. Real ones only; a link to proof (certificate,
+// announcement) makes one credible. Remove all entries to hide the section.
 
 export interface Award {
   title: string;
@@ -7,6 +7,9 @@ export interface Award {
   year: string;
   detail?: string;
   href?: string;
+  /** Photo in public/images/awards, e.g. "/images/awards/magna-cum-laude.webp" (4:3: the medal, ceremony or certificate). */
+  image?: string;
+  imageAlt?: string;
 }
 
 export const awards: Award[] = [
