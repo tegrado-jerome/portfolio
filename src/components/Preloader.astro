@@ -44,15 +44,21 @@ const CELLS = 24;
       document.dispatchEvent(new Event("preloader:done"));
     }
 
-    // Arriving on a section link (e.g. /#work): skip the intro and jump straight there.
-    if (location.hash && location.hash !== "#top") {
+    // Skip the intro when arriving on a section link (e.g. /#work), or if it already played this visit:
+    // reloads and back-navigation open instantly.
+    var seen = false;
+    try {
+      seen = sessionStorage.getItem("booted") === "1";
+      sessionStorage.setItem("booted", "1");
+    } catch (e) {}
+    if (seen || (location.hash && location.hash !== "#top")) {
       pre.remove();
       return;
     }
 
     root.classList.add("is-preloading");
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var duration = reduce ? 500 : 2200;
+    var duration = reduce ? 400 : 1200;
     var start = null;
 
     function finish() {

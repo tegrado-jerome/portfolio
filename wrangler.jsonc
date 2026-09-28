@@ -13,8 +13,8 @@
   },
   "vars": {
     "GEMINI_MODEL": "gemini-3.1-flash-lite",
-    // TODO: set to your real domain, e.g. "https://jerome.dev", to block other sites using the API.
-    "ALLOWED_ORIGINS": ""
+    // Only this site may call the chat API. Add your own domain here too if you move to one.
+    "ALLOWED_ORIGINS": "https://jerome-tegrado-portfolio.tegradojeromebrent.workers.dev"
   },
   // 10 chat messages per visitor IP per minute.
   "ratelimits": [

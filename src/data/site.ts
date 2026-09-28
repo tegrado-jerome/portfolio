@@ -7,9 +7,9 @@ export const site = {
   description: "[SHORT SITE DESCRIPTION FOR SEARCH ENGINES AND SOCIAL PREVIEWS]",
   headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
   intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
-  // Optional: put a photo in public/images and set e.g. "/images/portrait.jpg". Leave empty for a placeholder.
+  // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
-  portrait: "/images/portrait.jpg",
+  portrait: "/images/portrait.webp",
   email: "tegradojeromebrent@gmail.com",
   // Resume link shown in the footer (a PDF in public/ or a Google Drive link).
   resume: "[RESUME URL]",
@@ -19,16 +19,20 @@ export const site = {
     title: "Magna Cum Laude",
     detail: "GWA 1.36",
     school: "Technological University of the Philippines",
-    logo: "/images/tup-seal.png",
+    logo: "/images/tup-seal.webp",
   },
 
   // Your photo for the round chat button, e.g. "/images/avatar.jpg" (a square photo in public/images).
   // Leave empty to show the JT logo instead.
-  chatAvatar: "/images/chat-avatar.jpg",
+  chatAvatar: "/images/chat-avatar.webp",
 
   // Optional 1200×630 social preview image in public/images, e.g. "/images/og.jpg".
   ogImage: "",
 
+  // Google Search Console: the "content" value of its HTML-tag verification, e.g. "abc123...". Empty = no tag.
+  gscVerification: "",
+  // Google Analytics 4 measurement ID, e.g. "G-XXXXXXX". Empty = no analytics.
+  gaId: "",
 };
 
 // "Let's talk" opens a new Gmail message to me in the browser.

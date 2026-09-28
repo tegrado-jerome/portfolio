@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Geist Mono, self-hosted: one variable file per script covers weights 400 and 500.
+   "symbols" holds the box-drawing characters (└ █ ░) used in the TUI. */
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("/fonts/geist-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("/fonts/geist-mono-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("/fonts/geist-mono-symbols.woff2") format("woff2");
+  unicode-range: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F;
+}
+
 /* Slate & steel blue. Light is the default; the dark slate theme overrides the same tokens. */
 @theme {
   --color-paper: #eef0f2;
@@ -12,8 +39,7 @@
   --color-night: #1b2430;
   --color-online: #2f8a5f;
 
-  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
-  /* Full TUI: all text is mono, so "sans" points at the mono face; only the name keeps the serif. */
+  /* Full TUI: all text is mono, so "sans" points at the mono face too. */
   --font-sans: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
@@ -184,10 +210,10 @@
 /* Scroll reveal — only active when JS has run, so content is never hidden without it */
 .js [data-reveal] {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(6px);
   transition:
-    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft);
   transition-delay: calc(var(--i, 0) * 60ms);
 }
 .js [data-reveal].is-visible {

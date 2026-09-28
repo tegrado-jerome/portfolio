@@ -37,12 +37,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap"
-    />
+    <!-- The one font, self-hosted (see global.css): no third-party request to block the first paint. -->
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+    {site.gscVerification && <meta name="google-site-verification" content={site.gscVerification} />}
 
     <script is:inline>
       // Runs before first paint so a saved dark theme never flashes.
@@ -67,44 +64,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       class="eyebrow sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-ink focus:px-4 focus:py-3 focus:text-paper"
       >Skip to content</a
     >
-    <div class="scroll-progress" aria-hidden="true"></div>
     <slot />
 
-    <style>
-      /* Hairline that fills as you scroll (elliott.mangham.dev, wodniack.dev). CSS-only; hidden where unsupported. */
-      .scroll-progress {
-        display: none;
-      }
-      @supports (animation-timeline: scroll()) {
-        @media (prefers-reduced-motion: no-preference) {
-          .scroll-progress {
-            display: block;
-            position: fixed;
-            inset: 0 0 auto;
-            /* Above the header (40), under the chat sheet (45). */
-            z-index: 41;
-            height: 2px;
-            background: var(--color-accent);
-            transform-origin: 0 50%;
-            animation: scroll-progress linear both;
-            animation-timeline: scroll(root);
-            transition: right 0.24s var(--ease-out-soft);
-          }
-          /* With the chat open, the bar spans only the page area left of the sheet (same width as the sheet). */
-          :global(html.chat-open) .scroll-progress {
-            right: min(420px, 100vw);
-          }
-        }
-      }
-      @keyframes scroll-progress {
-        from {
-          transform: scaleX(0);
-        }
-        to {
-          transform: scaleX(1);
-        }
-      }
-    </style>
 
     <script>
       // "Back to top" links point at "/" — on the home page, scroll up instead of reloading,
@@ -148,9 +109,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       }
     </script>
 
-    <script>
-      import { initScramble } from "../scripts/scramble";
-      initScramble();
-    </script>
+    {
+      site.gaId && (
+        <script is:inline define:vars={{ gaId: site.gaId }}>
+          // Google Analytics 4, loaded once the page has finished loading so it never slows the first paint.
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () {
+            dataLayer.push(arguments);
+          };
+          gtag("js", new Date());
+          gtag("config", gaId);
+          addEventListener("load", function () {
+            setTimeout(function () {
+              var s = document.createElement("script");
+              s.async = true;
+              s.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+              document.head.appendChild(s);
+            }, 1500);
+          });
+        </script>
+      )
+    }
   </body>
 </html>

@@ -12,8 +12,8 @@ import Timeline from "./Timeline.astro";
   <!-- The main TUI pane: its title and status sit on the top border. The photo keeps its size and place. -->
   <div class="pane" data-pane="jerome-tegrado">
   <div class="absolute inset-x-0 top-0 flex justify-between gap-4 text-small" aria-hidden="true">
-    <span class="text-ink" data-scramble><span class="text-accent">~/</span>jerome-tegrado</span>
-    <span class="flex items-center gap-2 text-muted"><span class="size-1.5 rounded-full bg-online"></span>online</span>
+    <span class="text-ink"><span class="text-accent">~/</span>jerome-tegrado</span>
+    <span class="flex items-center gap-2 text-online"><span class="pulse size-1.5 rounded-full bg-online"></span>online</span>
   </div>
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
@@ -21,7 +21,7 @@ import Timeline from "./Timeline.astro";
       <h1
         id="hero-title"
         data-reveal
-        data-scramble
+       
         class="hero-title mb-[clamp(12px,1.6vw,18px)] text-display font-medium tracking-[-0.045em]"
       >
         {
@@ -96,8 +96,8 @@ import Timeline from "./Timeline.astro";
             <img
               src={site.portrait}
               alt={`Portrait of ${site.name}`}
-              width="960"
-              height="1200"
+              width="640"
+              height="800"
               class="size-full object-cover"
             />
           ) : (
@@ -219,12 +219,32 @@ import Timeline from "./Timeline.astro";
   .ask input:focus-visible {
     outline: none;
   }
+  /* A soft, slow ring breathing out of the online dot. */
+  .pulse {
+    position: relative;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--color-online);
+      animation: pulse 2.4s ease-out infinite;
+    }
+  }
+  @keyframes pulse {
+    to {
+      scale: 2.8;
+      opacity: 0;
+    }
+  }
   .guide {
     display: none;
     position: absolute;
     left: 0;
     align-items: center;
-    color: color-mix(in srgb, var(--color-muted) 80%, transparent);
+    color: var(--color-muted);
     white-space: pre;
     pointer-events: none;
   }

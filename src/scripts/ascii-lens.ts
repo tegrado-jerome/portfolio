@@ -17,6 +17,12 @@ interface LensOptions {
   autoplay?: boolean;
 }
 
+/** Only truly weak devices (2 or fewer cores, or 2 GB RAM or less) skip the drift; most phones report 4-8. */
+function isLowEnd() {
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  return (navigator.hardwareConcurrency || 8) <= 2 || (memory !== undefined && memory <= 2);
+}
+
 export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, className = "", autoplay = false }: LensOptions) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const mouse = matchMedia("(hover: hover) and (pointer: fine)");
@@ -96,16 +102,18 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
   window.addEventListener("resize", () => (ready = false));
   image.addEventListener("load", () => (ready = false));
 
-  if (autoplay) {
+  if (autoplay && !isLowEnd()) {
     // Checked live, so switching between mouse and touch (e.g. DevTools device mode) needs no reload.
-    let visible = false, drifting = false, t0 = -1;
+    let visible = false, drifting = false, t0 = -1, lastDraw = 0;
     const drift = (t: number) => {
       if (!visible || mouse.matches) {
         drifting = false;
         return;
       }
       if (!ready) ready = build();
-      if (ready) {
+      // 30 frames a second is plenty for a slow drift and halves the work on phones.
+      if (ready && t - lastDraw >= 33) {
+        lastDraw = t;
         if (t0 < 0) t0 = t;
         const s = (t - t0) / 1000;
         // starts at the bottom centre, then wanders; fainter than the hover lens so it stays in the background

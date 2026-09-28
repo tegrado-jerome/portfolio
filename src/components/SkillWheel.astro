@@ -75,7 +75,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 <script>
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const AUTO_EVERY = 2400; // ms between automatic steps
+  const AUTO_EVERY = 4500; // ms between automatic steps: slow and calm
   const IDLE_AFTER_USE = 5000; // ms to wait after the visitor spins or picks before stepping again
   const TAP_SLOP = 6; // px of movement that still counts as a tap
 
@@ -110,7 +110,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
         raf = 0;
         return;
       }
-      angle += diff * 0.16;
+      angle += diff * 0.09; // a slow, calm settle
       render();
       raf = requestAnimationFrame(tick);
     }

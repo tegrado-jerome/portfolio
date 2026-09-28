@@ -3,14 +3,15 @@
 // Laptops and desktops only; the keys it names work there: ↑↓ jump between panes, / focuses the AI prompt.
 ---
 
-<div class="status" aria-hidden="true">
-  <span class="mode">tui</span>
-  <span class="text-ink"><span class="text-accent">~/</span><span data-status-pane>jerome-tegrado</span></span>
+<!-- Decorative parts are hidden from screen readers; the two buttons stay reachable and named. -->
+<div class="status">
+  <span class="mode" aria-hidden="true">tui</span>
+  <span class="text-ink" aria-hidden="true"><span class="text-accent">~/</span><span data-status-pane>jerome-tegrado</span></span>
   <span class="ml-auto flex items-center gap-4 text-muted">
-    <span><kbd>↑↓</kbd> panes</span>
-    <button type="button" data-status-ask><kbd>/</kbd> ask</button>
-    <button type="button" data-palette-open><kbd>⌘K</kbd> menu</button>
-    <time data-status-clock class="text-ink tabular-nums"></time>
+    <span aria-hidden="true"><kbd>↑↓</kbd> panes</span>
+    <button type="button" data-status-ask aria-label="Ask my AI"><kbd aria-hidden="true">/</kbd> ask</button>
+    <button type="button" data-palette-open aria-label="Open command menu"><kbd aria-hidden="true">⌘K</kbd> menu</button>
+    <time data-status-clock class="text-ink tabular-nums" aria-hidden="true"></time>
   </span>
 </div>
 
@@ -72,17 +73,30 @@
     });
     return index;
   }
+  // At most once per frame, and only where the bar is shown (it's hidden below 1024px).
+  let queued = false;
   function syncPane() {
-    if (paneLabel && panes.length) paneLabel.textContent = panes[currentPane()].dataset.pane ?? "";
+    queued = false;
+    if (!paneLabel || !panes.length || !paneLabel.offsetParent) return;
+    const name = panes[currentPane()].dataset.pane ?? "";
+    if (paneLabel.textContent !== name) paneLabel.textContent = name;
   }
-  addEventListener("scroll", syncPane, { passive: true });
+  addEventListener(
+    "scroll",
+    () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(syncPane);
+    },
+    { passive: true },
+  );
   syncPane();
 
   function tickClock() {
-    if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+    if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
   }
   tickClock();
-  setInterval(tickClock, 1000);
+  setInterval(tickClock, 15_000);
 
   function focusAsk() {
     const ask = document.getElementById("hero-ask");
