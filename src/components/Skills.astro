@@ -13,20 +13,25 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     <section id="skills" class="shell section" aria-labelledby="skills-title">
       <SectionHead id="skills-title" title="Skills" />
 
-      <div data-reveal role="tablist" aria-label="Skill categories" class="mb-[clamp(28px,4vw,48px)] flex flex-wrap gap-2">
-        {groups.map((g, i) => (
-          <button
-            type="button"
-            role="tab"
-            id={`skills-tab-${slug(g.name)}`}
-            aria-controls={`skills-${slug(g.name)}`}
-            aria-selected={i === 0 ? "true" : "false"}
-            tabindex={i === 0 ? 0 : -1}
-            class="eyebrow rounded-full border border-line px-4 py-2 text-muted transition-colors duration-200 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
-          >
-            {g.name}
-          </button>
-        ))}
+      <!-- Segmented control styled as a radio's band switch, to pair with the tuning dial: a hairline track
+           and an ink tile (the dial's needle colour) that slides onto the picked category. -->
+      <div data-reveal class="mb-[clamp(28px,4vw,48px)]">
+        <div role="tablist" aria-label="Skill categories" class="seg relative inline-flex flex-wrap gap-0.5 rounded-[10px] border border-line p-1">
+          <span class="thumb" aria-hidden="true"></span>
+          {groups.map((g, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`skills-tab-${slug(g.name)}`}
+              aria-controls={`skills-${slug(g.name)}`}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              class="eyebrow relative z-[1] rounded-[7px] px-3.5 py-2.5 text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
+            >
+              {g.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {groups.map((g, i) => (
@@ -56,6 +61,25 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 <style>
+  /* The ink tile. JS moves it onto the picked tab (it can slide between rows when the tabs wrap on phones). */
+  .seg {
+    --tile: var(--color-ink);
+  }
+  .thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 7px;
+    background: var(--tile);
+    transition:
+      translate 0.3s var(--ease-out-soft),
+      width 0.3s var(--ease-out-soft),
+      height 0.3s var(--ease-out-soft);
+  }
+  /* Without JS there's no sliding tile, so the picked tab paints its own. */
+  :global(html:not(.js)) .seg [aria-selected="true"] {
+    background: var(--tile);
+  }
   /* The guide's gesture: a dot circling a small ring, the motion that spins the wheel. */
   .orbit {
     position: relative;
@@ -106,6 +130,17 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 <script>
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("#skills [role=tab]")];
 
+  const thumb = document.querySelector<HTMLElement>("#skills .thumb");
+
+  // Sit the raised tile exactly on the picked tab.
+  function moveThumb() {
+    const tab = tabs.find((t) => t.getAttribute("aria-selected") === "true");
+    if (!thumb || !tab) return;
+    thumb.style.translate = `${tab.offsetLeft}px ${tab.offsetTop}px`;
+    thumb.style.width = `${tab.offsetWidth}px`;
+    thumb.style.height = `${tab.offsetHeight}px`;
+  }
+
   function select(tab: HTMLButtonElement) {
     for (const t of tabs) {
       const selected = t === tab;
@@ -113,6 +148,16 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       t.tabIndex = selected ? 0 : -1;
       document.getElementById(t.getAttribute("aria-controls")!)!.hidden = !selected;
     }
+    moveThumb();
+  }
+
+  // Tabs can rewrap when the width changes, so re-place the tile then (without sliding it).
+  if (thumb) {
+    new ResizeObserver(() => {
+      thumb.style.transition = "none";
+      moveThumb();
+      requestAnimationFrame(() => (thumb.style.transition = ""));
+    }).observe(thumb.parentElement!);
   }
 
   tabs.forEach((tab, i) => {
