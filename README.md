@@ -21,6 +21,8 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 | `site.ts` | Name, headline, intro, portrait, email, socials, preloader, footer, archive, time zone |
 | `experience.ts` | Timeline entries and their icons |
 | `projects.ts` | Selected work (the first project is featured full-width) |
+| `testimonials.ts` | "Kind words" quotes — real ones only; empty list hides the section |
+| `assistant.ts` | Facts the AI chat may use about you |
 
 Also set your real domain as `site` in `astro.config.mjs`. It's used for canonical URLs, Open Graph, the sitemap, `robots.txt` and `llms.txt`.
 
