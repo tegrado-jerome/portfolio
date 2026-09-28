@@ -8,9 +8,11 @@ type Command = { label: string; group: string; action: string; value: string };
 
 const commands: Command[] = [
   { label: "Home", group: "Go to", action: "goto", value: "top" },
+  { label: "Skills", group: "Go to", action: "goto", value: "skills" },
   { label: "Selected Work", group: "Go to", action: "goto", value: "work" },
+  { label: "Awards", group: "Go to", action: "goto", value: "awards" },
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
-  { label: "Chat with me (AI)", group: "Action", action: "chat", value: "" },
+  { label: "Chat with me", group: "Action", action: "chat", value: "" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),
   { label: "Light theme", group: "Theme", action: "theme", value: "light" },
   { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
@@ -163,8 +165,11 @@ const commands: Command[] = [
     dialog.close();
     if (action === "goto") {
       const behavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-      if (value === "top") window.scrollTo({ top: 0, behavior });
-      else document.getElementById(value)?.scrollIntoView({ behavior });
+      const target = document.getElementById(value);
+      // Sections live on the home page; from any other page (like the 404), go there instead.
+      if (!target) location.href = value === "top" ? "/" : `/#${value}`;
+      else if (value === "top") window.scrollTo({ top: 0, behavior });
+      else target.scrollIntoView({ behavior });
     } else if (action === "theme") {
       const theme = themes.find((t) => t === value);
       if (theme) setTheme(theme);

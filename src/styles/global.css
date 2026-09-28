@@ -107,9 +107,10 @@
   text-transform: uppercase;
 }
 
-/* The same vertical space around every section. */
+/* The same space before every section, so the gap between any two sections is identical
+   (padding on top only: stacked top and bottom padding doubled some gaps and not others). */
 @utility section {
-  padding-block: clamp(64px, 9vw, 120px);
+  padding-top: clamp(96px, 12vw, 176px);
 }
 
 /* The one hover for text links: no lines, just a colour change.
