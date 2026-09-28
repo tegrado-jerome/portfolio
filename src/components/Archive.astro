@@ -142,7 +142,6 @@ const cards = ["right", "middle", "left"] as const;
     transform: rotate(-15.13deg);
   }
 
-  /* Frosted folder front that blurs the cards behind it */
   .folder__front {
     left: 3px;
     top: 84px;
@@ -168,7 +167,6 @@ const cards = ["right", "middle", "left"] as const;
     filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
   }
 
-  /* Hover / focus — cards pop out, arrow slides in */
   .folder:is(:hover, :focus-visible) .folder__card--left {
     transform: translate(-6px, -30px);
   }

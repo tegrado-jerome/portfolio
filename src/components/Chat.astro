@@ -159,7 +159,6 @@ import Icon from "./Icon.astro";
     e.preventDefault();
     ask(input.value);
   });
-  // Enter sends, Shift+Enter adds a new line.
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

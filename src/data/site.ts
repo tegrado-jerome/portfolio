@@ -25,6 +25,9 @@ export const site = {
   // Optional: your IANA time zone (e.g. "Europe/London") to show a live local-time clock in the footer.
   timezone: "",
 
+  // Optional 1200×630 social preview image in /public, e.g. "/og.jpg".
+  ogImage: "",
+
   // Optional wide photo for the footer, e.g. "/footer.jpg" (black & white works best).
   footerImage: "",
 

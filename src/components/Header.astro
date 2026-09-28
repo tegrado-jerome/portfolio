@@ -77,7 +77,6 @@ const links = [
 
   const header = document.getElementById("site-header")!;
 
-  // Theme toggle switches between Light and Dark.
   const toggle = header.querySelector<HTMLButtonElement>("[data-theme-toggle]")!;
   const toggleLabel = toggle.querySelector("[data-theme-label]")!;
   const title = (theme: string) => theme[0].toUpperCase() + theme.slice(1);
@@ -91,7 +90,6 @@ const links = [
 
   if (/Mac|iPhone|iPad/.test(navigator.userAgent)) header.querySelector("[data-shortcut]")!.textContent = "⌘K";
 
-  // Hide on scroll down, show on scroll up.
   let last = window.scrollY;
   let ticking = false;
   const update = () => {
@@ -116,7 +114,6 @@ const links = [
   // Keep the header visible while keyboard users tab through it.
   header.addEventListener("focusin", () => header.classList.remove("is-hidden"));
 
-  // Mark the nav link of the section currently in view.
   const links = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
   const sections = [...links]
     .map((a) => document.querySelector<HTMLElement>(a.hash))

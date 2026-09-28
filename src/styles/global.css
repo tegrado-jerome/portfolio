@@ -69,7 +69,6 @@
   padding-inline: clamp(20px, 11vw, 200px);
 }
 
-/* Small uppercase label used in nav, metadata and footer */
 @utility eyebrow {
   font-size: 12px;
   font-weight: 500;
