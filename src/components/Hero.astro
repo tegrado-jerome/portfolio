@@ -9,20 +9,16 @@ import Timeline from "./Timeline.astro";
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app).
      On phones the portrait comes first, so visitors see who this is before the name. -->
 <section id="top" class="shell pt-[clamp(48px,6vw,96px)]" aria-labelledby="hero-title">
-  <!-- The main TUI pane: its title and status sit on the top border. The photo keeps its size and place. -->
-  <div class="pane" data-pane="jerome-tegrado">
-  <div class="absolute inset-x-0 top-0 flex justify-between gap-4 text-small" aria-hidden="true">
-    <span class="text-ink"><span class="text-accent">~/</span>jerome-tegrado</span>
-    <span class="flex items-center gap-2 text-online"><span class="pulse size-1.5 rounded-full bg-online"></span>online</span>
-  </div>
+  <!-- The status bar names this pane "jerome-tegrado". -->
+  <div data-pane="jerome-tegrado">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
-      <!-- Name, then role, then intro, then the main action: the order real portfolios use. -->
+      <!-- Name, then intro, then the main action. The headline isn't shown; it's the page title's role for search. -->
       <h1
         id="hero-title"
         data-reveal
        
-        class="hero-title mb-[clamp(12px,1.6vw,18px)] text-display font-medium tracking-[-0.045em]"
+        class="hero-title mb-[clamp(18px,2.5vw,28px)] text-display font-medium tracking-[-0.045em]"
       >
         {
           site.name.split(" ").map((word, i) => (
@@ -34,7 +30,6 @@ import Timeline from "./Timeline.astro";
           ))
         }
       </h1>
-      <p data-reveal style="--i:1" class="eyebrow mb-[clamp(18px,2.5vw,28px)] text-muted">{site.headline}</p>
       <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft">{site.intro}</p>
 
       <!-- Ask-my-AI bar as a terminal line (after Warp / v0): a mono prompt with a blinking block cursor.
@@ -218,26 +213,6 @@ import Timeline from "./Timeline.astro";
   /* The ring replaces the default focus outline on the field itself. */
   .ask input:focus-visible {
     outline: none;
-  }
-  /* A soft, slow ring breathing out of the online dot. */
-  .pulse {
-    position: relative;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .pulse::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: var(--color-online);
-      animation: pulse 2.4s ease-out infinite;
-    }
-  }
-  @keyframes pulse {
-    to {
-      scale: 2.8;
-      opacity: 0;
-    }
   }
   .guide {
     display: none;
