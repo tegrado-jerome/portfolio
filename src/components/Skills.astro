@@ -60,8 +60,6 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
                 <mask id="gesture-reveal"><circle class="reveal" cx="12" cy="10" r="7" pathLength="100" /></mask>
                 <g mask="url(#gesture-reveal)">
                   <circle class="dots" cx="12" cy="10" r="7" pathLength="100" />
-                  {/* Arrowhead where the arc ends (306° clockwise from the top), pointing along it, like a retry icon. */}
-                  <path class="head" d="M-2 -2 L0.5 0 L-2 2" transform="translate(6.34 5.88) rotate(-54)" />
                 </g>
               </svg>
               <span class="hand"><Icon icon={faHandPointer} class="block text-[15px]" /></span>
@@ -102,13 +100,15 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
   }
-  /* The guide's gesture, like touch-gesture hints in apps: a pointing finger draws a circle with its tip, the circle
-     fades, and it starts again. That's the motion that spins the wheel. The circle is centred at (12px, 10px). */
+  /* The guide's gesture, like touch-gesture hints in apps: a pointing finger draws a dotted circle with its tip,
+     the circle fades, and it starts again. That's the motion that spins the wheel. */
   .gesture {
     position: relative;
     display: inline-block;
-    width: 26px;
-    height: 26px;
+    /* Sized to the circle (centred at 12px, 10px), so the circle lines up with the middle of the text beside it;
+       the hand hangs below it. */
+    width: 28px; /* room for the hand at the right of its lap */
+    height: 20px;
     color: var(--color-ink);
   }
   .trail {
@@ -116,8 +116,8 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     inset: 0;
     overflow: visible;
   }
-  /* A dotted retry arrow: dots around 85% of the circle and an arrowhead at the end. It starts at the top and runs
-     clockwise, like the finger; a mask reveals it behind the fingertip. */
+  /* A dotted circle, starting at the top and running clockwise like the finger; a mask reveals it behind the
+     fingertip. */
   .trail circle {
     fill: none;
     transform: rotate(-90deg);
@@ -129,18 +129,11 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     stroke-linecap: round;
     stroke-dasharray: 0 6;
   }
-  .head {
-    fill: none;
-    stroke: var(--color-muted);
-    stroke-width: 1.3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
   .reveal {
     stroke: #fff;
     stroke-width: 7;
     stroke-dasharray: 100;
-    stroke-dashoffset: 15;
+    stroke-dashoffset: 0;
   }
   /* The fingertip rests at the circle's centre (its transform-origin); it's moved out to the edge and around,
      while the hand stays upright. */
@@ -162,8 +155,8 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       animation: fade 2.8s linear infinite;
     }
   }
-  /* The finger sweeps 85% of a lap (to the arrowhead) in the first 70%, then lifts away so the finished arrow
-     shows, and comes back for the next lap. */
+  /* The finger draws one full lap in the first 70%, then lifts away so the finished circle shows, and comes back
+     for the next lap. */
   @keyframes trace {
     0% {
       transform: rotate(0deg) translateY(-7px) rotate(0deg);
@@ -173,12 +166,12 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       opacity: 1;
     }
     70% {
-      transform: rotate(306deg) translateY(-7px) rotate(-306deg);
+      transform: rotate(360deg) translateY(-7px) rotate(-360deg);
       opacity: 1;
     }
     78%,
     100% {
-      transform: rotate(306deg) translateY(-7px) rotate(-306deg);
+      transform: rotate(360deg) translateY(-7px) rotate(-360deg);
       opacity: 0;
     }
   }
@@ -188,7 +181,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     }
     70%,
     100% {
-      stroke-dashoffset: 15;
+      stroke-dashoffset: 0;
     }
   }
   @keyframes fade {
