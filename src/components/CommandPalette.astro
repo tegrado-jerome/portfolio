@@ -18,7 +18,6 @@ const commands: Command[] = [
   { label: "Ink theme (high contrast)", group: "Theme", action: "theme", value: "ink" },
   { label: "Night theme", group: "Theme", action: "theme", value: "night" },
   ...socials.filter((s) => isSet(s.href)).map((s) => ({ label: s.label, group: "Link", action: "link", value: s.href })),
-  { label: "Colophon (humans.txt)", group: "Link", action: "link", value: "/humans.txt" },
 ];
 ---
 

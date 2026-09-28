@@ -2,7 +2,6 @@
 import { faPenNib } from "@fortawesome/free-solid-svg-icons";
 import { site, socials } from "../data/site";
 import Icon from "./Icon.astro";
-import { formatDate, lastCommit } from "../lib/build-info";
 
 const year = new Date().getFullYear();
 const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact";
@@ -63,14 +62,6 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
           site.timezone && (
             <p>
               Local time <time data-clock={site.timezone} class="text-on-night tabular-nums" />
-            </p>
-          )
-        }
-        {
-          lastCommit && (
-            <p class="tabular-nums">
-              Updated <time datetime={lastCommit.date}>{formatDate(lastCommit.date)}</time>
-              <span class="text-on-night/40"> · {lastCommit.hash}</span>
             </p>
           )
         }
