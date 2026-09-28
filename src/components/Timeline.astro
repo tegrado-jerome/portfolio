@@ -7,29 +7,21 @@ import Icon from "./Icon.astro";
   <h2 id="journey-title" class="sr-only">Journey</h2>
 
   <!--
-    Desktop: a horizontal row — year, title, and a rule running to the next step.
-    Mobile: a vertical track with a dot for each step.
+    Desktop: one continuous line with a dot per step, year above and details below.
+    Mobile: a vertical track with the same dots.
   -->
-  <ol
-    class="timeline relative grid gap-y-9 border-l border-line pl-7 lg:grid-cols-5 lg:gap-x-[clamp(20px,2.6vw,48px)] lg:border-0 lg:pl-0"
-  >
+  <div class="timeline relative">
+  <span class="timeline-rule absolute inset-x-0 top-[39px] hidden h-px origin-left bg-ink lg:block" aria-hidden="true"></span>
+  <ol class="relative grid gap-y-9 border-l border-line pl-7 lg:grid-cols-5 lg:gap-x-[clamp(20px,2.6vw,48px)] lg:border-0 lg:pl-0">
     {
       experience.map((item, i) => (
-        <li data-reveal style={`--i:${i}`} class="timeline-item group relative min-w-0">
+        <li data-reveal style={`--i:${i}`} class="timeline-item group relative min-w-0 lg:flex lg:flex-col">
+          <span class="mb-1 block text-[14px] tabular-nums text-muted lg:mb-3">{item.year}</span>
           <span
-            class="absolute top-[7px] -left-[33px] size-[9px] rounded-full border border-ink bg-paper transition-colors duration-300 group-last:bg-accent group-last:border-accent group-hover:bg-ink lg:hidden"
+            class="absolute top-[7px] -left-[33px] size-[11px] rounded-full border border-ink bg-paper transition-colors duration-300 group-last:border-accent group-last:bg-accent group-hover:bg-ink lg:static lg:mb-4 lg:block"
             aria-hidden="true"
           />
-          <span class="mb-1 block text-[14px] tabular-nums text-muted">{item.year}</span>
-          <div class="mb-1.5 flex items-center gap-5">
-            <h3 class="shrink-0 text-[16px] font-medium uppercase tracking-[0.01em] whitespace-nowrap max-lg:whitespace-normal">
-              {item.title}
-            </h3>
-            <span
-              class="timeline-line hidden h-px flex-1 origin-left bg-ink group-last:hidden lg:block"
-              aria-hidden="true"
-            />
-          </div>
+          <h3 class="mb-1.5 text-[16px] font-medium tracking-[0.01em] uppercase">{item.title}</h3>
           <p class="font-serif text-[15px] leading-[1.4] text-ink-soft italic">
             {item.icon && <Icon icon={item.icon} class="mr-1.5 text-[12px] text-accent not-italic" />}
             {item.description}
@@ -38,14 +30,15 @@ import Icon from "./Icon.astro";
       ))
     }
   </ol>
+  </div>
 </section>
 
 <style>
-  :global(.js) .timeline-line {
+  :global(.js) .timeline-rule {
     transform: scaleX(0);
-    transition: transform 1.1s var(--ease-out-soft) 0.25s;
+    transition: transform 1.4s var(--ease-out-soft) 0.2s;
   }
-  :global(.js) .is-visible .timeline-line {
+  :global(.js) .timeline:has(:global(.is-visible)) .timeline-rule {
     transform: scaleX(1);
   }
 
