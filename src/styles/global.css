@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
-/* Bone & olive (light) is the default; the dark graphite theme overrides the same tokens. */
+/* Slate & steel blue. Light is the default; the dark slate theme overrides the same tokens. */
 @theme {
-  --color-paper: #eeede8;
-  --color-ink: #16181b;
-  --color-ink-soft: #3a3d42;
-  --color-muted: #5d605a;
-  --color-line: #d6d4cd;
-  --color-ph: #e0dfd8;
-  --color-accent: #5b6628;
-  --color-night: #16181b;
-  --color-on-night: #e8e6e1;
+  --color-paper: #eef0f2;
+  --color-ink: #1b2430;
+  --color-ink-soft: #3a4452;
+  --color-muted: #586270;
+  --color-line: #d5dae0;
+  --color-ph: #e0e4e9;
+  --color-accent: #2b4c7e;
+  --color-night: #1b2430;
+  --color-on-night: #eef0f2;
 
   --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -18,17 +18,17 @@
   --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* Dark: graphite paper, bone ink, a brighter olive */
+/* Dark: deep slate paper, pale ink, a lighter steel blue */
 [data-theme="dark"] {
-  --color-paper: #16181b;
-  --color-ink: #e8e6e1;
-  --color-ink-soft: #c4c2bc;
-  --color-muted: #9a9c98;
-  --color-line: #2a2d31;
-  --color-ph: #212428;
-  --color-accent: #a3ad6e;
-  --color-night: #0e0f11;
-  --color-on-night: #e8e6e1;
+  --color-paper: #141a22;
+  --color-ink: #e6e9ee;
+  --color-ink-soft: #c2c8d0;
+  --color-muted: #8f98a5;
+  --color-line: #263040;
+  --color-ph: #1c2430;
+  --color-accent: #8fb0e0;
+  --color-night: #0d1218;
+  --color-on-night: #e6e9ee;
   color-scheme: dark;
 }
 
@@ -77,24 +77,24 @@
   text-transform: uppercase;
 }
 
-/* Hand-painted brush underline from the reference; turns olive on hover */
+/* Hand-painted brush underline from the reference; turns steel blue on hover */
 @utility brush {
   padding-bottom: 0.12em;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23b9b7ae'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23c3cad3'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: left bottom;
   background-size: 100% 0.42em;
   transition: color 0.2s ease;
   &:hover {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%235b6628'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%232b4c7e'/%3E%3C/svg%3E");
   }
 }
 
 [data-theme="dark"] .brush {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23555a5f'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%233a4656'/%3E%3C/svg%3E");
 }
 [data-theme="dark"] .brush:hover {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23a3ad6e'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%238fb0e0'/%3E%3C/svg%3E");
 }
 
 /* Canvas injected by src/scripts/ascii-lens.ts */
