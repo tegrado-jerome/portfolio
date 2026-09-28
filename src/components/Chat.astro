@@ -35,27 +35,26 @@ import OnlineStatus from "./OnlineStatus.astro";
       <h2 id="chat-title" class="font-serif text-heading">
         Jerome
       </h2>
-      <OnlineStatus label="Online now" class="mt-1.5" />
+      <OnlineStatus label="Online" class="mt-1.5" />
     </div>
     <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
       <Icon icon={faXmark} class="text-[15px]" />
     </button>
   </header>
 
-  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6">
-    <li class="msg-ai">
-      {
-        site.chatAvatar ? (
-          <img data-avatar src={site.chatAvatar} alt="" width="56" height="56" class="avatar object-cover" />
-        ) : (
-          <span data-avatar class="avatar grid place-items-center bg-ink" aria-hidden="true">
-            <span class="chat-logo block size-4 bg-paper" />
-          </span>
-        )
-      }
-      <p class="bubble">{assistant.greeting}</p>
-    </li>
-  </ol>
+  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6"></ol>
+  <!-- My avatar, copied next to each of my replies. -->
+  <template data-avatar>
+    {
+      site.chatAvatar ? (
+        <img src={site.chatAvatar} alt="" width="56" height="56" class="avatar object-cover" />
+      ) : (
+        <span class="avatar grid place-items-center bg-ink" aria-hidden="true">
+          <span class="chat-logo block size-4 bg-paper" />
+        </span>
+      )
+    }
+  </template>
 
   <ul data-chat-suggestions class="mb-3 space-y-1 text-small">
     {
@@ -266,7 +265,7 @@ import OnlineStatus from "./OnlineStatus.astro";
 
   const sheet = document.getElementById("chat")!;
   const log = sheet.querySelector<HTMLOListElement>("[data-chat-log]")!;
-  const avatar = log.querySelector("[data-avatar]")!;
+  const avatar = sheet.querySelector<HTMLTemplateElement>("template[data-avatar]")!.content.firstElementChild!;
   const suggestions = sheet.querySelector<HTMLElement>("[data-chat-suggestions]")!;
   const form = sheet.querySelector<HTMLFormElement>("[data-chat-form]")!;
   const input = sheet.querySelector<HTMLTextAreaElement>("#chat-input")!;
