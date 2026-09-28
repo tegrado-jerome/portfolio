@@ -1,29 +1,7 @@
 @import "tailwindcss";
 
-/* Graphite & olive. Dark is the default; the light "bone" theme overrides the same tokens. */
+/* Bone & olive (light) is the default; the dark graphite theme overrides the same tokens. */
 @theme {
-  --color-paper: #16181b;
-  --color-ink: #e8e6e1;
-  --color-ink-soft: #c4c2bc;
-  --color-muted: #9a9c98;
-  --color-line: #2a2d31;
-  --color-ph: #212428;
-  --color-accent: #a3ad6e;
-  --color-night: #0e0f11;
-  --color-on-night: #e8e6e1;
-
-  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-:root {
-  color-scheme: dark;
-}
-
-/* Light: bone paper, graphite ink, a deeper olive that keeps AA contrast */
-[data-theme="light"] {
   --color-paper: #eeede8;
   --color-ink: #16181b;
   --color-ink-soft: #3a3d42;
@@ -33,7 +11,25 @@
   --color-accent: #5b6628;
   --color-night: #16181b;
   --color-on-night: #e8e6e1;
-  color-scheme: light;
+
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Dark: graphite paper, bone ink, a brighter olive */
+[data-theme="dark"] {
+  --color-paper: #16181b;
+  --color-ink: #e8e6e1;
+  --color-ink-soft: #c4c2bc;
+  --color-muted: #9a9c98;
+  --color-line: #2a2d31;
+  --color-ph: #212428;
+  --color-accent: #a3ad6e;
+  --color-night: #0e0f11;
+  --color-on-night: #e8e6e1;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -84,21 +80,21 @@
 /* Hand-painted brush underline from the reference; turns olive on hover */
 @utility brush {
   padding-bottom: 0.12em;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23555a5f'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23b9b7ae'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: left bottom;
   background-size: 100% 0.42em;
   transition: color 0.2s ease;
   &:hover {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23a3ad6e'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%235b6628'/%3E%3C/svg%3E");
   }
 }
 
-[data-theme="light"] .brush {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23b9b7ae'/%3E%3C/svg%3E");
+[data-theme="dark"] .brush {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23555a5f'/%3E%3C/svg%3E");
 }
-[data-theme="light"] .brush:hover {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%235b6628'/%3E%3C/svg%3E");
+[data-theme="dark"] .brush:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23a3ad6e'/%3E%3C/svg%3E");
 }
 
 /* Canvas injected by src/scripts/ascii-lens.ts */

@@ -1,13 +1,13 @@
-// Dark (default) and Light. The initial theme is applied by an inline script in Layout.astro
+// Light (default) and Dark. The initial theme is applied by an inline script in Layout.astro
 // before first paint; this module handles changes after load.
 
-export const themes = ["dark", "light"] as const;
+export const themes = ["light", "dark"] as const;
 export type Theme = (typeof themes)[number];
 
 const root = document.documentElement;
 
 export function currentTheme(): Theme {
-  return themes.find((t) => t === root.dataset.theme) ?? "dark";
+  return themes.find((t) => t === root.dataset.theme) ?? "light";
 }
 
 export function nextTheme(): Theme {
@@ -15,7 +15,7 @@ export function nextTheme(): Theme {
 }
 
 export function setTheme(theme: Theme) {
-  if (theme === "dark") delete root.dataset.theme;
+  if (theme === "light") delete root.dataset.theme;
   else root.dataset.theme = theme;
 
   try {
