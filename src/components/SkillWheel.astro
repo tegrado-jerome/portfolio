@@ -1,7 +1,8 @@
 ---
-// A minimal game-style skill wheel (after the GTA V weapon wheel the user picked) that turns like a
-// real dial: drag in a circle to spin the ring, and whichever slot stops under the marker at the top
-// is picked and shown in the centre. A tap or click turns a slot to the top; left alone, it steps round.
+// The skill wheel as a radio tuning dial (after the Braun dials by Dieter Rams, picked by the user
+// to match the site's hairline look): a ring of fine ticks with logos outside it turns under a fixed
+// needle. Drag in a circle to spin it; the logo that stops under the needle is the pick, shown in
+// colour and in the centre. A tap or click turns a logo to the needle; left alone, it steps round.
 import type { Skill } from "../data/skills";
 import SkillLogo from "./SkillLogo.astro";
 
@@ -10,58 +11,58 @@ interface Props {
 }
 
 const { skills } = Astro.props;
-// Every slot holds a logo: short lists repeat round the ring so it never looks empty.
+// Every position holds a logo: short lists repeat round the dial so it never looks empty.
 const N = Math.max(8, skills.length);
 const slotSkills = Array.from({ length: N }, (_, i) => skills[i % skills.length]);
-const S = 460; // viewBox size; the wheel scales to fit
+const S = 460; // viewBox size; the dial scales to fit
 const C = S / 2;
-const INNER = 128;
-const OUTER = 214;
-const GAP = 1.2; // degrees trimmed off each side of a slot
+const TICKS = N * 8;
+const TICK_OUTER = 163;
+const LOGO_RADIUS = 200;
 const step = 360 / N;
 
 const point = (r: number, deg: number) => {
   const a = ((deg - 90) * Math.PI) / 180;
   return [C + r * Math.cos(a), C + r * Math.sin(a)];
 };
-function slotPath(i: number) {
-  const a0 = i * step - step / 2 + GAP;
-  const a1 = i * step + step / 2 - GAP;
-  const [x0, y0] = point(OUTER, a0);
-  const [x1, y1] = point(OUTER, a1);
-  const [x2, y2] = point(INNER, a1);
-  const [x3, y3] = point(INNER, a0);
-  return `M${x0} ${y0}A${OUTER} ${OUTER} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${INNER} ${INNER} 0 0 0 ${x3} ${y3}Z`;
-}
+const ticks = Array.from({ length: TICKS }, (_, t) => {
+  const deg = (t * 360) / TICKS;
+  const major = t % 8 === 0; // one long tick per logo
+  const [x1, y1] = point(major ? 146 : 153, deg);
+  const [x2, y2] = point(TICK_OUTER, deg);
+  return { x1, y1, x2, y2, major };
+});
+const [needleX, needleY] = point(170, 0);
 const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<div class="gw" data-skill-wheel aria-hidden="true">
+<div class="dial-wrap" data-skill-wheel aria-hidden="true">
   <div class="dial">
     <svg viewBox={`0 0 ${S} ${S}`} class="block size-full overflow-visible">
-      {
-        Array.from({ length: N }, (_, i) => (
-          <path d={slotPath(i)} class="slot" data-index={i} data-active={i === 0 ? "" : undefined} />
-        ))
-      }
+      {ticks.map((t) => <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} class:list={["tick", t.major && "major"]} />)}
     </svg>
     {
       slotSkills.map((s, i) => {
-        const [x, y] = point((INNER + OUTER) / 2, i * step);
+        const [x, y] = point(LOGO_RADIUS, i * step);
         return (
-          <span class="slot-logo" data-active={i === 0 ? "" : undefined} style={`left:${(x / S) * 100}%;top:${(y / S) * 100}%`}>
-            <SkillLogo skill={s} class="size-[58%] text-[clamp(16px,4.5vw,24px)]" />
+          <span class="dial-logo" data-active={i === 0 ? "" : undefined} style={`left:${(x / S) * 100}%;top:${(y / S) * 100}%`}>
+            <SkillLogo skill={s} class="size-full text-[clamp(18px,4.5vw,28px)]" />
           </span>
         );
       })
     }
   </div>
-  <span class="marker"></span>
+
+  <svg viewBox={`0 0 ${S} ${S}`} class="needle">
+    <line x1={C} y1={C - 88} x2={needleX} y2={needleY} />
+    <circle cx={needleX} cy={needleY} r="3.5" />
+  </svg>
+
   <div class="hub">
     {
       skills.map((s, i) => (
         <div class="hub-item" data-active={i === 0 ? "" : undefined}>
-          <SkillLogo skill={s} class="size-[clamp(36px,9vw,52px)] text-[clamp(32px,8vw,48px)]" />
+          <SkillLogo skill={s} class="size-[clamp(34px,8vw,48px)] text-[clamp(30px,7vw,44px)]" />
           <p class="mt-2 font-serif text-[clamp(20px,5vw,30px)] leading-[1.05]">{s.name}</p>
           <p class="eyebrow mt-2 text-[9px] text-muted">
             {pad(i + 1)} / {pad(skills.length)}
@@ -79,16 +80,14 @@ const pad = (n: number) => String(n).padStart(2, "0");
   const TAP_SLOP = 6; // px of movement that still counts as a tap
 
   document.querySelectorAll<HTMLElement>("[data-skill-wheel]").forEach((wheel) => {
-    const dial = wheel.querySelector<HTMLElement>(".dial")!;
-    const slots = [...dial.querySelectorAll<SVGPathElement>(".slot")];
-    const logos = [...dial.querySelectorAll<HTMLElement>(".slot-logo")];
+    const logos = [...wheel.querySelectorAll<HTMLElement>(".dial-logo")];
     const hubItems = [...wheel.querySelectorAll<HTMLElement>(".hub-item")];
-    const total = slots.length;
+    const total = logos.length;
     const step = 360 / total;
     const mod = (a: number, n: number) => ((a % n) + n) % n;
     const snap = (deg: number) => Math.round(deg / step) * step;
 
-    // The dial's rotation in degrees. Slot i sits at i * step, so the slot under the marker is -angle / step.
+    // The dial's rotation in degrees. Logo i sits at i * step, so the one under the needle is -angle / step.
     let angle = 0;
     let target = 0;
     let active = 0;
@@ -99,7 +98,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
       const top = mod(Math.round(-angle / step), total);
       if (top === active) return;
       active = top;
-      slots.forEach((s, i) => s.toggleAttribute("data-active", i === top));
       logos.forEach((l, i) => l.toggleAttribute("data-active", i === top));
       hubItems.forEach((h, i) => h.toggleAttribute("data-active", i === top % hubItems.length));
     }
@@ -136,7 +134,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
     wheel.addEventListener("pointerdown", (e) => {
       const p = polar(e);
-      // Grab only the ring; the centre is left for scrolling the page on touch screens.
+      // Grab only the dial's rim; the centre is left for scrolling the page on touch screens.
       if (e.button !== 0 || p.dist < p.size * 0.26) return;
       dragging = true;
       moved = 0;
@@ -169,14 +167,14 @@ const pad = (n: number) => String(n).padStart(2, "0");
       wheel.classList.remove("is-dragging");
       lastUse = performance.now();
       if (moved < TAP_SLOP) {
-        // A tap: turn the tapped slot to the top the short way round.
+        // A tap: turn the tapped logo to the needle the short way round.
         const tapped = mod(Math.round((polar(e).deg - angle) / step), total);
-        let d = mod(tapped + snap(angle) / step, total); // steps clockwise from the marker
+        let d = mod(tapped + snap(angle) / step, total); // steps clockwise from the needle
         if (d > total / 2) d -= total;
         moveTo(snap(angle) - d * step);
         return;
       }
-      // Coast with the release speed, then settle a slot under the marker.
+      // Coast with the release speed, then settle a logo under the needle.
       moveTo(snap(angle + velocity * 260));
     }
     wheel.addEventListener("pointerup", release);
@@ -186,7 +184,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
     if (reduceMotion) return;
     let visible = false;
-    // Also false while this wheel's tab is hidden.
+    // Also false while this dial's tab is hidden.
     new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(wheel);
     setInterval(() => {
       const idle = performance.now() - lastUse > IDLE_AFTER_USE;
@@ -196,77 +194,68 @@ const pad = (n: number) => String(n).padStart(2, "0");
 </script>
 
 <style>
-  .gw {
-    --slot-bg: color-mix(in srgb, var(--color-paper) 45%, white);
+  .dial-wrap {
     --turn: 0deg;
     position: relative;
-    width: min(100%, 460px);
+    width: min(100%, 420px);
     aspect-ratio: 1;
     margin-inline: auto;
     user-select: none;
-    /* The ring spins under a finger instead of scrolling the page; the centre still scrolls. */
+    /* The rim spins under a finger instead of scrolling the page; the centre still scrolls. */
     touch-action: none;
     cursor: grab;
   }
-  .gw.is-dragging {
+  .dial-wrap.is-dragging {
     cursor: grabbing;
-  }
-  :global([data-theme="dark"]) .gw {
-    --slot-bg: color-mix(in srgb, var(--color-paper) 90%, white);
   }
   .dial {
     position: absolute;
     inset: 0;
     rotate: var(--turn);
   }
-  .slot {
-    fill: var(--slot-bg);
+  .tick {
     stroke: var(--color-line);
-    transition:
-      fill 0.2s ease,
-      stroke 0.2s ease;
+    stroke-width: 1;
   }
-  .slot:hover {
-    stroke: var(--color-ink);
+  .tick.major {
+    stroke: var(--color-muted);
   }
-  .slot[data-active] {
-    fill: var(--color-ink);
-    stroke: var(--color-ink);
-  }
-  .slot-logo {
+  .dial-logo {
     position: absolute;
-    display: grid;
-    place-items: center;
-    width: 11%;
+    width: 7.5%;
     aspect-ratio: 1;
     translate: -50% -50%;
     /* Stays upright while the dial turns. */
     rotate: calc(var(--turn) * -1);
-    border-radius: 50%;
+    filter: grayscale(1);
+    opacity: 0.45;
+    transition:
+      filter 0.25s ease,
+      opacity 0.25s ease,
+      scale 0.25s ease;
     pointer-events: none;
-    transition: background-color 0.2s ease;
   }
-  .slot-logo[data-active] {
-    background: var(--color-paper);
+  .dial-logo[data-active] {
+    filter: none;
+    opacity: 1;
+    scale: 1.2;
   }
-  .slot-logo :global(img) {
+  .dial-logo :global(img) {
     -webkit-user-drag: none;
   }
-  /* The selector: a small notch above the ring pointing at the picked slot. */
-  .marker {
+  .needle {
     position: absolute;
-    top: 0;
-    left: 50%;
-    translate: -50% -60%;
-    width: 0;
-    height: 0;
-    border-inline: 7px solid transparent;
-    border-top: 9px solid var(--color-ink);
+    inset: 0;
+    overflow: visible;
     pointer-events: none;
+    stroke: var(--color-ink);
+    stroke-width: 1.5;
+    fill: var(--color-ink);
   }
   .hub {
     position: absolute;
     inset: 30%;
+    top: 34%;
     border-radius: 50%;
     touch-action: pan-y;
   }
