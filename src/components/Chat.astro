@@ -54,7 +54,22 @@ import Icon from "./Icon.astro";
     </button>
   </header>
 
-  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6"></ol>
+  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6">
+    <!-- Like Messenger, the thread opens with my profile, and it stays at the top of the conversation. -->
+    <li class="flex flex-col items-center gap-1.5 pt-6 pb-4 text-center">
+      {
+        site.chatAvatar ? (
+          <img src={site.chatAvatar} alt="" width="152" height="152" class="mb-2 size-[76px] rounded-full object-cover" />
+        ) : (
+          <span class="mb-2 grid size-[76px] place-items-center rounded-full bg-ink" aria-hidden="true">
+            <span class="chat-logo block size-8 bg-paper" />
+          </span>
+        )
+      }
+      <p class="font-serif text-heading">{site.name}</p>
+      <p class="text-small text-muted">Online</p>
+    </li>
+  </ol>
   <!-- My avatar, copied next to each of my replies. -->
   <template data-avatar>
     {
@@ -68,11 +83,15 @@ import Icon from "./Icon.astro";
     }
   </template>
 
-  <ul data-chat-suggestions class="mb-3 space-y-1 text-small">
+  <!-- Quick replies (Messenger's icebreakers): outlined bubbles on the visitor's side. -->
+  <ul data-chat-suggestions class="mb-3 flex flex-col items-end gap-2">
     {
       assistant.suggestions.map((s) => (
         <li>
-          <button type="button" class="link text-muted">
+          <button
+            type="button"
+            class="rounded-[18px] border border-ink px-3.5 py-2 text-small text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+          >
             {s}
           </button>
         </li>
