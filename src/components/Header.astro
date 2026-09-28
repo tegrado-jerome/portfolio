@@ -31,9 +31,14 @@ const links = [
               <a
                 href={link.href}
                 data-nav-link
-                class="eyebrow -my-3 inline-block py-3 text-muted transition-colors duration-150 ease-in-out hover:text-ink aria-[current=true]:text-ink"
+                aria-label={link.label}
+                class="roll eyebrow -my-3 inline-block py-3 text-muted transition-colors duration-150 ease-in-out hover:text-ink aria-[current=true]:text-ink"
               >
-                {link.label}
+                <span class="roll-word" aria-hidden="true">
+                  {[...link.label].map((char, i) => (
+                    <span style={`--i:${i}`}>{char}</span>
+                  ))}
+                </span>
               </a>
             </li>
           ))
@@ -71,6 +76,26 @@ const links = [
     </div>
   </div>
 </header>
+
+<style>
+  /* Letters roll up to a copy of themselves on hover (bleibtgleich.dev, art-yakushev.com). */
+  .roll-word {
+    display: inline-flex;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+  .roll-word > span {
+    display: inline-block;
+    white-space: pre;
+    text-shadow: 0 1.2em currentColor;
+    transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1) calc(var(--i) * 15ms);
+  }
+  @media (hover: hover) {
+    .roll:hover .roll-word > span {
+      transform: translateY(-1.2em);
+    }
+  }
+</style>
 
 <script>
   import { currentTheme, nextTheme, setTheme } from "../scripts/theme";
