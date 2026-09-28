@@ -1,6 +1,6 @@
 # Jerome Tegrado — Portfolio
 
-Personal portfolio built with [Astro](https://astro.build), Tailwind CSS and a small amount of vanilla TypeScript. Statically generated and deployed to Cloudflare Workers.
+My personal portfolio. I built it with [Astro](https://astro.build), Tailwind CSS and a little vanilla TypeScript; it's statically generated and deployed on Cloudflare Workers.
 
 ## Development
 
