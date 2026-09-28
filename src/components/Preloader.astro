@@ -62,9 +62,51 @@ const CELLS = 12;
 
     root.classList.add("is-preloading");
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var duration = reduce ? 400 : 3500;
+    var duration = reduce ? 400 : 3500; // the shortest the boot runs
+    var MAX = 10000; // on a very slow connection, open the site anyway after this
     var start = null;
     var shown = 0;
+
+    // The boot does real work: each line waits for its part of the page to load, including the images further
+    // down that would otherwise load lazily on scroll, so the site is ready once the screen lifts.
+    // Line order matches the steps: hero + fonts, work, skills, awards (and the rest), chat, then the full page.
+    var groups = [
+      { sel: "#top img", waits: [document.fonts ? document.fonts.ready : null] },
+      { sel: "#work img" },
+      { sel: "#skills img" },
+      { sel: "#awards img, #certifications img, #testimonials img" },
+      { sel: "#chat img, [data-chat-open] img" },
+      { sel: "", waits: [new Promise(function (r) { addEventListener("load", r, { once: true }); })] },
+    ];
+    var total = 0;
+    var loaded = 0;
+    var collected = false;
+    function track(promise, group) {
+      total++;
+      group.pending++;
+      promise.then(function () {
+        loaded++;
+        group.pending--;
+      });
+    }
+    function imageReady(img) {
+      if (img.complete) return Promise.resolve();
+      img.loading = "eager"; // start lazy images now
+      return new Promise(function (r) {
+        img.addEventListener("load", r, { once: true });
+        img.addEventListener("error", r, { once: true });
+      });
+    }
+    function collect() {
+      groups.forEach(function (g) {
+        g.pending = 0;
+        (g.waits || []).forEach(function (p) { if (p) track(p, g); });
+        if (g.sel) document.querySelectorAll(g.sel).forEach(function (img) { track(imageReady(img), g); });
+      });
+      collected = true;
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", collect, { once: true });
+    else collect();
 
     function finish() {
       pre.classList.add("is-done");
@@ -77,19 +119,26 @@ const CELLS = 12;
     function tick(now) {
       if (start === null) start = now;
       var t = Math.min((now - start) / duration, 1);
-      var pct = Math.round((1 - Math.pow(1 - t, 2)) * 100); // easeOutQuad: steady, slowing a little at the end
+      var timeout = now - start >= MAX;
+      // The bar never runs ahead of what has really loaded.
+      var real = collected && total ? loaded / total : 0;
+      var pct = Math.round(Math.min(1 - Math.pow(1 - t, 2), timeout ? 1 : real) * 100);
       var filled = Math.round((pct / 100) * cells.length);
       countEl.textContent = pct;
       for (var c = 0; c < cells.length; c++) cells[c].className = c < filled ? "on" : "";
-      // The lines appear at even times across the boot, stamped with the real time since it began.
-      // The cursor sits at the end of the newest line.
-      while (shown < lines.length && t >= (shown + 1) / (lines.length + 1)) {
+      // A line appears once its time comes and its part of the page has loaded, stamped with the real time since
+      // the boot began. The cursor sits at the end of the newest line.
+      while (
+        shown < lines.length &&
+        t >= (shown + 1) / (lines.length + 1) &&
+        (timeout || (collected && groups[shown].pending === 0))
+      ) {
         if (shown > 0) lines[shown - 1].classList.remove("is-last");
         lines[shown].querySelector(".time").textContent = "[" + ((now - start) / 1000).toFixed(3) + "]";
         lines[shown].classList.add("is-on", "is-last");
         shown++;
       }
-      if (t < 1) requestAnimationFrame(tick);
+      if (pct < 100 || shown < lines.length) requestAnimationFrame(tick);
       else setTimeout(finish, reduce ? 60 : 320);
     }
     requestAnimationFrame(tick);
