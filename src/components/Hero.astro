@@ -139,5 +139,13 @@ import { site } from "../data/site";
 
   const portrait = document.getElementById("portrait");
   const img = portrait?.querySelector("img");
-  if (portrait && img) asciiLens(portrait, { cell: 8, radius: 66, alpha: 0.55, image: img, className: "z-[3]", autoplay: true });
+  const init = () => {
+    if (portrait && img) asciiLens(portrait, { cell: 8, radius: 66, alpha: 0.55, image: img, className: "z-[3]", autoplay: true });
+  };
+  // Wait for the preloader so the drifting dots on touch screens start at the bottom when the photo is first seen.
+  if (document.documentElement.classList.contains("is-preloading")) {
+    document.addEventListener("preloader:done", init, { once: true });
+  } else {
+    init();
+  }
 </script>

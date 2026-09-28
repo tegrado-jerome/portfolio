@@ -19,8 +19,8 @@ interface LensOptions {
 
 export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, className = "", autoplay = false }: LensOptions) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const hasMouse = matchMedia("(hover: hover) and (pointer: fine)").matches;
-  if (!hasMouse && !autoplay) return;
+  const mouse = matchMedia("(hover: hover) and (pointer: fine)");
+  if (!mouse.matches && !autoplay) return;
 
   const canvas = document.createElement("canvas");
   canvas.className = `ascii-lens ${className}`;
@@ -73,7 +73,7 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     return true;
   }
 
-  function draw() {
+  function draw(peak = alpha) {
     raf = 0;
     if (!bright) return;
     ctx.clearRect(0, 0, W, H);
@@ -87,7 +87,7 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
         if (dist > radius) continue;
         const ch = RAMP[Math.floor(((255 - bright[ry * cols + cx]) / 255) * (RAMP.length - 1))];
         if (ch === " ") continue;
-        ctx.fillStyle = `rgba(255,255,255,${((1 - dist / radius) * alpha).toFixed(3)})`;
+        ctx.fillStyle = `rgba(255,255,255,${((1 - dist / radius) * peak).toFixed(3)})`;
         ctx.fillText(ch, px, py);
       }
     }
@@ -96,36 +96,53 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
   window.addEventListener("resize", () => (ready = false));
   image.addEventListener("load", () => (ready = false));
 
-  if (!hasMouse) {
-    let visible = false;
+  if (autoplay) {
+    // Checked live, so switching between mouse and touch (e.g. DevTools device mode) needs no reload.
+    let visible = false, drifting = false, t0 = -1;
     const drift = (t: number) => {
-      if (!visible) return;
+      if (!visible || mouse.matches) {
+        drifting = false;
+        return;
+      }
       if (!ready) ready = build();
       if (ready) {
-        const s = t / 1000;
+        if (t0 < 0) t0 = t;
+        const s = (t - t0) / 1000;
+        // starts at the bottom centre, then wanders; fainter than the hover lens so it stays in the background
         mx = W * (0.5 + 0.32 * Math.sin(s * 0.7));
-        my = H * (0.45 + 0.3 * Math.sin(s * 1.1));
-        draw();
+        my = H * (0.45 + 0.3 * Math.cos(s * 1.1));
+        draw(alpha * 0.45);
       }
       requestAnimationFrame(drift);
     };
+    const start = () => {
+      if (drifting) return;
+      drifting = true;
+      requestAnimationFrame(drift);
+    };
     new IntersectionObserver(([entry]) => {
-      const wasVisible = visible;
       visible = entry.isIntersecting;
-      if (visible && !wasVisible) requestAnimationFrame(drift);
+      start();
     }).observe(host);
-    return;
+    mouse.addEventListener("change", () => {
+      mx = -1;
+      ready = false;
+      if (W && H) ctx.clearRect(0, 0, W, H);
+      start();
+    });
   }
 
   host.addEventListener("pointermove", (e) => {
+    if (!mouse.matches) return;
     if (!ready) ready = build();
     if (!ready) return;
     const rect = host.getBoundingClientRect();
     mx = e.clientX - rect.left;
     my = e.clientY - rect.top;
-    if (!raf) raf = requestAnimationFrame(draw);
+    if (!raf) raf = requestAnimationFrame(() => draw());
   });
   host.addEventListener("pointerleave", () => {
+    if (!mouse.matches) return;
     mx = -1;
     if (W && H) ctx.clearRect(0, 0, W, H);
   });
