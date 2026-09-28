@@ -10,10 +10,12 @@ import SectionHead from "./SectionHead.astro";
     <section id="awards" class="shell section" aria-labelledby="awards-title">
       <div class="pane" data-pane="awards">
       <SectionHead id="awards-title" title="Awards" meta={`${awards.length} total`} />
-      <div class="log font-mono text-small leading-[2.3] sm:text-body">
-        <ul>
+      <!-- One award per block: the ✓ year and title on the first line, then each detail on its own
+           indented line, so long details list neatly instead of wrapping into a crowded paragraph. -->
+      <div class="log font-mono text-small sm:text-body">
+        <ul class="flex flex-col gap-5">
           {awards.map((a, i) => (
-            <li data-reveal style={`--i:${i + 1}`} class="line grid grid-cols-[auto_auto_minmax(0,1fr)] gap-x-[1.2ch]">
+            <li data-reveal style={`--i:${i}`} class="line grid grid-cols-[auto_auto_minmax(0,1fr)] gap-x-[1.2ch] py-1">
               <span class="text-online" aria-hidden="true">✓</span>
               <span class="text-ink tabular-nums">{a.year}</span>
               <span>
@@ -24,10 +26,14 @@ import SectionHead from "./SectionHead.astro";
                 ) : (
                   <span class="text-ink">{a.title}</span>
                 )}
-                <span class="text-muted">
-                  {" "}· {a.issuer}
-                  {a.detail && ` · ${a.detail}`}
-                </span>
+              </span>
+              <span class="col-span-2 col-start-2 mt-1 block text-small leading-[1.7] text-muted">
+                {[a.issuer, ...(a.detail ? a.detail.split(" · ") : [])].map((part) => (
+                  <span class="block pl-[2ch] -indent-[2ch]">
+                    <span aria-hidden="true">└ </span>
+                    {part}
+                  </span>
+                ))}
               </span>
             </li>
           ))}
