@@ -4,7 +4,7 @@ import { site } from "../data/site";
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app). -->
 <section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
-  <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(240px,24vw,340px)]">
+  <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
       <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-[11px] text-muted">{site.headline}</p>
       <h1
@@ -29,7 +29,7 @@ import { site } from "../data/site";
       id="portrait"
       data-reveal
       style="--i:2"
-      class="group relative m-0 aspect-[4/5] w-full overflow-hidden rounded-[2px] bg-ph max-md:max-w-[300px]"
+      class="group relative m-0 aspect-[4/5] w-full overflow-hidden rounded-[2px] bg-ph max-md:max-w-[220px]"
     >
       {
         site.portrait ? (
@@ -46,11 +46,11 @@ import { site } from "../data/site";
       }
       {
         site.honor && (
-          <figcaption class="absolute inset-x-0 bottom-0 z-[2] flex items-center gap-3 bg-linear-to-t from-black/90 via-black/65 to-transparent px-4 pt-16 pb-4 text-white">
-            <img src={site.honor.logo} alt={site.honor.school} width="40" height="40" class="size-9 shrink-0" />
+          <figcaption class="absolute inset-x-0 bottom-0 z-[2] flex items-center gap-3 bg-linear-to-t from-black/90 via-black/65 to-transparent px-3 pt-14 pb-3 text-white">
+            <img src={site.honor.logo} alt={site.honor.school} width="40" height="40" class="size-7 shrink-0" />
             <span>
-              <span class="block font-serif text-[18px] leading-tight italic">{site.honor.title}</span>
-              <span class="eyebrow block text-[10px] text-white/80">{site.honor.detail}</span>
+              <span class="block font-serif text-[15px] leading-tight italic">{site.honor.title}</span>
+              <span class="eyebrow block text-[9px] text-white/80">{site.honor.detail}</span>
             </span>
           </figcaption>
         )
