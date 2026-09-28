@@ -1,17 +1,9 @@
 ---
-import { faArrowUp, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
-import { site, socials } from "../data/site";
-import { isSet } from "../data/placeholders";
+import { site } from "../data/site";
 import Icon from "./Icon.astro";
 import Timeline from "./Timeline.astro";
-
-// Placeholder links point nowhere ("#") until the real URLs are filled in.
-const linkedin = socials.find((s) => s.label === "LinkedIn");
-const heroLinks = [
-  ...(linkedin ? [{ label: "LinkedIn", href: isSet(linkedin.href) ? linkedin.href : "#", icon: linkedin.icon }] : []),
-  { label: "Resume", href: isSet(site.resume) ? site.resume : "#", icon: faFileLines },
-];
 ---
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app). -->
@@ -38,15 +30,18 @@ const heroLinks = [
 
       <!-- Ask-my-AI bar (after Perplexity / v0): sends the question straight into the chat. Needs JS, so hidden without it. -->
       <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] in-[.js]:block">
+
         <form data-hero-ask class="ask flex items-center gap-2 rounded-full border border-line py-1.5 pr-1.5 pl-5">
-          <label for="hero-ask" class="sr-only">Ask me about my work</label>
+          <!-- The placeholder advertises the chat as my own AI; the chat itself still answers as me. -->
+          <label for="hero-ask" class="sr-only">Ask my AI about my work</label>
+          <!-- w-0 lets the field shrink on narrow phones instead of pushing the bar off screen. -->
           <input
             id="hero-ask"
             type="text"
             maxlength="800"
             autocomplete="off"
-            placeholder="Ask me anything about my work…"
-            class="min-w-0 flex-1 bg-transparent py-1.5 text-[16px] text-ink placeholder:text-muted focus:outline-none"
+            placeholder="Ask my AI about my work…"
+            class="w-0 min-w-0 flex-1 bg-transparent py-1.5 text-[16px] text-ink placeholder:text-muted focus:outline-none"
           />
           <button
             type="submit"
@@ -74,23 +69,6 @@ const heroLinks = [
         </ul>
       </div>
 
-      <ul data-reveal style="--i:3" class="mt-[clamp(20px,3vw,32px)] flex flex-wrap gap-x-7 gap-y-3">
-        {
-          heroLinks.map((l) => (
-            <li>
-                      <a
-                href={l.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group link eyebrow inline-flex items-center gap-2 text-muted"
-              >
-                {l.icon && <Icon icon={l.icon} class="text-[14px] transition-colors duration-200 group-hover:text-accent group-focus-visible:text-accent" />}
-                {l.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
     </div>
 
     <!-- Crop marks frame the photo and spread out on hover. -->

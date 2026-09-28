@@ -17,6 +17,7 @@ const commands: Command[] = [
   { label: "Light theme", group: "Theme", action: "theme", value: "light" },
   { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
   ...socials.filter((s) => isSet(s.href)).map((s) => ({ label: s.label, group: "Link", action: "link", value: s.href })),
+  ...(isSet(site.resume) ? [{ label: "Resume", group: "Link", action: "link", value: site.resume }] : []),
 ];
 ---
 

@@ -18,7 +18,8 @@ const cta = "Let's Talk";
       <OnlineStatus label="Online" hideLabel class="-ml-1" />
     </a>
 
-    <!-- Utilities first, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
+    <!-- Kept to three: search, theme, then the main action. LinkedIn and resume live in the footer and ⌘K menu.
+         The ⌘K and theme buttons need JS, so they stay hidden without it. -->
     <nav aria-label="Primary" class="ml-auto flex items-center gap-2 sm:gap-3">
       <button
         type="button"
@@ -33,7 +34,7 @@ const cta = "Let's Talk";
       <button
         type="button"
         data-theme-toggle
-        class="hidden size-9 place-items-center rounded-full border border-line text-muted transition-colors hover:border-ink hover:text-ink in-[.js]:grid"
+        class="hidden size-9 place-items-center rounded-full border border-line text-muted transition-colors duration-200 hover:border-ink hover:text-ink in-[.js]:grid"
       >
         <Icon icon={faCircleHalfStroke} class="text-[14px]" />
       </button>
