@@ -120,7 +120,15 @@ import { site } from "../data/site";
     #portrait img {
       filter: none;
     }
+  }
+  /* ...and the crop marks breathe in and out on their own. */
+  @media (hover: none) and (prefers-reduced-motion: no-preference) {
     .mark {
+      animation: mark-breathe 2.4s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes mark-breathe {
+    to {
       translate: calc(var(--x) * 2) calc(var(--y) * 2);
     }
   }
