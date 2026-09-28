@@ -10,7 +10,7 @@ export const site = {
   // Optional: put a photo in public/images and set e.g. "/images/portrait.jpg". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.jpg",
-  email: "[EMAIL]",
+  email: "tegradojeromebrent@gmail.com",
   // Optional: a resume link shown in the header. Leave empty to hide it.
   resume: "",
 
@@ -44,6 +44,11 @@ export const site = {
   ogImage: "",
 
 };
+
+// "Let's talk" opens a new Gmail message to me in the browser.
+export const contactHref = site.email.includes("@")
+  ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(site.email)}`
+  : "#contact";
 
 export const socials = [
   { label: "LinkedIn", href: "#", icon: faLinkedin }, // [LINKEDIN URL]

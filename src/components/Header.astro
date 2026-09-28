@@ -1,6 +1,6 @@
 ---
 import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
-import { site } from "../data/site";
+import { contactHref, site } from "../data/site";
 import Icon from "./Icon.astro";
 
 const cta = "Let's Talk";
@@ -41,8 +41,10 @@ const cta = "Let's Talk";
         )
       }
       <a
-        href="#contact"
-        aria-label={cta}
+        href={contactHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${cta} (email me in Gmail)`}
         class="roll eyebrow inline-flex h-9 items-center rounded-full bg-ink px-4 text-[11px] text-paper transition-colors duration-200 hover:bg-accent"
       >
         <span class="roll-word" aria-hidden="true">
