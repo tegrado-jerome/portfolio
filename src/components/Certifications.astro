@@ -8,7 +8,7 @@ const entries = certifications.map((c) => ({
   href: c.href,
   image: c.image,
   imageAlt: c.imageAlt,
-  lines: [c.issuer, c.credentialId ? `ID ${c.credentialId}` : ""],
+  caption: c.issuer,
 }));
 ---
 

@@ -8,7 +8,7 @@ const entries = awards.map((a) => ({
   href: a.href,
   image: a.image,
   imageAlt: a.imageAlt,
-  lines: [a.issuer, ...(a.detail ? a.detail.split(" · ") : [])],
+  caption: a.short ?? a.issuer,
 }));
 ---
 
