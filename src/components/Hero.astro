@@ -2,57 +2,61 @@
 import { site } from "../data/site";
 ---
 
-<!-- Centered name and intro, with the portrait as a wide band below (after pacomepertant.com). -->
-<section id="top" class="shell pt-[clamp(48px,8vw,110px)] text-center" aria-labelledby="hero-title">
-  <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-[11px] text-muted">{site.headline}</p>
-  <h1
-    id="hero-title"
-    data-reveal
-    class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-[clamp(52px,8.5vw,128px)] leading-[0.9] font-normal tracking-[-0.02em]"
-  >
-    {
-      site.name.split(" ").map((word, i) => (
-        <>
-          <span class="hero-word" style={`--w:${i}`}>
-            <span>{word}</span>
-          </span>{" "}
-        </>
-      ))
-    }
-  </h1>
-  <p data-reveal style="--i:1" class="mx-auto max-w-[52ch] text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
+<!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app). -->
+<section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
+  <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(240px,24vw,340px)]">
+    <div class="max-w-[640px]">
+      <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-[11px] text-muted">{site.headline}</p>
+      <h1
+        id="hero-title"
+        data-reveal
+        class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-[clamp(52px,7.5vw,104px)] leading-[0.9] font-normal tracking-[-0.02em]"
+      >
+        {
+          site.name.split(" ").map((word, i) => (
+            <>
+              <span class="hero-word" style={`--w:${i}`}>
+                <span>{word}</span>
+              </span>{" "}
+            </>
+          ))
+        }
+      </h1>
+      <p data-reveal style="--i:1" class="max-w-[52ch] text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
+    </div>
 
-  <figure
-    id="portrait"
-    data-reveal
-    style="--i:2"
-    class="group relative mx-auto mt-[clamp(32px,5vw,64px)] mb-0 aspect-square w-full max-w-[min(440px,82vw)] overflow-hidden rounded-[2px] bg-ph"
-  >
-    {
-      site.portrait ? (
-        <img
-          src={site.portrait}
-          alt={`Portrait of ${site.name}`}
-          width="1600"
-          height="1600"
-          class="size-full object-cover grayscale transition-[filter] duration-[450ms] ease-[ease] group-hover:grayscale-0"
-        />
-      ) : (
-        <span class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</span>
-      )
-    }
-    {
-      site.honor && (
-        <figcaption class="absolute inset-x-0 bottom-0 z-[2] flex items-center gap-3 bg-linear-to-t from-black/75 to-transparent px-4 pt-14 pb-4 text-left text-white">
-          <img src={site.honor.logo} alt={site.honor.school} width="40" height="40" class="size-10 shrink-0" />
-          <span>
-            <span class="block font-serif text-[19px] leading-tight italic">{site.honor.title}</span>
-            <span class="eyebrow block text-[10px] text-white/80">{site.honor.detail}</span>
-          </span>
-        </figcaption>
-      )
-    }
-  </figure>
+    <figure
+      id="portrait"
+      data-reveal
+      style="--i:2"
+      class="group relative m-0 aspect-[4/5] w-full overflow-hidden rounded-[2px] bg-ph max-md:max-w-[300px]"
+    >
+      {
+        site.portrait ? (
+          <img
+            src={site.portrait}
+            alt={`Portrait of ${site.name}`}
+            width="1600"
+            height="1600"
+            class="size-full object-cover grayscale transition-[filter] duration-[450ms] ease-[ease] group-hover:grayscale-0"
+          />
+        ) : (
+          <span class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</span>
+        )
+      }
+      {
+        site.honor && (
+          <figcaption class="absolute inset-x-0 bottom-0 z-[2] flex items-center gap-3 bg-linear-to-t from-black/90 via-black/65 to-transparent px-4 pt-16 pb-4 text-white">
+            <img src={site.honor.logo} alt={site.honor.school} width="40" height="40" class="size-9 shrink-0" />
+            <span>
+              <span class="block font-serif text-[18px] leading-tight italic">{site.honor.title}</span>
+              <span class="eyebrow block text-[10px] text-white/80">{site.honor.detail}</span>
+            </span>
+          </figcaption>
+        )
+      }
+    </figure>
+  </div>
 </section>
 
 <style>
