@@ -17,7 +17,7 @@ const CELLS = 12;
     {
       steps.map((step) => (
         <li>
-          <span class="time">[0.000]</span> <span class="ok">ok</span> {step}
+          <span class="time">[0.0s]</span> <span class="ok">ok</span> {step}
         </li>
       ))
     }
@@ -66,6 +66,7 @@ const CELLS = 12;
     var MAX = 10000; // on a very slow connection, open the site anyway after this
     var start = null;
     var shown = 0;
+    var lastStamp = 0;
 
     // The boot does real work: each line waits for its part of the page to load, including the images further
     // down that would otherwise load lazily on scroll, so the site is ready once the screen lifts.
@@ -126,15 +127,17 @@ const CELLS = 12;
       var filled = Math.round((pct / 100) * cells.length);
       countEl.textContent = pct;
       for (var c = 0; c < cells.length; c++) cells[c].className = c < filled ? "on" : "";
-      // A line appears once its time comes and its part of the page has loaded, stamped with the real time since
-      // the boot began. The cursor sits at the end of the newest line.
+      // A line appears once its time comes and its part of the page has loaded. The cursor sits at the end of the
+      // newest line.
       while (
         shown < lines.length &&
         t >= (shown + 1) / (lines.length + 1) &&
         (timeout || (collected && groups[shown].pending === 0))
       ) {
         if (shown > 0) lines[shown - 1].classList.remove("is-last");
-        lines[shown].querySelector(".time").textContent = "[" + ((now - start) / 1000).toFixed(3) + "]";
+        // Stamped in half-second steps (0.5s, 1.0s…): the real time rounded to the nearest step, always counting up.
+        lastStamp = Math.max(lastStamp + 0.5, Math.round(((now - start) / 1000) * 2) / 2);
+        lines[shown].querySelector(".time").textContent = "[" + lastStamp.toFixed(1) + "s]";
         lines[shown].classList.add("is-on", "is-last");
         shown++;
       }
