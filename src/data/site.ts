@@ -1,5 +1,5 @@
 // Personal details used across the site. Replace every [PLACEHOLDER].
-import { faGithub, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
 export const site = {
   name: "Jerome Tegrado",
@@ -22,6 +22,14 @@ export const site = {
     image: "/images/loading.jpg",
   },
 
+  // Honor shown over the hero portrait. Remove to hide the caption.
+  honor: {
+    title: "Magna Cum Laude",
+    detail: "TUP Manila · 1.36",
+    school: "Technological University of the Philippines",
+    logo: "/images/tup-seal.png",
+  },
+
   // Your photo for the round chat button, e.g. "/images/avatar.jpg" (a square photo in public/images).
   // Leave empty to show the JT logo instead.
   chatAvatar: "/images/chat-avatar.jpg",
@@ -38,6 +46,6 @@ export const site = {
 };
 
 export const socials = [
-  { label: "LinkedIn", href: "#", icon: faLinkedinIn }, // [LINKEDIN URL]
+  { label: "LinkedIn", href: "#", icon: faLinkedin }, // [LINKEDIN URL]
   { label: "GitHub", href: "#", icon: faGithub }, // [GITHUB URL]
 ];

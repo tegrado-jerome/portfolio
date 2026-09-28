@@ -13,7 +13,7 @@ export const assistant = {
     "[YEARS OF EXPERIENCE AND MAIN SKILLS]",
     "[CURRENT COMPANY OR FREELANCE STATUS]",
     "[WHAT KIND OF WORK OR CLIENTS YOU'RE LOOKING FOR]",
-    "[EDUCATION]",
+    "I graduated Magna Cum Laude (1.36) from the Technological University of the Philippines (TUP) Manila.",
     "[LINKEDIN PROFILE URL]",
   ],
 };
