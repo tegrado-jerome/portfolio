@@ -1,6 +1,8 @@
 ---
+import { faArrowTurnDown } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import { site } from "../data/site";
+import Icon from "./Icon.astro";
 import Timeline from "./Timeline.astro";
 ---
 
@@ -57,7 +59,7 @@ import Timeline from "./Timeline.astro";
             disabled
             class="send grid h-9 shrink-0 place-items-center px-1 transition-opacity duration-200 disabled:opacity-35"
           >
-            <kbd class="key">↵</kbd>
+            <kbd class="key"><Icon icon={faArrowTurnDown} class="rotate-90 text-[13px]" /></kbd>
           </button>
         </form>
         <p class="mt-2.5 font-mono text-small text-muted">
@@ -234,8 +236,8 @@ import Timeline from "./Timeline.astro";
   .send .key {
     display: inline-grid;
     place-items: center;
-    min-width: 26px;
-    height: 24px;
+    min-width: 32px;
+    height: 28px;
     padding-inline: 6px;
     border: 1px solid var(--color-line);
     border-radius: 5px;
