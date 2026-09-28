@@ -21,7 +21,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
       <div class="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[55%] bg-linear-to-b from-paper to-transparent" aria-hidden="true" />
     ) : (
       <p
-        class="pointer-events-none absolute inset-x-0 top-[clamp(40px,7vw,100px)] z-0 text-center font-serif text-[14vw] leading-none whitespace-nowrap text-on-night/[0.08] select-none"
+        class="pointer-events-none absolute inset-x-0 top-[clamp(40px,7vw,100px)] z-0 text-center font-serif text-[11vw] leading-none whitespace-nowrap text-on-night/[0.08] select-none"
         aria-hidden="true"
       >
         {site.name}
@@ -34,7 +34,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
       <a href="/" data-to-top class="grid size-[46px] place-items-center rounded-full border border-on-night font-serif text-[21px] leading-none transition-colors hover:bg-on-night hover:text-night" aria-label="Back to top">
         <span aria-hidden="true">JT</span>
       </a>
-      <a href={emailHref} class="group inline-flex items-center gap-2.5 text-[14px] font-medium tracking-[0.12em] text-on-night uppercase">
+      <a href={emailHref} class="group inline-flex items-center gap-2.5 font-mono text-[13px] font-medium tracking-[0.06em] text-on-night uppercase">
         <Icon icon={faPenNib} class="text-[14px] transition-transform duration-300 group-hover:rotate-12" />
         <span class="brush">Pen a note</span>
       </a>
@@ -48,7 +48,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="eyebrow inline-flex items-center gap-2 tracking-[0.14em] text-on-night/72 transition-colors duration-150 ease-in-out hover:text-on-night"
+                class="eyebrow inline-flex items-center gap-2 text-on-night/72 transition-colors duration-150 ease-in-out hover:text-on-night"
               >
                 <Icon icon={s.icon} class="text-[13px]" />
                 {s.label}
