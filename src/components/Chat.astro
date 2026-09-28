@@ -90,11 +90,19 @@ import Icon from "./Icon.astro";
     transform: none;
     transition-delay: 0s;
   }
+  [data-chat-log] {
+    overscroll-behavior: contain;
+  }
   @media (max-width: 639px) {
     .sheet {
       padding: 20px;
       border-left: 0;
       transform: translateY(24px);
+    }
+    /* The sheet is full-screen here, so the page behind it must not scroll. */
+    :global(html.chat-open),
+    :global(html.chat-open body) {
+      overflow: hidden;
     }
   }
 </style>
@@ -115,6 +123,7 @@ import Icon from "./Icon.astro";
 
   function setOpen(open: boolean) {
     sheet.toggleAttribute("data-open", open);
+    document.documentElement.classList.toggle("chat-open", open);
     openers.forEach((b) => {
       b.setAttribute("aria-expanded", String(open));
       b.hidden = open; // the sheet covers the corner; its own close button takes over
