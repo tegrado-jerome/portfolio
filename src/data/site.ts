@@ -3,7 +3,7 @@ import { faGithub, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
 
 export const site = {
   name: "Jerome Tegrado",
-  title: "Jerome Tegrado — [YOUR HEADLINE]",
+  title: "Jerome Tegrado | [YOUR HEADLINE]",
   description: "[SHORT SITE DESCRIPTION FOR SEARCH ENGINES AND SOCIAL PREVIEWS]",
   headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
   intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
@@ -16,10 +16,10 @@ export const site = {
 
   // Full-screen loading intro.
   preloader: {
-    label: "Portfolio — Jerome Tegrado",
+    label: "Portfolio of Jerome Tegrado",
     title: "[PRELOADER TAGLINE]",
-    // Optional background photo, e.g. "/preloader.jpg".
-    image: "",
+    // Background photo behind the intro.
+    image: "/loading.png",
   },
 
   // Optional: your IANA time zone (e.g. "Europe/London") to show a live local-time clock in the footer.
