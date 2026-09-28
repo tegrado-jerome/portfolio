@@ -1,10 +1,11 @@
 ---
-import { faComment, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faComment, faStop, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import Icon from "./Icon.astro";
 ---
 
-<!-- Floating round trigger (after guillaumemaarek.com) opening an editorial side sheet (after chat-sdk.dev, Mintlify). -->
+<!-- Floating round trigger (after guillaumemaarek.com) opening an editorial side sheet (after chat-sdk.dev, Mintlify).
+     Turns read like letters: the question in small caps, the answer in the serif, signed. The composer follows ChatGPT. -->
 <button
   type="button"
   data-chat-open
@@ -30,10 +31,10 @@ import Icon from "./Icon.astro";
     </button>
   </header>
 
-  <ol data-chat-log aria-live="polite" class="flex-1 space-y-6 overflow-y-auto pt-6 text-[15px] leading-[1.6]">
-    <li>
-      <p class="eyebrow mb-1.5 text-[10px] text-accent">Jerome, AI</p>
-      <p class="text-ink-soft">{assistant.greeting}</p>
+  <ol data-chat-log aria-live="polite" class="flex-1 divide-y divide-line overflow-y-auto">
+    <li class="py-6">
+      <p class="font-serif text-[18px] leading-[1.45]">{assistant.greeting}</p>
+      <p class="mt-2 font-serif text-muted italic">— J. (AI)</p>
     </li>
   </ol>
 
@@ -49,20 +50,27 @@ import Icon from "./Icon.astro";
     }
   </ul>
 
-  <form data-chat-form class="flex items-end gap-3 border border-line p-3.5 focus-within:border-accent">
+  <form data-chat-form class="composer flex items-end gap-2 rounded-[26px] border border-line py-2 pr-2 pl-5 transition-colors focus-within:border-muted">
     <label for="chat-input" class="sr-only">Your message</label>
     <textarea
       id="chat-input"
       rows="1"
       maxlength="800"
       placeholder="Ask me something…"
-      class="max-h-32 flex-1 resize-none bg-transparent text-[15px] text-ink placeholder:text-muted focus:outline-none"
+      class="max-h-32 flex-1 resize-none self-center bg-transparent py-1.5 text-[16px] leading-[1.4] text-ink placeholder:text-muted focus:outline-none"
     ></textarea>
-    <button type="submit" class="shrink-0 text-[11px] text-muted transition-colors hover:text-accent disabled:opacity-40">
-      ↵ send
+    <button
+      type="submit"
+      data-state="send"
+      disabled
+      aria-label="Send"
+      class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-paper transition-opacity disabled:opacity-25"
+    >
+      <Icon icon={faArrowUp} class="send-icon text-[14px]" />
+      <Icon icon={faStop} class="stop-icon text-[11px]" />
     </button>
   </form>
-  <p class="mt-2.5 text-[11px] text-muted">AI answers from my portfolio. May be imperfect.</p>
+  <p class="mt-2.5 text-center text-[11px] text-muted">AI answers from my portfolio. May be imperfect.</p>
 </aside>
 
 <style>
@@ -93,6 +101,26 @@ import Icon from "./Icon.astro";
   [data-chat-log] {
     overscroll-behavior: contain;
   }
+  .composer {
+    background: color-mix(in srgb, var(--color-paper) 45%, white);
+  }
+  :global([data-theme="dark"]) .composer {
+    background: color-mix(in srgb, var(--color-paper) 90%, white);
+  }
+  [data-state="send"] :global(.stop-icon),
+  [data-state="stop"] :global(.send-icon) {
+    display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.writing) {
+      animation: writing 1.4s ease-in-out infinite;
+    }
+  }
+  @keyframes writing {
+    50% {
+      opacity: 0.35;
+    }
+  }
   @media (max-width: 639px) {
     .sheet {
       padding: 20px;
@@ -118,7 +146,7 @@ import Icon from "./Icon.astro";
   const send = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
   const openers = document.querySelectorAll<HTMLButtonElement>("[data-chat-open]");
   const history: Message[] = [];
-  let pending = false;
+  let request: AbortController | null = null;
   let returnFocus: HTMLElement | null = null;
 
   function setOpen(open: boolean) {
@@ -136,38 +164,43 @@ import Icon from "./Icon.astro";
     }
   }
 
-  // Text only (textContent) — model output is never parsed as HTML.
-  function addMessage(role: Message["role"] | "error", text: string) {
-    const li = document.createElement("li");
-    const label = document.createElement("p");
-    const body = document.createElement("p");
-    label.className = "eyebrow mb-1.5 text-[10px] text-accent";
-    label.textContent = role === "user" ? "You" : "Jerome, AI";
-    body.className = role === "user" ? "whitespace-pre-line text-ink" : "whitespace-pre-line text-ink-soft";
-    body.textContent = text;
-    if (role === "error") {
-      body.className = "text-[13px] text-muted";
-      li.append(body);
-    } else {
-      li.append(label, body);
-    }
-    log.append(li);
-    log.scrollTop = log.scrollHeight;
-    return li;
+  function syncButton() {
+    const busy = request !== null;
+    send.dataset.state = busy ? "stop" : "send";
+    send.setAttribute("aria-label", busy ? "Stop" : "Send");
+    send.disabled = !busy && input.value.trim() === "";
+  }
+
+  function growInput() {
+    input.style.height = "auto";
+    input.style.height = `${input.scrollHeight}px`;
+  }
+
+  function paragraph(className: string, text: string) {
+    const p = document.createElement("p");
+    p.className = className;
+    p.textContent = text; // text only — model output is never parsed as HTML
+    return p;
   }
 
   async function ask(question: string) {
     const text = question.trim();
-    if (!text || pending) return;
-    pending = true;
-    send.disabled = true;
+    if (!text || request) return;
     suggestions.hidden = true;
     input.value = "";
+    growInput();
 
     history.push({ role: "user", content: text });
-    addMessage("user", text);
-    const thinking = addMessage("assistant", "…");
+    const turn = document.createElement("li");
+    turn.className = "py-6";
+    const writing = paragraph("writing font-serif text-[18px] text-muted italic", "writing…");
+    turn.append(paragraph("eyebrow mb-3 text-[10px] text-muted", text), writing);
+    log.append(turn);
+    turn.scrollIntoView({ block: "start", behavior: "smooth" });
 
+    request = new AbortController();
+    log.setAttribute("aria-busy", "true");
+    syncButton();
     try {
       // The server accepts at most 12 messages. History alternates and ends with the visitor,
       // so the last 11 always start with a user turn.
@@ -175,19 +208,25 @@ import Icon from "./Icon.astro";
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history.slice(-11) }),
+        signal: request.signal,
       });
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
-      thinking.remove();
       if (!res.ok || !data.reply) throw new Error(data.error ?? "The chat is unavailable right now.");
       history.push({ role: "assistant", content: data.reply });
-      addMessage("assistant", data.reply);
+      writing.replaceWith(
+        paragraph("font-serif text-[18px] leading-[1.45] whitespace-pre-line", data.reply),
+        paragraph("mt-2 font-serif text-muted italic", "— J. (AI)"),
+      );
     } catch (error) {
-      thinking.remove();
       history.pop(); // keep history alternating so the next question is still valid
-      addMessage("error", error instanceof Error ? error.message : "Something went wrong.");
+      const stopped = error instanceof DOMException && error.name === "AbortError";
+      writing.replaceWith(
+        paragraph("text-[13px] text-muted", stopped ? "Stopped." : error instanceof Error ? error.message : "Something went wrong."),
+      );
     } finally {
-      pending = false;
-      send.disabled = false;
+      request = null;
+      log.removeAttribute("aria-busy");
+      syncButton();
       input.focus();
     }
   }
@@ -202,7 +241,12 @@ import Icon from "./Icon.astro";
   suggestions.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent ?? "")));
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    ask(input.value);
+    if (request) request.abort();
+    else ask(input.value);
+  });
+  input.addEventListener("input", () => {
+    growInput();
+    syncButton();
   });
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
