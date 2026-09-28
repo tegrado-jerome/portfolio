@@ -88,10 +88,13 @@
       root!.style.visibility = doc.scrollHeight > innerHeight + 1 ? "visible" : "hidden";
       position();
     }
-    // Snap the thumb to whole rows, like a real terminal bar.
+    // Move the thumb in row steps, like a real terminal bar. The steps are stretched to the bar's real height
+    // (rarely a whole number of rows) so the last one lands flush with the bottom.
     function position() {
-      const rows = Math.round((scrollY / maxScroll()) * (trackRows - thumbRows));
-      thumb.style.transform = `translateY(${rows * LINE}px)`;
+      const steps = Math.max(1, trackRows - thumbRows);
+      const step = Math.round(Math.min(1, scrollY / maxScroll()) * steps);
+      const space = root!.clientHeight - thumbRows * LINE;
+      thumb.style.transform = `translateY(${Math.round((step / steps) * space)}px)`;
     }
 
     let queued = false;
