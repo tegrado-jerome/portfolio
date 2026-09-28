@@ -2,6 +2,7 @@
 import { faPenNib } from "@fortawesome/free-solid-svg-icons";
 import { site, socials } from "../data/site";
 import Icon from "./Icon.astro";
+import { formatDate, lastCommit } from "../lib/build-info";
 
 const year = new Date().getFullYear();
 const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact";
@@ -9,7 +10,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
 
 <footer
   id="site-footer"
-  class="relative flex min-h-[clamp(380px,44vw,600px)] items-end overflow-hidden bg-night bg-cover bg-center px-5 py-[clamp(32px,4vw,60px)] text-paper sm:px-[clamp(20px,11vw,200px)]"
+  class="relative flex min-h-[clamp(380px,44vw,600px)] items-end overflow-hidden bg-night bg-cover bg-center px-5 py-[clamp(32px,4vw,60px)] text-on-night sm:px-[clamp(20px,11vw,200px)]"
   style={site.footerImage
     ? `background-image: linear-gradient(180deg, rgb(20 20 20 / 0.1), rgb(20 20 20 / 0.45)), url("${site.footerImage}")`
     : undefined}
@@ -21,7 +22,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
       <div class="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[55%] bg-linear-to-b from-paper to-transparent" aria-hidden="true" />
     ) : (
       <p
-        class="pointer-events-none absolute inset-x-0 top-[clamp(40px,7vw,100px)] z-0 text-center font-serif text-[14vw] leading-none whitespace-nowrap text-paper/[0.08] select-none"
+        class="pointer-events-none absolute inset-x-0 top-[clamp(40px,7vw,100px)] z-0 text-center font-serif text-[14vw] leading-none whitespace-nowrap text-on-night/[0.08] select-none"
         aria-hidden="true"
       >
         {site.name}
@@ -31,10 +32,10 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
 
   <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,54px)]">
     <div class="flex items-center justify-between gap-6">
-      <a href="/" data-to-top class="grid size-[46px] place-items-center rounded-full border border-paper font-serif text-[21px] leading-none transition-colors hover:bg-paper hover:text-night" aria-label="Back to top">
+      <a href="/" data-to-top class="grid size-[46px] place-items-center rounded-full border border-on-night font-serif text-[21px] leading-none transition-colors hover:bg-on-night hover:text-night" aria-label="Back to top">
         <span aria-hidden="true">JT</span>
       </a>
-      <a href={emailHref} class="group inline-flex items-center gap-2.5 text-[14px] font-medium tracking-[0.12em] text-white uppercase">
+      <a href={emailHref} class="group inline-flex items-center gap-2.5 text-[14px] font-medium tracking-[0.12em] text-on-night uppercase">
         <Icon icon={faPenNib} class="text-[14px] transition-transform duration-300 group-hover:rotate-12" />
         <span class="brush">Pen a note</span>
       </a>
@@ -48,7 +49,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="eyebrow inline-flex items-center gap-2 tracking-[0.14em] text-white/70 transition-colors hover:text-white"
+                class="eyebrow inline-flex items-center gap-2 tracking-[0.14em] text-on-night/70 transition-colors hover:text-on-night"
               >
                 <Icon icon={s.icon} class="text-[13px]" />
                 {s.label}
@@ -57,15 +58,26 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
           ))
         }
       </ul>
-      <div class="flex items-center gap-6 text-[12px] tracking-[0.08em] text-white/70">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] tracking-[0.08em] text-on-night/70">
         {
           site.timezone && (
             <p>
-              Local time <time data-clock={site.timezone} class="text-white tabular-nums" />
+              Local time <time data-clock={site.timezone} class="text-on-night tabular-nums" />
+            </p>
+          )
+        }
+        {
+          lastCommit && (
+            <p class="tabular-nums">
+              Updated <time datetime={lastCommit.date}>{formatDate(lastCommit.date)}</time>
+              <span class="text-on-night/40"> · {lastCommit.hash}</span>
             </p>
           )
         }
         <p>© {year} {site.name}</p>
+        <button type="button" data-palette-open class="hidden transition-colors hover:text-on-night in-[.js]:inline">
+          Command menu
+        </button>
       </div>
     </div>
   </div>
