@@ -13,7 +13,7 @@ import Icon from "./Icon.astro";
   aria-controls="chat"
   aria-expanded="false"
   aria-label="Chat with me"
-  class="group fixed right-4 bottom-4 z-30 hidden size-14 rounded-full border-2 border-paper bg-ink shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] transition-transform duration-300 ease-out-soft hover:scale-105 place-items-center in-[.js]:grid sm:right-6 sm:bottom-6"
+  class="chat-fab group fixed right-4 bottom-4 z-30 hidden size-14 rounded-full border-2 border-paper bg-ink shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] place-items-center in-[.js]:grid sm:right-6 sm:bottom-6"
 >
   {
     site.chatAvatar ? (
@@ -28,7 +28,8 @@ import Icon from "./Icon.astro";
   >
 </button>
 
-<aside id="chat" class="sheet" aria-labelledby="chat-title">
+<aside id="chat" class="sheet" role="dialog" aria-labelledby="chat-title">
+  <p id="chat-keys" class="sr-only">Enter to send, Shift and Enter for a new line, Escape to close.</p>
   <!-- Laid out like Messenger's chat header: photo with an online dot, name, status underneath. -->
   <header class="flex items-center justify-between border-b border-line pb-4">
     <div class="flex items-center gap-3">
@@ -105,6 +106,9 @@ import Icon from "./Icon.astro";
       id="chat-input"
       rows="1"
       maxlength="800"
+      enterkeyhint="send"
+      autocapitalize="sentences"
+      aria-describedby="chat-keys"
       placeholder="Ask me something…"
       class="max-h-32 flex-1 resize-none self-center bg-transparent py-1.5 text-[16px] leading-[1.4] text-ink placeholder:text-muted focus:outline-none"
     ></textarea>
@@ -123,6 +127,27 @@ import Icon from "./Icon.astro";
 </aside>
 
 <style>
+  /* The round chat button tucks away while the hero's prompt bar is on screen (it does the same job there),
+     and gently fades back in once you scroll past it. */
+  .chat-fab {
+    transition:
+      opacity 0.5s var(--ease-out-soft),
+      translate 0.5s var(--ease-out-soft),
+      scale 0.3s var(--ease-out-soft);
+  }
+  .chat-fab:hover {
+    scale: 1.05;
+  }
+  .chat-fab.is-tucked {
+    opacity: 0;
+    translate: 0 12px;
+    pointer-events: none;
+    visibility: hidden;
+    transition:
+      opacity 0.5s var(--ease-out-soft),
+      translate 0.5s var(--ease-out-soft),
+      visibility 0s linear 0.5s;
+  }
   .online-badge {
     position: absolute;
     right: -1px;
@@ -293,7 +318,7 @@ import Icon from "./Icon.astro";
   type Message = { role: "user" | "assistant"; content: string };
 
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const MIN_TYPING_DOTS = 3000; // ms
+  const MIN_TYPING_DOTS = 2000; // ms
 
   // Resolves after `ms`, or straight away once the visitor presses stop.
   function wait(ms: number, signal: AbortSignal) {
@@ -329,7 +354,45 @@ import Icon from "./Icon.astro";
     } else {
       returnFocus?.focus();
     }
+    fitToViewport();
   }
+
+  // "Stick to bottom", like ChatGPT and Messenger: the log follows new text only while the visitor is at the
+  // bottom. Scrolling up to read turns that off, so it never fights them; scrolling back down turns it on.
+  let stickToBottom = true;
+  log.addEventListener(
+    "scroll",
+    () => (stickToBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40),
+    { passive: true },
+  );
+  function toBottom(smooth = false) {
+    log.scrollTo({ top: log.scrollHeight, behavior: smooth && !reduceMotion ? "smooth" : "auto" });
+  }
+
+  // Phones: the on-screen keyboard shrinks the visible area without resizing the page (iOS especially), so the
+  // sheet is sized to the visible viewport, keeping the input just above the keyboard and the latest message
+  // in view.
+  const phone = matchMedia("(max-width: 639px)");
+  const viewport = window.visualViewport;
+  function fitToViewport() {
+    if (!viewport || !phone.matches || !sheet.hasAttribute("data-open")) {
+      sheet.style.removeProperty("height");
+      sheet.style.removeProperty("top");
+      return;
+    }
+    sheet.style.top = `${viewport.offsetTop}px`;
+    sheet.style.height = `${viewport.height}px`;
+    if (stickToBottom) toBottom();
+  }
+  viewport?.addEventListener("resize", fitToViewport);
+  viewport?.addEventListener("scroll", fitToViewport);
+  input.addEventListener("focus", () => {
+    // Once the keyboard has slid up, bring the latest message back into view.
+    setTimeout(() => {
+      fitToViewport();
+      if (stickToBottom) toBottom();
+    }, 300);
+  });
 
   function syncButton() {
     const busy = request !== null;
@@ -372,10 +435,9 @@ import Icon from "./Icon.astro";
     bubble.classList.add("is-typing");
     return new Promise<void>((resolve) => {
       const frame = (now: number) => {
-        const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
         const shown = signal.aborted ? chars.length : Math.min(chars.length, Math.floor(((now - start) / 1000) * perSecond));
         bubble.textContent = chars.slice(0, shown).join("");
-        if (atBottom) log.scrollTop = log.scrollHeight;
+        if (stickToBottom) toBottom();
         if (shown < chars.length) {
           requestAnimationFrame(frame);
           return;
@@ -405,7 +467,9 @@ import Icon from "./Icon.astro";
     history.push({ role: "user", content: text });
     const writing = typingDots();
     log.append(message("user", paragraph("bubble", text)), message("assistant", writing));
-    writing.scrollIntoView({ block: "end", behavior: "smooth" });
+    // Sending always jumps to your own message, like chat apps do.
+    stickToBottom = true;
+    toBottom(true);
 
     request = new AbortController();
     const askedAt = performance.now();
@@ -423,7 +487,7 @@ import Icon from "./Icon.astro";
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
       if (!res.ok || !data.reply) throw new Error(data.error ?? "Chat's down right now. Try again later.");
       history.push({ role: "assistant", content: data.reply });
-      // Keep the typing dots up for at least 3s, so a fast reply still reads as being written.
+      // Keep the typing dots up for at least 2s, so a fast reply still reads as being written.
       await wait(MIN_TYPING_DOTS - (performance.now() - askedAt), request.signal);
       const reply = paragraph("bubble", "");
       writing.replaceWith(reply);
@@ -475,6 +539,13 @@ import Icon from "./Icon.astro";
   });
   document.addEventListener("chat:open", () => setOpen(true));
   // Questions asked from elsewhere on the page (the hero prompt bar) open the chat and send.
+  // Tuck the round button away while the hero prompt bar is visible.
+  const heroAsk = document.querySelector("[data-hero-ask]");
+  if (heroAsk) {
+    new IntersectionObserver(([entry]) => {
+      openers.forEach((b) => b.classList.toggle("is-tucked", entry.isIntersecting));
+    }).observe(heroAsk);
+  }
   document.addEventListener("chat:ask", (e) => {
     setOpen(true);
     ask((e as CustomEvent<string>).detail);
@@ -491,7 +562,8 @@ import Icon from "./Icon.astro";
     syncButton();
   });
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // Enter sends, Shift+Enter is a new line. Not while an IME (Chinese, Japanese, Korean) is composing a word.
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       ask(input.value);
     }
