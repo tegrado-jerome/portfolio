@@ -28,7 +28,7 @@
       bottom: 6px;
       z-index: 36;
       display: block;
-      width: 8px;
+      width: 10px;
       user-select: none;
     }
   }
@@ -44,7 +44,7 @@
     position: absolute;
     inset: 0;
     background: repeating-conic-gradient(var(--color-muted) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: pointer;
   }
   .bar {
@@ -53,11 +53,11 @@
     width: 100%;
     background: repeating-linear-gradient(var(--color-bar) 0 9px, transparent 9px 10px);
     cursor: grab;
-    --color-bar: var(--color-muted);
+    --color-bar: var(--color-ink);
   }
   .tui-scroll:hover .bar,
   .bar.is-dragging {
-    --color-bar: var(--color-ink);
+    --color-bar: var(--color-accent);
   }
   .bar.is-dragging {
     cursor: grabbing;
