@@ -17,7 +17,6 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       <!-- TUI layout (lazygit / btop): a category list with an ink selection bar on the left, the dial on the right. -->
       <div class="grid gap-[clamp(40px,6vw,96px)] md:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] md:items-center">
         <div data-reveal>
-          <p class="mb-4 text-small text-muted" aria-hidden="true">categories</p>
           <div role="tablist" aria-label="Skill categories" aria-orientation="vertical" class="seg relative flex flex-col">
             <span class="thumb" aria-hidden="true"></span>
             {groups.map((g, i) => (
