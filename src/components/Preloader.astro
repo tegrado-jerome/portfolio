@@ -1,0 +1,176 @@
+---
+import { site } from "../data/site";
+const { preloader } = site;
+---
+
+<!-- Full-screen intro: counts to 100%, then the curtain lifts. Only shown when JS runs. -->
+<div id="preloader" class="preloader" role="status" aria-label="Loading">
+  {preloader.image && <img class="preloader__bg" src={preloader.image} alt="" />}
+  <div class="preloader__scrim"></div>
+  <div class="preloader__inner">
+    <p class="preloader__label">{preloader.label}</p>
+    <p class="preloader__title">{preloader.title}</p>
+  </div>
+  <div class="preloader__count" aria-hidden="true"><span id="preCount">0</span><span class="preloader__pct">%</span></div>
+  <div class="preloader__bar" aria-hidden="true"><span id="preBar"></span></div>
+</div>
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var pre = document.getElementById("preloader");
+    var countEl = document.getElementById("preCount");
+    var barEl = document.getElementById("preBar");
+    if (!pre) return;
+
+    function done() {
+      root.classList.remove("is-preloading");
+      document.dispatchEvent(new Event("preloader:done"));
+    }
+
+    // Arriving on a section link (e.g. /#work) — skip the intro and jump straight there.
+    if (location.hash && location.hash !== "#top") {
+      pre.remove();
+      return;
+    }
+
+    root.classList.add("is-preloading");
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var duration = reduce ? 500 : 2200;
+    var start = null;
+
+    function finish() {
+      pre.classList.add("is-done");
+      done();
+      var remove = function () { pre.remove(); };
+      pre.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 1400);
+    }
+
+    function tick(now) {
+      if (start === null) start = now;
+      var t = Math.min((now - start) / duration, 1);
+      var pct = Math.round((1 - Math.pow(1 - t, 3)) * 100); // easeOutCubic
+      countEl.textContent = pct;
+      barEl.style.width = pct + "%";
+      if (t < 1) requestAnimationFrame(tick);
+      else setTimeout(finish, reduce ? 60 : 260);
+    }
+    requestAnimationFrame(tick);
+  })();
+</script>
+
+<style>
+  .preloader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-night);
+    color: #fff;
+    transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+    will-change: transform;
+  }
+  :global(.js) .preloader {
+    display: flex;
+  }
+  .preloader.is-done {
+    transform: translateY(-100%);
+  }
+  :global(.is-preloading) :global(body) {
+    overflow: hidden;
+  }
+
+  .preloader__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .preloader__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(10 10 10 / 0.5), rgb(10 10 10 / 0.35) 45%, rgb(10 10 10 / 0.6));
+  }
+  .preloader__inner {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding-inline: clamp(20px, 11vw, 200px);
+  }
+  .preloader__label {
+    margin: 0 0 18px;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.55);
+    opacity: 0;
+    animation: pre-fade-up 0.9s ease forwards 0.1s;
+  }
+  .preloader__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(44px, 9vw, 130px);
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    animation: pre-fade-up 1.1s var(--ease-out-soft) forwards 0.28s;
+  }
+  .preloader__count {
+    position: absolute;
+    z-index: 2;
+    right: clamp(20px, 11vw, 200px);
+    bottom: clamp(28px, 5vw, 56px);
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-family: var(--font-serif);
+    font-size: clamp(30px, 5vw, 64px);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(255 255 255 / 0.9);
+  }
+  .preloader__pct {
+    font-size: 0.5em;
+    color: rgb(255 255 255 / 0.5);
+  }
+  .preloader__bar {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: rgb(255 255 255 / 0.12);
+  }
+  .preloader__bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #fff;
+  }
+
+  @keyframes pre-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .preloader__label,
+    .preloader__title {
+      animation-duration: 0.3s !important;
+    }
+    .preloader {
+      transition-duration: 0.3s !important;
+    }
+  }
+</style>
