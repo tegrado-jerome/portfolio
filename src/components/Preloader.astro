@@ -28,7 +28,7 @@ const { preloader } = site;
       document.dispatchEvent(new Event("preloader:done"));
     }
 
-    // Arriving on a section link (e.g. /#work) — skip the intro and jump straight there.
+    // Arriving on a section link (e.g. /#work): skip the intro and jump straight there.
     if (location.hash && location.hash !== "#top") {
       pre.remove();
       return;

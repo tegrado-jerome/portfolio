@@ -19,7 +19,7 @@ type GeminiResponse = {
 };
 
 const LIMITS = { bodyChars: 16_000, messages: 12, messageChars: 800 };
-const FALLBACK = "Sorry — this chat is just for questions about me and my work.";
+const FALLBACK = "Haha that one's outside my lane, this chat is just for stuff about me and my work. Ask me about my projects or skills though!";
 const SAFETY_CATEGORIES = [
   "HARM_CATEGORY_HARASSMENT",
   "HARM_CATEGORY_HATE_SPEECH",
@@ -44,16 +44,16 @@ async function chat(request: Request, env: Env): Promise<Response> {
   const origin = request.headers.get("Origin");
   if (allowed.length && (!origin || !allowed.includes(origin))) return json({ error: "Forbidden." }, 403);
 
-  if (!env.GEMINI_API_KEY) return json({ error: "The chat isn't set up yet." }, 503);
+  if (!env.GEMINI_API_KEY) return json({ error: "The chat isn't plugged in yet, check back soon!" }, 503);
 
   if (env.CHAT_LIMITER) {
     const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
     const { success } = await env.CHAT_LIMITER.limit({ key: ip });
-    if (!success) return json({ error: "Too many messages — please wait a minute." }, 429);
+    if (!success) return json({ error: "Whoa, slow down a sec haha. Give me a minute and try again." }, 429);
   }
 
   const body = await request.text();
-  if (body.length > LIMITS.bodyChars) return json({ error: "That message is too long." }, 413);
+  if (body.length > LIMITS.bodyChars) return json({ error: "That one's a bit long for me, mind trimming it down?" }, 413);
   const messages = parseMessages(body);
   if (!messages) return json({ error: "Invalid request." }, 400);
 
@@ -72,14 +72,21 @@ async function chat(request: Request, env: Env): Promise<Response> {
   if (!upstream.ok) {
     // Log details for the owner; never forward provider errors to visitors.
     console.error("Gemini request failed", upstream.status, await upstream.text());
-    return json({ error: "The chat is unavailable right now." }, 502);
+    return json({ error: "My brain's offline for a sec. Try again in a bit?" }, 502);
   }
 
   const data: GeminiResponse = await upstream.json();
   const reply = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("").trim();
   // Blocked prompts, empty replies and anything echoing the system prompt get a safe fallback.
   if (!reply || data.promptFeedback?.blockReason || reply.includes(CANARY)) return json({ reply: FALLBACK });
-  return json({ reply });
+  return json({ reply: withoutDashes(reply) });
+}
+
+/** The site never shows em or en dashes; this catches any the model writes anyway. */
+function withoutDashes(text: string) {
+  return text
+    .replace(/(\d)\s*[–—]\s*(\d)/g, "$1-$2") // ranges like 2021–2025
+    .replace(/\s*[—–]\s*/g, ", ");
 }
 
 /** Accepts only a short, well-formed, alternating conversation that ends with the visitor. */

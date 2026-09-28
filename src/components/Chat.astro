@@ -363,7 +363,7 @@ import Icon from "./Icon.astro";
         signal: request.signal,
       });
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
-      if (!res.ok || !data.reply) throw new Error(data.error ?? "The chat is unavailable right now.");
+      if (!res.ok || !data.reply) throw new Error(data.error ?? "My brain's offline for a sec. Try again in a bit?");
       history.push({ role: "assistant", content: data.reply });
       // Keep the typing dots up for at least 3s, so a fast reply still reads as being written.
       await wait(MIN_TYPING_DOTS - (performance.now() - askedAt), request.signal);
@@ -374,7 +374,7 @@ import Icon from "./Icon.astro";
       history.pop(); // keep history alternating so the next question is still valid
       const stopped = error instanceof DOMException && error.name === "AbortError";
       writing.replaceWith(
-        paragraph("bubble text-muted", stopped ? "Stopped." : error instanceof Error ? error.message : "Something went wrong."),
+        paragraph("bubble text-muted", stopped ? "Okay, stopped." : error instanceof Error ? error.message : "Oops, something broke on my end. Try again?"),
       );
     } finally {
       request = null;
