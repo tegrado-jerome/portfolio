@@ -18,7 +18,7 @@ import Icon from "./Icon.astro";
         id="hero-title"
         data-reveal
        
-        class="hero-title mb-[clamp(18px,2.5vw,28px)] text-display max-sm:text-[clamp(26px,9.5vw,52px)] max-sm:whitespace-nowrap font-medium tracking-[-0.045em]"
+        class="hero-title mb-[clamp(18px,2.5vw,28px)] text-display max-sm:text-[clamp(26px,9vw,50px)] max-sm:whitespace-nowrap font-medium tracking-[-0.045em] max-sm:tracking-[-0.02em]"
       >
         {
           site.name.split(" ").map((word, i) => (
@@ -137,6 +137,12 @@ import Icon from "./Icon.astro";
   /* A mono space is a full character wide; with the tight letter tracking it reads as a gap, so pull the words closer. */
   .hero-title {
     word-spacing: -0.3em;
+  }
+  /* Smaller on phones, so the letters and words need less pulling in to read naturally. */
+  @media (max-width: 639px) {
+    .hero-title {
+      word-spacing: -0.2em;
+    }
   }
   .hero-word {
     display: inline-block;
