@@ -1,5 +1,7 @@
 ---
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { site, socials } from "../data/site";
+import Icon from "./Icon.astro";
 
 const year = new Date().getFullYear();
 const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
@@ -16,14 +18,26 @@ const photo = site.footerImage;
   <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,44px)]">
     <div class="flex items-center justify-between gap-6">
       <a href="/" data-to-top aria-label="Back to top" class="logo-mark size-12 bg-white transition-opacity hover:opacity-80"></a>
-      <a href={emailHref} class="eyebrow text-[13px] text-white transition-opacity hover:opacity-80">Let's talk ↗</a>
+      <a href={emailHref} class="group eyebrow inline-flex items-center gap-2.5 text-[13px] text-white transition-opacity hover:opacity-80">
+        Let's talk
+        <Icon
+          icon={faArrowRight}
+          class="-rotate-45 text-[15px] transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        />
+      </a>
     </div>
     <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
       <ul class="flex gap-7">
         {
           socials.map((s) => (
             <li>
-              <a href={s.href} target="_blank" rel="noopener noreferrer" class="eyebrow text-[11px] text-white/75 transition-colors hover:text-white">
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="eyebrow inline-flex items-center gap-2 text-[11px] text-white/75 transition-colors hover:text-white"
+              >
+                <Icon icon={s.icon} class="text-[16px]" />
                 {s.label}
               </a>
             </li>
