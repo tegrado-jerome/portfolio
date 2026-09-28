@@ -6,7 +6,7 @@ export const site = {
   title: "Jerome Tegrado | [YOUR HEADLINE]",
   description: "[SHORT SITE DESCRIPTION FOR SEARCH ENGINES AND SOCIAL PREVIEWS]",
   headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
-  intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
+  intro: "I f*cking love learning new things!",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.webp",

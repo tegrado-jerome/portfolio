@@ -30,7 +30,10 @@ import Timeline from "./Timeline.astro";
           ))
         }
       </h1>
-      <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft">{site.intro}</p>
+      <!-- One line on phones: no wrapping, and the size follows the screen width so it always fits. -->
+      <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft max-sm:text-[clamp(11px,3.6vw,15px)] max-sm:whitespace-nowrap">
+        {site.intro}
+      </p>
 
       <!-- Ask-my-AI bar as a terminal line (after Warp / v0): a mono prompt with a blinking block cursor.
            It sends the question straight into the chat. Needs JS, so it stays hidden without it. -->
