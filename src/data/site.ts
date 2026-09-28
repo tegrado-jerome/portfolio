@@ -10,11 +10,6 @@ export const site = {
   // Optional: put a photo in /public and set e.g. "/portrait.jpg". Leave empty for a placeholder.
   // It shows in black & white and turns to colour (with an ASCII lens) on hover.
   portrait: "",
-  about: [
-    "[WRITE YOUR ABOUT SECTION HERE — FIRST PARAGRAPH]",
-    "[OPTIONAL SECOND PARAGRAPH]",
-  ],
-  contactMessage: "[SHORT CONTACT MESSAGE]",
   email: "[EMAIL]",
   // Optional: a resume link shown in the header. Leave empty to hide it.
   resume: "",
@@ -47,11 +42,4 @@ export const site = {
 export const socials = [
   { label: "LinkedIn", href: "#", icon: faLinkedinIn }, // [LINKEDIN URL]
   { label: "GitHub", href: "#", icon: faGithub }, // [GITHUB URL]
-];
-
-export const capabilities = [
-  { title: "Development", items: ["[PLACEHOLDER]", "[PLACEHOLDER]", "[PLACEHOLDER]"] },
-  { title: "AI & Automation", items: ["[PLACEHOLDER]", "[PLACEHOLDER]", "[PLACEHOLDER]"] },
-  { title: "SEO / Digital Marketing", items: ["[PLACEHOLDER]", "[PLACEHOLDER]", "[PLACEHOLDER]"] },
-  { title: "Other", items: ["[PLACEHOLDER]", "[PLACEHOLDER]"] },
 ];

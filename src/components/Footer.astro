@@ -4,11 +4,11 @@ import { site, socials } from "../data/site";
 import Icon from "./Icon.astro";
 
 const year = new Date().getFullYear();
-const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact";
+const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
 ---
 
 <footer
-  id="site-footer"
+  id="contact"
   class="relative flex min-h-[clamp(380px,44vw,600px)] items-end overflow-hidden bg-night bg-cover bg-center px-5 py-[clamp(32px,4vw,60px)] text-on-night sm:px-[clamp(20px,11vw,200px)]"
   style={site.footerImage
     ? `background-image: linear-gradient(180deg, rgb(20 20 20 / 0.1), rgb(20 20 20 / 0.45)), url("${site.footerImage}")`
@@ -85,7 +85,7 @@ const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#contact"
     setInterval(tick, 30_000);
   }
 
-  const footer = document.getElementById("site-footer");
+  const footer = document.getElementById("contact");
   if (footer) {
     const src = footer.dataset.image;
     const start = (image: HTMLImageElement | null) =>

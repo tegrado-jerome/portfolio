@@ -1,7 +1,7 @@
 ---
 // schema.org JSON-LD: tells search engines and AI answer engines who you are and what you've made.
 // Fields still holding a [PLACEHOLDER] are left out automatically.
-import { capabilities, site, socials } from "../data/site";
+import { site, socials } from "../data/site";
 import { projects } from "../data/projects";
 import { isSet, onlySet } from "../lib/content";
 
@@ -19,9 +19,6 @@ const person = {
   ...(isSet(site.email) && { email: `mailto:${site.email}` }),
   ...(isSet(site.portrait) && { image: abs(site.portrait) }),
   ...(onlySet(socials.map((s) => s.href)).length && { sameAs: onlySet(socials.map((s) => s.href)) }),
-  ...(onlySet(capabilities.flatMap((c) => c.items)).length && {
-    knowsAbout: onlySet(capabilities.flatMap((c) => c.items)),
-  }),
 };
 
 const works = projects.filter((p) => isSet(p.title));
