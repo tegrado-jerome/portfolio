@@ -4,7 +4,7 @@
 // Write one plain fact per line, about yourself. Keep private details (phone, home address) out.
 
 export const assistant = {
-  suggestions: ["What do you do?", "What have you worked on?", "How can I contact you?"],
+  suggestions: ["What do you do?", "How can I contact you?", "What have you worked on?"],
   facts: [
     "Full name: Jerome Brent Tegrado. I go by Jerome.",
     "[YOUR ROLE / WHAT YOU DO]",
