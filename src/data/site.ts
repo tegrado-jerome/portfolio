@@ -1,5 +1,5 @@
 // Personal details used across the site. Replace every [PLACEHOLDER].
-import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
 export const site = {
   name: "Jerome Tegrado",
@@ -11,8 +11,8 @@ export const site = {
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.jpg",
   email: "tegradojeromebrent@gmail.com",
-  // Optional: a resume link shown in the header. Leave empty to hide it.
-  resume: "",
+  // Resume link shown in the hero (a PDF in public/ or a Google Drive link).
+  resume: "[RESUME URL]",
 
   // Full-screen loading intro.
   preloader: {
@@ -51,6 +51,5 @@ export const contactHref = site.email.includes("@")
   : "#contact";
 
 export const socials = [
-  { label: "LinkedIn", href: "#", icon: faLinkedin }, // [LINKEDIN URL]
-  { label: "GitHub", href: "#", icon: faGithub }, // [GITHUB URL]
+  { label: "LinkedIn", href: "[LINKEDIN URL]", icon: faLinkedin },
 ];

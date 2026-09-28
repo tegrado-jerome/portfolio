@@ -1,6 +1,16 @@
 ---
-import { site } from "../data/site";
+import { faArrowRight, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { site, socials } from "../data/site";
+import { isSet } from "../data/placeholders";
+import Icon from "./Icon.astro";
 import Timeline from "./Timeline.astro";
+
+// Placeholder links point nowhere ("#") until the real URLs are filled in.
+const linkedin = socials.find((s) => s.label === "LinkedIn");
+const heroLinks = [
+  ...(linkedin ? [{ label: "LinkedIn", href: isSet(linkedin.href) ? linkedin.href : "#", icon: linkedin.icon }] : []),
+  { label: "Resume", href: isSet(site.resume) ? site.resume : "#", icon: faFileLines },
+];
 ---
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app). -->
@@ -24,6 +34,22 @@ import Timeline from "./Timeline.astro";
         }
       </h1>
       <p data-reveal style="--i:1" class="max-w-[52ch] text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
+      <ul data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] flex flex-wrap gap-x-7 gap-y-3">
+        {
+          heroLinks.map((l) => (
+            <li>
+              <a href={l.href} target="_blank" rel="noopener noreferrer" class="group eyebrow inline-flex items-center gap-2 text-[11px] text-ink">
+                {l.icon && <Icon icon={l.icon} class="text-[14px] text-accent" />}
+                <span class="brush">{l.label}</span>
+                <Icon
+                  icon={faArrowRight}
+                  class="-rotate-45 text-[11px] text-muted transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </div>
 
     <!-- Crop marks frame the photo and spread out on hover. -->

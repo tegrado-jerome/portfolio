@@ -1,6 +1,7 @@
 ---
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site, socials } from "../data/site";
+import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
 
 const year = new Date().getFullYear();
@@ -31,7 +32,7 @@ const photo = site.footerImage;
           socials.map((s) => (
             <li>
               <a
-                href={s.href}
+                href={isSet(s.href) ? s.href : "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="eyebrow inline-flex items-center gap-2 text-[11px] text-white/75 transition-colors hover:text-white"
