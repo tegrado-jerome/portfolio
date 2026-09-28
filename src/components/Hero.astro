@@ -1,5 +1,5 @@
 ---
-import { faArrowRight, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
@@ -38,13 +38,9 @@ const heroLinks = [
         {
           heroLinks.map((l) => (
             <li>
-              <a href={l.href} target="_blank" rel="noopener noreferrer" class="group eyebrow inline-flex items-center gap-2 text-[11px] text-ink">
+              <a href={l.href} target="_blank" rel="noopener noreferrer" class="eyebrow inline-flex items-center gap-2 text-[11px] text-ink">
                 {l.icon && <Icon icon={l.icon} class="text-[14px] text-accent" />}
                 <span class="brush">{l.label}</span>
-                <Icon
-                  icon={faArrowRight}
-                  class="-rotate-45 text-[11px] text-muted transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
               </a>
             </li>
           ))
