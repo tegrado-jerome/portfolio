@@ -6,7 +6,7 @@ import Icon from "./Icon.astro";
 ---
 
 <!-- Floating round trigger (after guillaumemaarek.com) opening an editorial side sheet (after chat-sdk.dev, Mintlify).
-     Turns read like letters: the question in small caps, the answer in the serif, signed. The composer follows ChatGPT. -->
+     Messages are bubbles, mine on the left and the visitor's on the right. The composer follows ChatGPT. -->
 <button
   type="button"
   data-chat-open
@@ -38,10 +38,18 @@ import Icon from "./Icon.astro";
     </button>
   </header>
 
-  <ol data-chat-log aria-live="polite" class="flex-1 divide-y divide-line overflow-y-auto">
-    <li class="py-6">
-      <p class="font-serif text-[18px] leading-[1.45]">{assistant.greeting}</p>
-      <p class="mt-2 font-serif text-muted italic">J. (AI)</p>
+  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6">
+    <li class="msg-ai">
+      {
+        site.chatAvatar ? (
+          <img data-avatar src={site.chatAvatar} alt="" width="56" height="56" class="avatar object-cover" />
+        ) : (
+          <span data-avatar class="avatar grid place-items-center bg-ink" aria-hidden="true">
+            <span class="chat-logo block size-4 bg-paper" />
+          </span>
+        )
+      }
+      <p class="bubble">{assistant.greeting}</p>
     </li>
   </ol>
 
@@ -111,6 +119,41 @@ import Icon from "./Icon.astro";
   [data-chat-log] {
     overscroll-behavior: contain;
   }
+  /* Me on the left with my photo, the visitor on the right. */
+  [data-chat-log] :global(.msg-ai) {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding-right: 36px;
+  }
+  [data-chat-log] :global(.msg-user) {
+    display: flex;
+    justify-content: flex-end;
+    padding-left: 48px;
+  }
+  [data-chat-log] :global(.avatar) {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+  }
+  [data-chat-log] :global(.bubble) {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  [data-chat-log] :global(.msg-ai .bubble) {
+    background: var(--color-ph);
+    border-bottom-left-radius: 4px;
+  }
+  [data-chat-log] :global(.msg-user .bubble) {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border-bottom-right-radius: 4px;
+  }
   .composer {
     background: color-mix(in srgb, var(--color-paper) 45%, white);
   }
@@ -150,6 +193,7 @@ import Icon from "./Icon.astro";
 
   const sheet = document.getElementById("chat")!;
   const log = sheet.querySelector<HTMLOListElement>("[data-chat-log]")!;
+  const avatar = log.querySelector("[data-avatar]")!;
   const suggestions = sheet.querySelector<HTMLElement>("[data-chat-suggestions]")!;
   const form = sheet.querySelector<HTMLFormElement>("[data-chat-form]")!;
   const input = sheet.querySelector<HTMLTextAreaElement>("#chat-input")!;
@@ -193,6 +237,14 @@ import Icon from "./Icon.astro";
     return p;
   }
 
+  function message(role: Message["role"], bubble: HTMLElement) {
+    const li = document.createElement("li");
+    li.className = role === "user" ? "msg-user" : "msg-ai";
+    if (role === "assistant") li.append(avatar.cloneNode(true));
+    li.append(bubble);
+    return li;
+  }
+
   async function ask(question: string) {
     const text = question.trim();
     if (!text || request) return;
@@ -201,12 +253,9 @@ import Icon from "./Icon.astro";
     growInput();
 
     history.push({ role: "user", content: text });
-    const turn = document.createElement("li");
-    turn.className = "py-6";
-    const writing = paragraph("writing font-serif text-[18px] text-muted italic", "writing…");
-    turn.append(paragraph("eyebrow mb-3 text-[10px] text-muted", text), writing);
-    log.append(turn);
-    turn.scrollIntoView({ block: "start", behavior: "smooth" });
+    const writing = paragraph("bubble writing text-muted", "writing…");
+    log.append(message("user", paragraph("bubble", text)), message("assistant", writing));
+    writing.scrollIntoView({ block: "end", behavior: "smooth" });
 
     request = new AbortController();
     log.setAttribute("aria-busy", "true");
@@ -223,15 +272,12 @@ import Icon from "./Icon.astro";
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
       if (!res.ok || !data.reply) throw new Error(data.error ?? "The chat is unavailable right now.");
       history.push({ role: "assistant", content: data.reply });
-      writing.replaceWith(
-        paragraph("font-serif text-[18px] leading-[1.45] whitespace-pre-line", data.reply),
-        paragraph("mt-2 font-serif text-muted italic", "J. (AI)"),
-      );
+      writing.replaceWith(paragraph("bubble", data.reply));
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid
       const stopped = error instanceof DOMException && error.name === "AbortError";
       writing.replaceWith(
-        paragraph("text-[13px] text-muted", stopped ? "Stopped." : error instanceof Error ? error.message : "Something went wrong."),
+        paragraph("bubble text-muted", stopped ? "Stopped." : error instanceof Error ? error.message : "Something went wrong."),
       );
     } finally {
       request = null;
