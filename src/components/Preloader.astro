@@ -44,14 +44,8 @@ const CELLS = 24;
       document.dispatchEvent(new Event("preloader:done"));
     }
 
-    // Skip the intro when arriving on a section link (e.g. /#work), or if it already played this visit:
-    // reloads and back-navigation open instantly.
-    var seen = false;
-    try {
-      seen = sessionStorage.getItem("booted") === "1";
-      sessionStorage.setItem("booted", "1");
-    } catch (e) {}
-    if (seen || (location.hash && location.hash !== "#top")) {
+    // Plays on every load; skipped only when arriving on a section link (e.g. /#work).
+    if (location.hash && location.hash !== "#top") {
       pre.remove();
       return;
     }
