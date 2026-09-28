@@ -25,7 +25,7 @@
     top: 6px;
     right: 3px;
     bottom: 6px;
-    z-index: 41; /* above the header (40), under the chat (45) */
+    z-index: 36;
     display: block;
     width: 10px;
     user-select: none;
@@ -78,8 +78,10 @@
     const doc = document.documentElement;
     const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
 
-    // The thumb is sized in whole rows to how much of the page is visible.
+    // The bar starts just under the header. The thumb is sized in whole rows to how much of the page is visible.
+    const header = document.getElementById("site-header");
     function layout() {
+      if (header) root!.style.top = `${header.offsetHeight + 6}px`;
       trackRows = Math.floor(root!.clientHeight / LINE);
       thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
       thumb.style.height = `${thumbRows * LINE}px`;
@@ -105,7 +107,9 @@
       },
       { passive: true },
     );
-    new ResizeObserver(layout).observe(document.body);
+    const resize = new ResizeObserver(layout);
+    resize.observe(document.body);
+    if (header) resize.observe(header);
     addEventListener("resize", layout);
     layout();
 
