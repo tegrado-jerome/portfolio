@@ -14,9 +14,8 @@ const commands: Command[] = [
   ...(site.archive.show ? [{ label: site.archive.title, group: "Go to", action: "goto", value: "archive" }] : []),
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),
-  { label: "Paper theme", group: "Theme", action: "theme", value: "paper" },
-  { label: "Ink theme (high contrast)", group: "Theme", action: "theme", value: "ink" },
-  { label: "Night theme", group: "Theme", action: "theme", value: "night" },
+  { label: "Light theme", group: "Theme", action: "theme", value: "light" },
+  { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
   ...socials.filter((s) => isSet(s.href)).map((s) => ({ label: s.label, group: "Link", action: "link", value: s.href })),
 ];
 ---
@@ -71,10 +70,10 @@ const commands: Command[] = [
     border-radius: 6px;
     background: var(--color-paper);
     color: var(--color-ink);
-    box-shadow: 0 24px 60px -20px rgb(14 26 43 / 0.35);
+    box-shadow: 0 24px 60px -20px rgb(20 20 20 / 0.3);
   }
   .palette::backdrop {
-    background: rgb(14 26 43 / 0.28);
+    background: rgb(20 20 20 / 0.25);
   }
   @media (prefers-reduced-motion: no-preference) {
     .palette[open] {
