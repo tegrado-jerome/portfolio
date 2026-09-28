@@ -23,8 +23,10 @@ const cta = "Let's Talk";
         data-palette-open
         class="eyebrow hidden h-9 items-center rounded-full border border-line px-3 text-[11px] text-muted transition-colors hover:border-ink hover:text-ink lg:in-[.js]:inline-flex"
         aria-label="Open command menu"
+        title="⌘K on Mac, Ctrl K on Windows"
       >
-        <kbd data-shortcut class="font-mono">Ctrl K</kbd>
+        <!-- Shown as ⌘K everywhere; Ctrl+K works too (see CommandPalette). -->
+        <kbd class="font-mono">⌘K</kbd>
       </button>
       <button
         type="button"
@@ -98,8 +100,6 @@ const cta = "Let's Talk";
   toggle.addEventListener("click", () => setTheme(nextTheme()));
   document.addEventListener("themechange", syncToggle);
   syncToggle();
-
-  if (/Mac|iPhone|iPad/.test(navigator.userAgent)) header.querySelector("[data-shortcut]")!.textContent = "⌘K";
 
   let last = window.scrollY;
   let ticking = false;
