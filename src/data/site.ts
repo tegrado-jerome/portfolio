@@ -22,6 +22,10 @@ export const site = {
     image: "/loading.png",
   },
 
+  // Your photo for the round chat button, e.g. "/avatar.jpg" (a square photo in /public).
+  // Leave empty to show the JT logo instead.
+  chatAvatar: "",
+
   // Optional: your IANA time zone (e.g. "Europe/London") to show a live local-time clock in the footer.
   timezone: "",
 
