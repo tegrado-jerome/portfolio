@@ -43,18 +43,18 @@ const commands: Command[] = [
           aria-selected="false"
           data-action={c.action}
           data-value={c.value}
-          class="flex cursor-pointer items-center justify-between gap-4 rounded-[3px] px-3 py-2.5 text-[15px] aria-selected:bg-ph"
+          class="flex cursor-pointer items-center justify-between gap-4 rounded-[3px] px-3 py-2.5 text-body aria-selected:bg-ph"
         >
           <span>{c.label}</span>
-          <span class="eyebrow text-[10px] text-muted">{c.group}</span>
+          <span class="eyebrow text-muted">{c.group}</span>
         </li>
       ))
     }
   </ul>
-  <p data-palette-empty hidden class="px-5 pb-5 text-[14px] text-muted">No matching commands.</p>
+  <p data-palette-empty hidden class="px-5 pb-5 text-small text-muted">No matching commands.</p>
 
   <!-- Key hints as small keycaps with a label each (after Linear's command menu). -->
-  <p class="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line px-4 py-2.5 text-[11.5px] text-muted" aria-hidden="true">
+  <p class="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line px-4 py-2.5 text-small text-muted" aria-hidden="true">
     <span class="inline-flex items-center gap-1.5">
       <kbd class="key"><Icon icon={faArrowUp} class="text-[9px]" /></kbd>
       <kbd class="key"><Icon icon={faArrowDown} class="text-[9px]" /></kbd>
@@ -91,7 +91,7 @@ const commands: Command[] = [
     background: color-mix(in srgb, var(--color-paper) 45%, white);
     box-shadow: 0 1px 0 var(--color-line);
     color: var(--color-ink);
-    font: 500 10.5px var(--font-mono);
+    font: 500 var(--text-label) / 1 var(--font-mono);
   }
   :global([data-theme="dark"]) .key {
     background: color-mix(in srgb, var(--color-paper) 90%, white);

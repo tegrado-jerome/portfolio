@@ -21,12 +21,12 @@ const cta = "Let's Talk";
       <button
         type="button"
         data-palette-open
-        class="eyebrow hidden h-9 items-center rounded-full border border-line px-3 text-[11px] text-muted transition-colors hover:border-ink hover:text-ink lg:in-[.js]:inline-flex"
+        class="eyebrow hidden h-9 items-center rounded-full border border-line px-3 text-muted transition-colors duration-200 hover:border-ink hover:text-ink lg:in-[.js]:inline-flex"
         aria-label="Open command menu"
         title="⌘K on Mac, Ctrl K on Windows"
       >
         <!-- Shown as ⌘ + K everywhere; Ctrl+K works too (see CommandPalette). -->
-        <kbd class="font-mono">⌘ + K</kbd>
+        <kbd class="[font:inherit]">⌘ + K</kbd>
       </button>
       <button
         type="button"
@@ -40,7 +40,7 @@ const cta = "Let's Talk";
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${cta} (email me in Gmail)`}
-        class="roll eyebrow inline-flex h-9 items-center rounded-full bg-ink px-4 text-[11px] text-paper transition-colors duration-200 hover:bg-accent"
+        class="roll eyebrow inline-flex h-9 items-center rounded-full bg-ink px-4 text-paper transition-colors duration-200 hover:bg-accent"
       >
         <span class="roll-word" aria-hidden="true">
           {[...cta].map((char, i) => (

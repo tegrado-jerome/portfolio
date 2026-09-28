@@ -17,14 +17,14 @@ import Icon from "./Icon.astro";
       {
         experience.map((item, i) => (
           <li data-reveal style={`--i:${i}`} class="timeline-item group relative min-w-0 lg:flex lg:flex-col">
-            <span class="mb-0.5 block text-[12px] leading-4 tabular-nums text-muted lg:mb-2">{item.year}</span>
+            <span class="eyebrow mb-0.5 block leading-4 text-muted tabular-nums lg:mb-2">{item.year}</span>
             <span
               class="absolute top-[4px] -left-[28.5px] size-[9px] rounded-full border border-muted bg-paper transition-colors duration-300 group-last:border-accent group-last:bg-accent group-hover:bg-ink lg:static lg:mb-3 lg:block"
               aria-hidden="true"
             />
-            <h3 class="mb-1 text-[12px] font-medium tracking-[0.06em] uppercase">{item.title}</h3>
-            <p class="font-serif text-[14px] leading-[1.4] text-muted italic">
-              {item.icon && <Icon icon={item.icon} class="mr-1 text-[11px] text-accent not-italic" />}
+            <h3 class="eyebrow mb-1 text-ink">{item.title}</h3>
+            <p class="text-small text-muted">
+              {item.icon && <Icon icon={item.icon} class="mr-1.5 text-[11px] text-accent" />}
               {item.description}
             </p>
           </li>

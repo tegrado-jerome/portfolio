@@ -17,11 +17,11 @@ const heroLinks = [
 <section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
-      <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-[11px] text-muted">{site.headline}</p>
+      <p data-reveal class="eyebrow mb-[clamp(14px,2vw,22px)] text-muted">{site.headline}</p>
       <h1
         id="hero-title"
         data-reveal
-        class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-[clamp(52px,7.5vw,104px)] leading-[0.9] font-normal tracking-[-0.02em]"
+        class="hero-title mb-[clamp(18px,2.5vw,28px)] font-serif text-display font-normal"
       >
         {
           site.name.split(" ").map((word, i) => (
@@ -33,17 +33,16 @@ const heroLinks = [
           ))
         }
       </h1>
-      <p data-reveal style="--i:1" class="max-w-[52ch] text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
+      <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft">{site.intro}</p>
       <ul data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] flex flex-wrap gap-x-7 gap-y-3">
         {
           heroLinks.map((l) => (
             <li>
-              {/* No lines: muted at rest, ink on hover (after Linear). */}
-              <a
+                      <a
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group eyebrow inline-flex items-center gap-2 text-[11px] text-muted transition-colors duration-200 hover:text-ink focus-visible:text-ink"
+                class="group link eyebrow inline-flex items-center gap-2 text-muted"
               >
                 {l.icon && <Icon icon={l.icon} class="text-[14px] transition-colors duration-200 group-hover:text-accent group-focus-visible:text-accent" />}
                 {l.label}
@@ -71,7 +70,7 @@ const heroLinks = [
               class="size-full object-cover"
             />
           ) : (
-            <span class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</span>
+            <span class="eyebrow absolute inset-0 grid place-items-center text-muted">[PORTRAIT]</span>
           )
         }
         {
@@ -85,8 +84,8 @@ const heroLinks = [
                 class="size-7 shrink-0"
               />
               <span>
-                <span class="block font-serif text-[15px] leading-tight italic">{site.honor.title}</span>
-                <span class="eyebrow block text-[9px] text-white/80">{site.honor.detail}</span>
+                <span class="block font-serif text-body leading-tight">{site.honor.title}</span>
+                <span class="eyebrow block text-white/80">{site.honor.detail}</span>
               </span>
             </figcaption>
           )

@@ -18,11 +18,11 @@ const photo = site.footerImage;
   <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,44px)]">
     <div class="flex items-center justify-between gap-6">
       <a href="/" data-to-top aria-label="Back to top" class="logo-mark size-12 bg-white transition-opacity hover:opacity-80"></a>
-      <a href={contactHref} target="_blank" rel="noopener noreferrer" class="group eyebrow inline-flex items-center gap-2.5 text-[13px] text-white transition-opacity hover:opacity-80">
+      <a href={contactHref} target="_blank" rel="noopener noreferrer" class="group eyebrow inline-flex items-center gap-2.5 text-white/75 transition-colors duration-200 hover:text-white">
         Let's talk
         <Icon
           icon={faArrowRight}
-          class="-rotate-45 text-[15px] transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          class="-rotate-45 text-[13px] transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
         />
       </a>
     </div>
@@ -35,9 +35,9 @@ const photo = site.footerImage;
                 href={isSet(s.href) ? s.href : "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="eyebrow inline-flex items-center gap-2 text-[11px] text-white/75 transition-colors hover:text-white"
+                class="eyebrow inline-flex items-center gap-2 text-white/75 transition-colors duration-200 hover:text-white"
               >
-                <Icon icon={s.icon} class="text-[16px]" />
+                <Icon icon={s.icon} class="text-[14px]" />
                 {s.label}
               </a>
             </li>
@@ -47,12 +47,12 @@ const photo = site.footerImage;
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
         {
           site.timezone && (
-            <p class="eyebrow text-[11px] text-white/75">
+            <p class="eyebrow text-white/75">
               Local time <time data-clock={site.timezone} class="text-white tabular-nums" />
             </p>
           )
         }
-        <p class="eyebrow text-[11px] text-white/75">© {year} {site.name}</p>
+        <p class="eyebrow text-white/75">© {year} {site.name}</p>
       </div>
     </div>
   </div>

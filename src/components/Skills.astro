@@ -1,6 +1,7 @@
 ---
 // Skills by category: one tab per category, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
+import SectionHead from "./SectionHead.astro";
 import SkillWheel from "./SkillWheel.astro";
 
 const groups = skillGroups.filter((g) => g.skills.length > 0);
@@ -9,10 +10,8 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 {
   groups.length > 0 && (
-    <section id="skills" class="shell py-[clamp(56px,8vw,110px)]" aria-labelledby="skills-title">
-      <h2 id="skills-title" data-reveal class="eyebrow mb-[clamp(20px,3vw,32px)] text-[11px] text-muted">
-        Skills
-      </h2>
+    <section id="skills" class="shell section" aria-labelledby="skills-title">
+      <SectionHead id="skills-title" title="Skills" />
 
       <div data-reveal role="tablist" aria-label="Skill categories" class="mb-[clamp(28px,4vw,48px)] flex flex-wrap gap-2">
         {groups.map((g, i) => (
@@ -23,7 +22,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             aria-controls={`skills-${slug(g.name)}`}
             aria-selected={i === 0 ? "true" : "false"}
             tabindex={i === 0 ? 0 : -1}
-            class="eyebrow rounded-full border border-line px-4 py-2 text-[10px] text-muted transition-colors hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
+            class="eyebrow rounded-full border border-line px-4 py-2 text-muted transition-colors duration-200 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
           >
             {g.name}
           </button>
@@ -47,7 +46,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
         </div>
       ))}
 
-      <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-[10px] text-muted" aria-hidden="true">
+      <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
         <span class="orbit" />
         <span class="hint-mouse">Drag in a circle to spin, or click a slot</span>
         <span class="hint-touch">Swipe in a circle to spin, or tap a slot</span>

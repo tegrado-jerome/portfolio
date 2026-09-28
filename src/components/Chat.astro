@@ -23,15 +23,15 @@ import Icon from "./Icon.astro";
     )
   }
   <span
-    class="eyebrow pointer-events-none absolute right-full mr-3 rounded-full border border-line bg-paper px-3 py-1.5 text-[10px] whitespace-nowrap text-ink opacity-0 transition-opacity group-hover:opacity-100 max-sm:hidden"
+    class="eyebrow pointer-events-none absolute right-full mr-3 rounded-full border border-line bg-paper px-3 py-1.5 whitespace-nowrap text-ink opacity-0 transition-opacity group-hover:opacity-100 max-sm:hidden"
     aria-hidden="true">Ask me</span
   >
 </button>
 
 <aside id="chat" class="sheet" aria-labelledby="chat-title">
   <header class="flex items-baseline justify-between border-b border-line pb-4">
-    <h2 id="chat-title" class="font-serif text-[30px] leading-none">
-      Jerome <span class="text-[18px] text-muted">(AI)</span>
+    <h2 id="chat-title" class="font-serif text-heading">
+      Jerome <span class="text-body text-muted">(AI)</span>
     </h2>
     <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
       <Icon icon={faXmark} class="text-[15px]" />
@@ -53,11 +53,11 @@ import Icon from "./Icon.astro";
     </li>
   </ol>
 
-  <ul data-chat-suggestions class="mb-3 space-y-1 text-[13px]">
+  <ul data-chat-suggestions class="mb-3 space-y-1 text-small">
     {
       assistant.suggestions.map((s) => (
         <li>
-          <button type="button" class="text-muted transition-colors hover:text-ink">
+          <button type="button" class="link text-muted">
             {s}
           </button>
         </li>
@@ -85,7 +85,7 @@ import Icon from "./Icon.astro";
       <Icon icon={faStop} class="stop-icon text-[11px]" />
     </button>
   </form>
-  <p class="mt-2.5 text-center text-[11px] text-muted">AI answers from my portfolio. May be imperfect.</p>
+  <p class="mt-2.5 text-center text-small text-muted">AI answers from my portfolio. May be imperfect.</p>
 </aside>
 
 <style>
