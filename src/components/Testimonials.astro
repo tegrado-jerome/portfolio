@@ -1,6 +1,8 @@
 ---
 // Quotes as straight hairline boxes inside the "kind-words" pane.
 import { testimonials } from "../data/testimonials";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
 ---
 
@@ -17,7 +19,16 @@ import SectionHead from "./SectionHead.astro";
               <blockquote class="m-0 text-heading">
                 <p>{t.quote}</p>
               </blockquote>
-              <figcaption class="mt-5">
+              {/* A round photo beside the name, like a LinkedIn recommendation. */}
+              <figcaption class="mt-5 flex items-start gap-3">
+                <span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ph text-muted">
+                  {t.avatar ? (
+                    <img src={t.avatar} alt="" width="80" height="80" loading="lazy" decoding="async" class="size-full object-cover" />
+                  ) : (
+                    <Icon icon={faUser} class="text-[14px]" />
+                  )}
+                </span>
+                <span>
                 <span class="block text-body font-medium">
                   {t.href ? (
                     <a href={t.href} target="_blank" rel="noopener noreferrer" class="link-strong">
@@ -31,6 +42,7 @@ import SectionHead from "./SectionHead.astro";
                   {t.role}, {t.company}
                 </span>
                 <span class="eyebrow mt-2 block text-muted tabular-nums">{t.year}</span>
+                </span>
               </figcaption>
             </div>
           </figure>

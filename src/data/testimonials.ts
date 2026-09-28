@@ -9,6 +9,8 @@ export interface Testimonial {
   company: string;
   year: string;
   href?: string;
+  /** Their photo in public/images, e.g. "/images/testimonial-ana.webp" (square). Empty = a person icon. */
+  avatar?: string;
 }
 
 export const testimonials: Testimonial[] = [
@@ -19,6 +21,7 @@ export const testimonials: Testimonial[] = [
     company: "[COMPANY]",
     year: "[YEAR]",
     href: "", // [LINK TO THEIR LINKEDIN OR SITE]
+    avatar: "", // [THEIR PHOTO]
   },
   {
     quote: "[A REAL QUOTE FROM A CLIENT OR COLLEAGUE, ONE OR TWO SENTENCES]",
@@ -27,5 +30,6 @@ export const testimonials: Testimonial[] = [
     company: "[COMPANY]",
     year: "[YEAR]",
     href: "",
+    avatar: "",
   },
 ];
