@@ -3,7 +3,7 @@
 // Fields still holding a [PLACEHOLDER] are left out automatically.
 import { site, socials } from "../data/site";
 import { projects } from "../data/projects";
-import { isSet, onlySet } from "../lib/content";
+import { isSet, onlySet } from "../data/placeholders";
 
 const home = new URL("/", Astro.site).href;
 const abs = (path: string) => new URL(path, Astro.site).href;

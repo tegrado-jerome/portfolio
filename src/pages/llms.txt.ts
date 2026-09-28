@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
 import { site, socials } from "../data/site";
 import { experience } from "../data/experience";
 import { projects } from "../data/projects";
-import { isSet, onlySet } from "../lib/content";
+import { isSet, onlySet } from "../data/placeholders";
 
 export const GET: APIRoute = ({ site: siteUrl }) => {
   const home = new URL("/", siteUrl).href;

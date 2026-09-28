@@ -4,7 +4,7 @@ import { site, socials } from "../src/data/site";
 import { experience } from "../src/data/experience";
 import { projects } from "../src/data/projects";
 import { assistant } from "../src/data/assistant";
-import { isSet, onlySet } from "../src/lib/content";
+import { isSet, onlySet } from "../src/data/placeholders";
 
 /** Random marker; if it ever appears in a reply, the reply is leaking the system prompt. */
 export const CANARY = "c4n4ry-7Q2xV9";
