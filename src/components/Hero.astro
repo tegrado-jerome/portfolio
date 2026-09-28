@@ -1,0 +1,82 @@
+---
+import { site } from "../data/site";
+---
+
+<section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
+  <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
+    <div class="max-w-[640px]">
+      <h1
+        id="hero-title"
+        data-reveal
+        class="hero-title mb-[clamp(20px,3vw,32px)] font-serif text-[clamp(52px,7.5vw,96px)] leading-[0.92] font-normal tracking-[-0.01em]"
+      >
+        {
+          site.name.split(" ").map((word, i) => (
+            <>
+              <span class="hero-word" style={`--w:${i}`}>
+                <span>{word}</span>
+              </span>{" "}
+            </>
+          ))
+        }
+      </h1>
+      <p data-reveal style="--i:1" class="mb-6 text-[15px] text-ink">{site.headline}</p>
+      <p data-reveal style="--i:2" class="text-[15px] leading-[1.75] text-ink-soft">{site.intro}</p>
+    </div>
+
+    <figure
+      id="portrait"
+      data-reveal
+      style="--i:2"
+      class="group relative m-0 aspect-[4/5] w-full max-w-[260px] overflow-hidden rounded-[2px] bg-ph max-md:max-w-[220px]"
+    >
+      {
+        site.portrait ? (
+          <img
+            src={site.portrait}
+            alt={`Portrait of ${site.name}`}
+            width="520"
+            height="650"
+            class="size-full object-cover object-top grayscale transition-[filter] duration-[450ms] group-hover:grayscale-0"
+          />
+        ) : (
+          <figcaption class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</figcaption>
+        )
+      }
+    </figure>
+  </div>
+</section>
+
+<style>
+  /* Each word rises out of its own mask as the preloader lifts. */
+  .hero-word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    /* room for descenders inside the mask */
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+  }
+  .hero-word > span {
+    display: inline-block;
+  }
+  :global(.js) .hero-title[data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  :global(.js) .hero-title .hero-word > span {
+    transform: translateY(105%);
+    transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--w) * 90ms);
+  }
+  :global(.js) .hero-title:global(.is-visible) .hero-word > span {
+    transform: none;
+  }
+</style>
+
+<script>
+  import { asciiLens } from "../scripts/ascii-lens";
+
+  const portrait = document.getElementById("portrait");
+  const img = portrait?.querySelector("img");
+  if (portrait && img) asciiLens(portrait, { cell: 8, radius: 66, alpha: 0.55, image: img, className: "z-[3]" });
+</script>

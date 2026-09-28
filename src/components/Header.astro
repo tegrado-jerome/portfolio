@@ -1,0 +1,98 @@
+---
+import { site } from "../data/site";
+
+const links = [
+  { label: "Work", href: "#work" },
+  { label: "About", href: "#about" },
+  { label: "Contact", href: "#contact" },
+];
+---
+
+<header
+  id="site-header"
+  class="sticky top-0 z-40 bg-paper/45 backdrop-blur-lg backdrop-saturate-150 transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(.4,0,.2,1)] [&.is-hidden]:-translate-y-full [&.is-scrolled]:shadow-[0_1px_0_var(--color-line)]"
+>
+  <div class="flex items-center justify-between px-5 py-4 sm:px-[clamp(20px,10vw,200px)] sm:py-5">
+    <a href="/" data-to-top class="group flex items-center gap-3" aria-label={`${site.name} — home`}>
+      <span
+        class="grid size-10 place-items-center rounded-full border border-ink font-serif text-[19px] leading-none tracking-tight transition-colors duration-300 group-hover:bg-ink group-hover:text-paper"
+        aria-hidden="true">JT</span
+      >
+      <span class="eyebrow hidden tracking-[0.2em] sm:inline">{site.name}</span>
+    </a>
+
+    <nav aria-label="Primary">
+      <ul class="flex items-center gap-5 sm:gap-9">
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                data-nav-link
+                class="eyebrow -my-3 inline-block py-3 text-muted transition-colors hover:text-ink aria-[current=true]:text-ink"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        {
+          site.resume && (
+            <li>
+              <a href={site.resume} target="_blank" rel="noopener" class="eyebrow text-muted transition-colors hover:text-ink">
+                Resume
+              </a>
+            </li>
+          )
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById("site-header")!;
+
+  // Hide on scroll down, show on scroll up.
+  let last = window.scrollY;
+  let ticking = false;
+  const update = () => {
+    const y = window.scrollY;
+    if (Math.abs(y - last) > 6) {
+      header.classList.toggle("is-hidden", y > last && y > 120);
+      last = y;
+    }
+    header.classList.toggle("is-scrolled", y > 8);
+    ticking = false;
+  };
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    },
+    { passive: true },
+  );
+  // Keep the header visible while keyboard users tab through it.
+  header.addEventListener("focusin", () => header.classList.remove("is-hidden"));
+
+  // Mark the nav link of the section currently in view.
+  const links = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+  const sections = [...links]
+    .map((a) => document.querySelector<HTMLElement>(a.hash))
+    .filter((el): el is HTMLElement => el !== null);
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        links.forEach((a) =>
+          a.hash === `#${entry.target.id}` ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current"),
+        );
+      }
+    },
+    { rootMargin: "-45% 0px -50% 0px" },
+  );
+  sections.forEach((s) => io.observe(s));
+</script>
