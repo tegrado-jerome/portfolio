@@ -10,7 +10,6 @@
   --color-ph: #e0e4e9;
   --color-accent: #2b4c7e;
   --color-night: #1b2430;
-  --color-on-night: #eef0f2;
 
   --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
   --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -29,7 +28,6 @@
   --color-ph: #1c2430;
   --color-accent: #8fb0e0;
   --color-night: #0d1218;
-  --color-on-night: #e6e9ee;
   color-scheme: dark;
 }
 

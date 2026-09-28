@@ -1,5 +1,5 @@
 // Cursor-following ASCII lens: characters appear in a soft circle around the pointer,
-// picked by the brightness of whatever is underneath (an image, or a generated field).
+// picked by the brightness of the image underneath.
 
 const RAMP = " .:-=+*#%@";
 
@@ -10,8 +10,8 @@ interface LensOptions {
   radius: number;
   /** Peak glyph opacity at the lens centre. */
   alpha: number;
-  /** Image to sample. When omitted, a smooth generated pattern is used. */
-  image?: HTMLImageElement | null;
+  /** Image to sample. */
+  image: HTMLImageElement;
   className?: string;
 }
 
@@ -45,22 +45,12 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     return out;
   }
 
-  function sampleField() {
-    const out = new Float32Array(cols * rows);
-    for (let y = 0; y < rows; y++)
-      for (let x = 0; x < cols; x++) {
-        const v = Math.sin(x * 0.21 + Math.cos(y * 0.13) * 2) * Math.cos(y * 0.17 - x * 0.05) + Math.sin((x + y) * 0.07);
-        out[y * cols + x] = 128 + v * 60;
-      }
-    return out;
-  }
-
   function build() {
     const rect = host.getBoundingClientRect();
     W = Math.round(rect.width);
     H = Math.round(rect.height);
     if (!W || !H) return false;
-    if (image && !(image.complete && image.naturalWidth)) return false;
+    if (!(image.complete && image.naturalWidth)) return false;
 
     canvas.width = W * dpr;
     canvas.height = H * dpr;
@@ -73,7 +63,7 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     cols = Math.ceil(W / cell);
     rows = Math.ceil(H / cell);
     try {
-      bright = image ? sampleImage(image) : sampleField();
+      bright = sampleImage(image);
     } catch {
       bright = null;
     }
@@ -113,5 +103,5 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     if (W && H) ctx.clearRect(0, 0, W, H);
   });
   window.addEventListener("resize", () => (ready = false));
-  image?.addEventListener("load", () => (ready = false));
+  image.addEventListener("load", () => (ready = false));
 }

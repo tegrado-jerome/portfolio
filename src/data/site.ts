@@ -28,9 +28,6 @@ export const site = {
   // Optional 1200×630 social preview image in /public, e.g. "/og.jpg".
   ogImage: "",
 
-  // Optional wide photo for the footer, e.g. "/footer.jpg" (black & white works best).
-  footerImage: "",
-
 };
 
 export const socials = [
