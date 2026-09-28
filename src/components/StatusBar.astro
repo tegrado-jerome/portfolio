@@ -9,7 +9,7 @@
   <span class="ml-auto flex items-center gap-4 text-muted">
     <span><kbd>↑↓</kbd> panes</span>
     <button type="button" data-status-ask><kbd>/</kbd> ask</button>
-    <button type="button" data-status-menu><kbd>⌘K</kbd> menu</button>
+    <button type="button" data-palette-open><kbd>⌘K</kbd> menu</button>
     <time data-status-clock class="text-ink tabular-nums"></time>
   </span>
 </div>
@@ -91,9 +91,6 @@
     ask.focus({ preventScroll: true });
   }
   document.querySelector("[data-status-ask]")?.addEventListener("click", focusAsk);
-  document.querySelector("[data-status-menu]")?.addEventListener("click", () =>
-    document.querySelector<HTMLButtonElement>("[data-palette-open]")?.click(),
-  );
 
   // TUI keys, only when not typing and nothing modal is open: ↑↓ jump between panes, / focuses the AI prompt.
   addEventListener("keydown", (e) => {

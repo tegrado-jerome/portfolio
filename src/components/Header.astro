@@ -15,17 +15,9 @@ import Icon from "./Icon.astro";
       <span class="hidden text-ink sm:inline" aria-hidden="true"><span class="text-accent">~/</span>jerome-tegrado</span>
     </a>
 
-    <!-- Bracketed commands, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
+    <!-- Bracketed commands, the main action last. The theme button needs JS, so it stays hidden without it.
+         The command menu opens from the status bar and with ⌘K / Ctrl K. -->
     <nav aria-label="Primary" class="ml-auto flex items-center gap-2">
-      <button
-        type="button"
-        data-palette-open
-        class="tui-btn hidden lg:in-[.js]:inline-flex"
-        aria-label="Open command menu"
-        title="⌘K on Mac, Ctrl K on Windows"
-      >
-        [ <kbd class="[font:inherit]">⌘ + K</kbd> menu ]
-      </button>
       <button type="button" data-theme-toggle class="tui-btn hidden in-[.js]:inline-flex">
         [ <Icon icon={faCircleHalfStroke} class="text-[12px]" /> theme ]
       </button>
