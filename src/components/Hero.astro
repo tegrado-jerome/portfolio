@@ -115,6 +115,37 @@ import { site } from "../data/site";
   .portrait:hover .mark {
     translate: calc(var(--x) * 2) calc(var(--y) * 2);
   }
+  /* Touch screens can't hover, so the hover state plays by itself in a slow loop. */
+  @media (hover: none) and (prefers-reduced-motion: no-preference) {
+    #portrait > img {
+      animation: portrait-photo 8s ease-in-out 1.5s infinite;
+    }
+    figcaption img {
+      animation: portrait-colour 8s ease-in-out 1.5s infinite;
+    }
+    .mark {
+      animation: portrait-mark 8s ease-in-out 1.5s infinite;
+    }
+  }
+  @keyframes portrait-colour {
+    40%,
+    75% {
+      filter: none;
+    }
+  }
+  @keyframes portrait-photo {
+    40%,
+    75% {
+      filter: none;
+      scale: 1.04;
+    }
+  }
+  @keyframes portrait-mark {
+    40%,
+    75% {
+      translate: calc(var(--x) * 2) calc(var(--y) * 2);
+    }
+  }
 </style>
 
 <script>
