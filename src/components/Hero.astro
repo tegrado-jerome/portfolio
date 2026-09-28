@@ -3,12 +3,12 @@ import { faArrowTurnDown } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import { site } from "../data/site";
 import Icon from "./Icon.astro";
-import Timeline from "./Timeline.astro";
 ---
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app).
      On phones the portrait comes first, so visitors see who this is before the name. -->
-<section id="top" class="shell pt-[clamp(48px,6vw,96px)]" aria-labelledby="hero-title">
+<!-- Fills the first screen below the header, so nothing else shows until you scroll. -->
+<section id="top" class="shell flex min-h-[calc(100svh-64px)] flex-col justify-center py-[clamp(32px,5vw,72px)] sm:min-h-[calc(100svh-72px)]" aria-labelledby="hero-title">
   <!-- The status bar names this pane "jerome-tegrado". -->
   <div data-pane="jerome-tegrado">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
@@ -130,11 +130,14 @@ import Timeline from "./Timeline.astro";
       </figure>
     </div>
   </div>
-  <Timeline />
   </div>
 </section>
 
 <style>
+  /* A mono space is a full character wide; with the tight letter tracking it reads as a gap, so pull the words closer. */
+  .hero-title {
+    word-spacing: -0.3em;
+  }
   .hero-word {
     display: inline-block;
     overflow: hidden;

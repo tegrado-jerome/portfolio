@@ -19,7 +19,7 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 | File | What it holds |
 |---|---|
 | `site.ts` | Name, headline, intro, portrait, honour caption, email, resume, chat photo, socials |
-| `experience.ts` | Journey timeline entries (shown in the hero) and their icons |
+| `experience.ts` | Timeline entries the chat and llms.txt use |
 | `projects.ts` | Selected work: cover, category, year, title, description and tools per project |
 | `skills.ts` | Skills by category: a category list beside a turning wheel of logos (in `public/images/skills` or a Font Awesome icon); empty list hides the section |
 | `awards.ts` | Awards and honours (year, award, issuer, optional proof link); empty list hides the section |
