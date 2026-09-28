@@ -12,7 +12,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   groups.length > 0 && (
     <section id="skills" class="shell section" aria-labelledby="skills-title">
       <div class="pane" data-pane="skills">
-      <SectionHead id="skills-title" title="Skills" meta={`${groups.length} categories`} />
+      <SectionHead id="skills-title" title="Skills" />
 
       <!-- TUI layout (lazygit / btop): a category list with an ink selection bar on the left, the dial on the right. -->
       <div class="grid gap-[clamp(40px,6vw,96px)] md:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] md:items-center">
