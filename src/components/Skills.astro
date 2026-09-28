@@ -1,6 +1,8 @@
 ---
 // Skills by category: one tab per category, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
+import { faComputerMouse, faHandPointer } from "@fortawesome/free-solid-svg-icons";
+import Icon from "./Icon.astro";
 import SkillWheel from "./SkillWheel.astro";
 
 const groups = skillGroups.filter((g) => g.skills.length > 0);
@@ -46,9 +48,36 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
           <SkillWheel skills={g.skills} />
         </div>
       ))}
+
+      <p class="eyebrow mt-5 flex items-center justify-center gap-2 text-[10px] text-muted" aria-hidden="true">
+        <span class="hint-mouse items-center gap-2">
+          <Icon icon={faComputerMouse} class="text-[12px]" /> Point at a slot to pick it
+        </span>
+        <span class="hint-touch items-center gap-2">
+          <Icon icon={faHandPointer} class="text-[12px]" /> Tap or drag around the wheel
+        </span>
+      </p>
     </section>
   )
 }
+
+<style>
+  /* The guide matches the device: pointing with a mouse, tapping on touch screens. */
+  .hint-mouse,
+  .hint-touch {
+    display: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hint-mouse {
+      display: inline-flex;
+    }
+  }
+  @media not ((hover: hover) and (pointer: fine)) {
+    .hint-touch {
+      display: inline-flex;
+    }
+  }
+</style>
 
 <script>
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("#skills [role=tab]")];
