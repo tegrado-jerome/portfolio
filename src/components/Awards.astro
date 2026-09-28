@@ -8,9 +8,7 @@ const entries = awards.map((a) => ({
   href: a.href,
   image: a.image,
   imageAlt: a.imageAlt,
-  caption: a.short ?? a.issuer,
-  detail: a.detail,
-}));
+  caption: a.short ?? a.issuer,}));
 ---
 
 <CredentialGrid id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" />

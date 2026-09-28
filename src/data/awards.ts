@@ -9,7 +9,7 @@ export interface Award {
   /** Short name for the card caption (e.g. "TUP Manila"); the full issuer still goes to search engines and the chat. */
   short?: string;
   href?: string;
-  /** Photo in public/images/awards, e.g. "/images/awards/magna-cum-laude.webp" (3:2: the medal, ceremony or certificate). */
+  /** Photo in public/images/awards, e.g. "/images/awards/magna-cum-laude.webp" (4:5 portrait: the medal, ceremony or certificate). */
   image?: string;
   imageAlt?: string;
 }
