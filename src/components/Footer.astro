@@ -1,15 +1,17 @@
 ---
 // The last TUI pane, ~/contact: the contact command, a big "let's talk", bracketed links, and the footer photo
 // rendered as ASCII art in the background (the futuristic take on the reference's photo footer).
+import { faArrowRight, faArrowUp, faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
+import Icon from "./Icon.astro";
 
 const year = new Date().getFullYear();
-// LinkedIn and resume sit here beside "Let's talk", where visitors look when they're ready to reach out.
-// Placeholder links point nowhere ("#") until the real URLs are filled in.
+// LinkedIn and resume sit here beside "Let's talk", where visitors look when they're ready to reach out,
+// each with its real logo. Placeholder links point nowhere ("#") until the real URLs are filled in.
 const profileLinks = [
-  ...socials.map((s) => ({ label: s.label, href: isSet(s.href) ? s.href : "#" })),
-  { label: "Resume", href: isSet(site.resume) ? site.resume : "#" },
+  ...socials.map((s) => ({ label: s.label, href: isSet(s.href) ? s.href : "#", icon: s.icon })),
+  { label: "Resume", href: isSet(site.resume) ? site.resume : "#", icon: faFileLines },
 ];
 ---
 
@@ -24,8 +26,17 @@ const profileLinks = [
 
     <div class="relative z-[1] flex flex-col gap-7">
       <p class="text-small text-muted"><span class="text-accent">jerome@ai</span> ~ <span class="text-ink">contact</span></p>
-      <a href={contactHref} target="_blank" rel="noopener noreferrer" class="link-strong w-fit text-title font-medium tracking-[-0.03em]">
-        let's talk ↗
+      <a
+        href={contactHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group link-strong inline-flex w-fit items-center gap-[0.3em] text-title font-medium tracking-[-0.03em]"
+      >
+        let's talk
+        <Icon
+          icon={faArrowRight}
+          class="-rotate-45 text-[0.6em] transition-transform duration-300 ease-out-soft group-hover:translate-x-1 group-hover:-translate-y-1"
+        />
       </a>
       {isSet(site.email) && <p class="text-body text-muted">{site.email}</p>}
       <ul class="flex flex-wrap gap-2">
@@ -33,13 +44,15 @@ const profileLinks = [
           profileLinks.map((l) => (
             <li>
               <a href={l.href} target="_blank" rel="noopener noreferrer" class="tui-btn inline-flex border border-line">
-                [ {l.label.toLowerCase()} ↗ ]
+                [ <Icon icon={l.icon} class="text-[14px]" /> {l.label.toLowerCase()} ]
               </a>
             </li>
           ))
         }
         <li>
-          <a href="/" data-to-top class="tui-btn inline-flex border border-line">[ ↑ top ]</a>
+          <a href="/" data-to-top class="tui-btn inline-flex border border-line">
+            [ <Icon icon={faArrowUp} class="text-[12px]" /> top ]
+          </a>
         </li>
       </ul>
       <p class="mt-4 text-small text-muted">© {year} {site.name.toLowerCase().replace(" ", "-")}</p>
