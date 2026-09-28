@@ -48,17 +48,16 @@ import Timeline from "./Timeline.astro";
           <span class="relative flex min-w-0 flex-1 items-center">
             <label for="hero-ask" class="sr-only">Ask my AI about my work</label>
             <!-- w-0 lets the field shrink on narrow phones instead of pushing the bar off screen.
-                 The blank placeholder lets CSS know when the field is empty, to show the idle cursor. -->
+                 The guide text reads like a shell comment and disappears once you type. -->
             <input
               id="hero-ask"
               type="text"
               maxlength="800"
               autocomplete="off"
               spellcheck="false"
-              placeholder=" "
-              class="w-0 min-w-0 flex-1 bg-transparent py-1.5 text-ink caret-accent focus:outline-none"
+              placeholder="# type here"
+              class="w-0 min-w-0 flex-1 bg-transparent py-1.5 text-ink caret-accent placeholder:text-muted/70 focus:outline-none"
             />
-            <span class="idle-caret" aria-hidden="true"></span>
           </span>
           <button
             type="submit"
@@ -217,29 +216,6 @@ import Timeline from "./Timeline.astro";
   /* The ring replaces the default focus outline on the field itself. */
   .ask input:focus-visible {
     outline: none;
-  }
-  /* A blinking block cursor while the field is empty and not focused; typing shows the real caret. */
-  .idle-caret {
-    display: none;
-    position: absolute;
-    left: 0;
-    width: 0.6em;
-    height: 1.15em;
-    background: var(--color-ink);
-    pointer-events: none;
-  }
-  .term:not(:focus-within) input:placeholder-shown + .idle-caret {
-    display: block;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .idle-caret {
-      animation: blink 1.1s steps(1) infinite;
-    }
-  }
-  @keyframes blink {
-    50% {
-      opacity: 0;
-    }
   }
   .send .key {
     display: inline-grid;
