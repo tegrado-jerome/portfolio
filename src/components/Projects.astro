@@ -1,114 +1,24 @@
 ---
-import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { projects } from "../data/projects";
 import SectionHead from "./SectionHead.astro";
 import Project from "./Project.astro";
-import Icon from "./Icon.astro";
-
-const isExternal = (url?: string) => !!url && /^https?:\/\//.test(url);
-const views = ["Gallery", "Index"];
 ---
 
 <section id="work" class="shell py-[clamp(56px,8vw,110px)]" aria-labelledby="work-title">
-  <SectionHead id="work-title" title="Selected Work">
-    <div role="group" aria-label="Project view" class="ml-auto hidden translate-y-[0.3em] gap-4 in-[.js]:flex sm:ml-0">
-      {
-        views.map((view, i) => (
-          <button
-            type="button"
-            data-view={view.toLowerCase()}
-            aria-pressed={i === 0 ? "true" : "false"}
-            class="eyebrow -my-2 py-2 text-[11px] text-muted transition-colors hover:text-ink aria-pressed:text-ink aria-pressed:underline aria-pressed:decoration-accent aria-pressed:decoration-[1.5px] aria-pressed:underline-offset-[6px]"
-          >
-            {view}
-          </button>
-        ))
-      }
-    </div>
-  </SectionHead>
-
-  <div data-view-panel="gallery" class="gallery grid gap-y-[clamp(48px,6vw,88px)] md:grid-cols-2 md:gap-x-[clamp(24px,4vw,64px)]">
+  <SectionHead id="work-title" title="Selected Work" />
+  <div class="gallery grid gap-y-[clamp(48px,6vw,88px)] md:grid-cols-2 md:gap-x-[clamp(24px,4vw,64px)]">
     {projects.map((project, i) => <Project project={project} index={i} featured={i === 0} />)}
-  </div>
-
-  <!-- The same work as a dense, scannable table. -->
-  <div data-view-panel="index" hidden>
-    <table class="index w-full border-b border-line text-left text-[15px]">
-      <caption class="sr-only">Selected work</caption>
-      <thead class="eyebrow text-[10px] text-muted max-md:sr-only">
-        <tr>
-          <th scope="col" class="w-14 pb-3 font-medium">No.</th>
-          <th scope="col" class="pb-3 font-medium">Project</th>
-          <th scope="col" class="pb-3 font-medium">Category</th>
-          <th scope="col" class="pb-3 font-medium">Stack</th>
-          <th scope="col" class="pb-3 text-right font-medium">Year</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          projects.map((p, i) => (
-            <tr class="group grid grid-cols-[2.5rem_1fr_auto] gap-x-3 border-t border-line py-4 md:table-row md:py-0">
-              <td class="text-[12px] text-muted tabular-nums md:py-5">{String(i + 1).padStart(2, "0")}</td>
-              <th scope="row" class="font-medium md:py-5">
-                {p.href && !p.locked ? (
-                  <a
-                    href={p.href}
-                    {...(isExternal(p.href) && { target: "_blank", rel: "noopener noreferrer" })}
-                    class="transition-colors group-hover:text-accent"
-                  >
-                    {p.title}
-                  </a>
-                ) : (
-                  <span class="inline-flex items-center gap-2">
-                    {p.title}
-                    {p.locked && <Icon icon={faLock} class="text-[10px] text-muted" label="Classified" />}
-                  </span>
-                )}
-              </th>
-              <td class="col-start-2 text-[13px] text-muted md:py-5">{p.category}</td>
-              <td class="col-start-2 text-[13px] text-ink-soft md:py-5">{p.technologies.join(", ")}</td>
-              <td class="row-start-1 col-start-3 text-right text-[13px] text-muted tabular-nums md:py-5">{p.year}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
   </div>
 </section>
 
 <style>
-  /* Pointing at one project quietly steps the others back — in both views. */
-  .gallery :global(.project > *),
-  .index tbody tr > * {
+  /* Pointing at one project quietly steps the others back. */
+  .gallery :global(.project > *) {
     transition: opacity 0.25s ease;
   }
   @media (hover: hover) {
-    .gallery:has(:global(.project:hover)) :global(.project:not(:hover) > *),
-    .index tbody:has(tr:hover) tr:not(:hover) > * {
-      opacity: 0.4;
+    .gallery:has(:global(.project:hover)) :global(.project:not(:hover) > *) {
+      opacity: 0.45;
     }
   }
 </style>
-
-<script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-view]");
-  const panels = document.querySelectorAll<HTMLElement>("[data-view-panel]");
-
-  function show(view: string) {
-    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
-    panels.forEach((p) => (p.hidden = p.dataset.viewPanel !== view));
-    try {
-      localStorage.setItem("work-view", view);
-    } catch {
-      // Storage blocked — the choice just isn't remembered.
-    }
-  }
-
-  buttons.forEach((b) => b.addEventListener("click", () => show(b.dataset.view!)));
-
-  let saved: string | null = null;
-  try {
-    saved = localStorage.getItem("work-view");
-  } catch {}
-  if (saved === "index") show("index");
-</script>
