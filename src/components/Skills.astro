@@ -1,6 +1,8 @@
 ---
 // Skills by category: a TUI list of categories, each with its own turning wheel of logos.
+import { faHandPointer } from "@fortawesome/free-solid-svg-icons";
 import { skillGroups } from "../data/skills";
+import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
 import SkillWheel from "./SkillWheel.astro";
 
@@ -53,7 +55,17 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
           ))}
 
           <p class="eyebrow mt-8 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
-            <span class="orbit" />
+            <span class="gesture">
+              <svg class="trail" viewBox="0 0 26 26" aria-hidden="true">
+                <mask id="gesture-reveal"><circle class="reveal" cx="12" cy="10" r="7" pathLength="100" /></mask>
+                <g mask="url(#gesture-reveal)">
+                  <circle class="dots" cx="12" cy="10" r="7" pathLength="100" />
+                  {/* Arrowhead where the arc ends (306° clockwise from the top), pointing along it, like a retry icon. */}
+                  <path class="head" d="M-2 -2 L0.5 0 L-2 2" transform="translate(6.34 5.88) rotate(-54)" />
+                </g>
+              </svg>
+              <span class="hand"><Icon icon={faHandPointer} class="block text-[15px]" /></span>
+            </span>
             <span class="hint-mouse">Drag in a circle to spin</span>
             <span class="hint-touch">Swipe in a circle to spin</span>
           </p>
@@ -90,34 +102,102 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
   }
-  /* The guide's gesture: a dot circling a small ring, the motion that spins the wheel. */
-  .orbit {
+  /* The guide's gesture, like touch-gesture hints in apps: a pointing finger draws a circle with its tip, the circle
+     fades, and it starts again. That's the motion that spins the wheel. The circle is centred at (12px, 10px). */
+  .gesture {
     position: relative;
-    width: 16px;
-    height: 16px;
-    border: 1px dashed currentColor;
-    border-radius: 50%;
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    color: var(--color-ink);
   }
-  .orbit::after {
-    content: "";
+  .trail {
     position: absolute;
-    top: -3px;
-    left: 50%;
-    width: 5px;
-    height: 5px;
-    margin-left: -2.5px;
-    border-radius: 50%;
-    background: var(--color-ink);
-    transform-origin: 2.5px 10px;
+    inset: 0;
+    overflow: visible;
+  }
+  /* A dotted retry arrow: dots around 85% of the circle and an arrowhead at the end. It starts at the top and runs
+     clockwise, like the finger; a mask reveals it behind the fingertip. */
+  .trail circle {
+    fill: none;
+    transform: rotate(-90deg);
+    transform-origin: 12px 10px;
+  }
+  .dots {
+    stroke: var(--color-muted);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0 6;
+  }
+  .head {
+    fill: none;
+    stroke: var(--color-muted);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .reveal {
+    stroke: #fff;
+    stroke-width: 7;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 15;
+  }
+  /* The fingertip rests at the circle's centre (its transform-origin); it's moved out to the edge and around,
+     while the hand stays upright. */
+  .hand {
+    position: absolute;
+    top: 9px;
+    left: 8.25px;
+    transform-origin: 3.75px 1px;
+    transform: translateY(-7px);
   }
   @media (prefers-reduced-motion: no-preference) {
-    .orbit::after {
-      animation: orbit 1.8s linear infinite;
+    .hand {
+      animation: trace 2.8s linear infinite;
+    }
+    .reveal {
+      animation: draw 2.8s linear infinite;
+    }
+    .trail {
+      animation: fade 2.8s linear infinite;
     }
   }
-  @keyframes orbit {
-    to {
-      rotate: 360deg;
+  /* The finger sweeps 85% of a lap (to the arrowhead) in the first 70%, then lifts away so the finished arrow
+     shows, and comes back for the next lap. */
+  @keyframes trace {
+    0% {
+      transform: rotate(0deg) translateY(-7px) rotate(0deg);
+      opacity: 0;
+    }
+    6% {
+      opacity: 1;
+    }
+    70% {
+      transform: rotate(306deg) translateY(-7px) rotate(-306deg);
+      opacity: 1;
+    }
+    78%,
+    100% {
+      transform: rotate(306deg) translateY(-7px) rotate(-306deg);
+      opacity: 0;
+    }
+  }
+  @keyframes draw {
+    0% {
+      stroke-dashoffset: 100;
+    }
+    70%,
+    100% {
+      stroke-dashoffset: 15;
+    }
+  }
+  @keyframes fade {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
     }
   }
   /* The guide's words match the device. */
