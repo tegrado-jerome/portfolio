@@ -1,6 +1,6 @@
 ---
 // The last TUI pane, ~/contact: the contact command, a big "let's talk" and bracketed links.
-import { faArrowUp, faFileLines, faTerminal } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faFileLines, faAt } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
@@ -28,7 +28,7 @@ const profileLinks = [
         rel="noopener noreferrer"
         class="group link-strong inline-flex w-fit items-center gap-[0.3em] text-title font-medium tracking-[-0.03em]"
       >
-        <Icon icon={faTerminal} class="text-[0.6em]" />
+        <Icon icon={faAt} class="text-[0.6em]" />
         let's talk
       </a>
       {isSet(site.email) && <p class="text-body text-muted">{site.email}</p>}
