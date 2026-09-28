@@ -54,7 +54,7 @@ const heroLinks = [
         </form>
         <ul class="mt-3 flex flex-wrap gap-2">
           {
-            assistant.suggestions.map((q) => (
+            assistant.suggestions.slice(0, 1).map((q) => (
               <li>
                 <button
                   type="button"
