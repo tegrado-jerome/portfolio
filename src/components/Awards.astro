@@ -1,6 +1,6 @@
 ---
 // Awards printed as a terminal log (matching the hero prompt bar and the ~/ section paths):
-// a command line, then one ✓ line per award.
+// one ✓ line per award.
 import { awards } from "../data/awards";
 import SectionHead from "./SectionHead.astro";
 ---
@@ -11,9 +11,6 @@ import SectionHead from "./SectionHead.astro";
       <div class="pane" data-pane="awards">
       <SectionHead id="awards-title" title="Awards" meta={`${awards.length} total`} />
       <div class="log font-mono text-small leading-[2.3] sm:text-body">
-        <p data-reveal aria-hidden="true">
-          <span class="text-accent">jerome@ai</span> <span class="text-muted">~</span> <span class="text-ink">awards --list</span>
-        </p>
         <ul>
           {awards.map((a, i) => (
             <li data-reveal style={`--i:${i + 1}`} class="line grid grid-cols-[auto_auto_minmax(0,1fr)] gap-x-[1.2ch]">
