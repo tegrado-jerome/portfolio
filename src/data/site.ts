@@ -34,7 +34,7 @@ export const site = {
   // Google Search Console: the "content" value of its HTML-tag verification, e.g. "abc123...". Empty = no tag.
   gscVerification: "",
   // Google Analytics 4 measurement ID, e.g. "G-XXXXXXX". Empty = no analytics.
-  gaId: "",
+  gaId: "G-BS752S4BCT",
 };
 
 // "Let's talk" opens a new Gmail message to me in the browser.
