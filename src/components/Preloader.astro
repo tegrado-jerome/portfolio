@@ -44,6 +44,15 @@ const CELLS = 24;
       document.dispatchEvent(new Event("preloader:done"));
     }
 
+    // Every refresh is a fresh visit: the browser doesn't restore the old scroll spot, and a leftover #section
+    // is dropped so the page opens on the hero again.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+    if (nav && nav.type === "reload" && location.hash) {
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    if (!location.hash) window.scrollTo(0, 0);
+
     // Plays on every load; skipped only when arriving on a section link (e.g. /#work).
     if (location.hash && location.hash !== "#top") {
       pre.remove();
