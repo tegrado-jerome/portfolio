@@ -6,10 +6,10 @@ import Icon from "./Icon.astro";
 interface Props {
   project: Project;
   index: number;
-  featured?: boolean;
+  class?: string;
 }
 
-const { project, index, featured = false } = Astro.props;
+const { project, index, class: className } = Astro.props;
 const number = String(index + 1).padStart(2, "0");
 const isExternal = !!project.href && /^https?:\/\//.test(project.href);
 const linkAttrs = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
@@ -18,16 +18,13 @@ const MediaTag = href ? "a" : "div";
 ---
 
 <!-- Reference-style card: cover, title and one line. Other project data feeds structured data. -->
-<article data-reveal class:list={["project flex flex-col", featured && "md:col-span-2"]}>
+<article data-reveal class:list={["project flex flex-col", className]}>
   <MediaTag
     href={href || undefined}
     {...href && linkAttrs}
     aria-label={href ? project.title : undefined}
     tabindex={href ? -1 : undefined}
-    class:list={[
-      "media relative block w-full overflow-hidden rounded-[2px] bg-ph transition-opacity duration-200 hover:opacity-90",
-      featured ? "aspect-[5/4] md:aspect-[16/7]" : "aspect-[5/4]",
-    ]}
+    class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph transition-opacity duration-200 hover:opacity-90"
     data-locked={project.locked ? "" : undefined}
   >
     {
