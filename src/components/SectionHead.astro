@@ -1,15 +1,20 @@
 ---
+// Every section title: a small terminal path (like the hero prompt's "jerome@ai ~"), then the serif title and a hairline.
 interface Props {
   id: string;
   title: string;
 }
 
 const { id, title } = Astro.props;
+const path = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 ---
 
-<div data-reveal class="mb-[clamp(32px,4.5vw,56px)] flex items-center gap-7">
-  <h2 id={id} class="font-serif text-title font-normal">
-    {title}
-  </h2>
-  <span class="hidden h-px flex-1 translate-y-[0.3em] bg-line sm:block" aria-hidden="true"></span>
+<div data-reveal class="mb-[clamp(32px,4.5vw,56px)]">
+  <p class="mb-3 font-mono text-small text-muted" aria-hidden="true"><span class="text-accent">~/</span>{path}</p>
+  <div class="flex items-center gap-7">
+    <h2 id={id} class="font-serif text-title font-normal">
+      {title}
+    </h2>
+    <span class="hidden h-px flex-1 translate-y-[0.3em] bg-line sm:block" aria-hidden="true"></span>
+  </div>
 </div>
