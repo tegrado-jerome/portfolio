@@ -88,6 +88,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             transform-origin: 0 50%;
             animation: scroll-progress linear both;
             animation-timeline: scroll(root);
+            transition: right 0.24s var(--ease-out-soft);
+          }
+          /* With the chat open, the bar spans only the page area left of the sheet (same width as the sheet). */
+          :global(html.chat-open) .scroll-progress {
+            right: min(420px, 100vw);
           }
         }
       }
