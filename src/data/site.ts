@@ -3,9 +3,11 @@ import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
 export const site = {
   name: "Jerome Tegrado",
-  title: "Jerome Tegrado | [YOUR HEADLINE]",
-  description: "[SHORT SITE DESCRIPTION FOR SEARCH ENGINES AND SOCIAL PREVIEWS]",
-  headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
+  // What search engines and link previews show. Title ≤ 60 characters, description ≤ 155.
+  title: "Jerome Tegrado | Web Developer, SEO & AI Automation",
+  description:
+    "Jerome Tegrado builds websites, SEO and AI automations. Magna Cum Laude graduate of the Technological University of the Philippines, Manila (2026).",
+  headline: "Web Developer, SEO & AI Automation",
   intro: "I f*cking love learning new things!",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
@@ -26,8 +28,8 @@ export const site = {
   // Leave empty to show the JT logo instead.
   chatAvatar: "/images/chat-avatar.webp",
 
-  // Optional 1200×630 social preview image in public/images, e.g. "/images/og.jpg".
-  ogImage: "",
+  // 1200×630 social preview image in public/images (shown when the link is shared).
+  ogImage: "/images/og.jpg",
 
   // Google Search Console: the "content" value of its HTML-tag verification, e.g. "abc123...". Empty = no tag.
   gscVerification: "",

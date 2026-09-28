@@ -5,6 +5,7 @@ import { site, socials } from "../data/site";
 import { projects } from "../data/projects";
 import { awards } from "../data/awards";
 import { certifications } from "../data/certifications";
+import { skillGroups } from "../data/skills";
 import { isSet, onlySet } from "../data/placeholders";
 
 const home = new URL("/", Astro.site).href;
@@ -22,13 +23,20 @@ const credentials = certifications
     ...(isSet(c.href) && { url: c.href }),
   }));
 
+// What I know: the skill categories and the named tools in them.
+const knowsAbout = onlySet(skillGroups.flatMap((g) => [g.name, ...g.skills.map((s) => s.name)]));
+
 const person = {
   "@type": "Person",
   "@id": personId,
   name: site.name,
   url: home,
   ...(isSet(site.headline) && { jobTitle: site.headline }),
-  ...(isSet(site.intro) && { description: site.intro }),
+  ...(isSet(site.description) && { description: site.description }),
+  ...(site.honor && {
+    alumniOf: { "@type": "CollegeOrUniversity", name: site.honor.school },
+  }),
+  ...(knowsAbout.length && { knowsAbout }),
   ...(isSet(site.email) && { email: `mailto:${site.email}` }),
   ...(isSet(site.portrait) && { image: abs(site.portrait) }),
   ...(awardNames.length && { award: awardNames }),

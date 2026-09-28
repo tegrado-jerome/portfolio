@@ -13,8 +13,8 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
   const home = new URL("/", siteUrl).href;
   const lines: string[] = [`# ${site.name}`, ""];
 
-  const summary = onlySet([site.headline, site.intro]).join(". ");
-  if (summary) lines.push(`> ${summary}`, "");
+  if (isSet(site.headline)) lines.push(`> ${site.headline}`, "");
+  if (isSet(site.description)) lines.push(site.description, "");
 
   const journey = experience.filter((e) => isSet(e.description));
   if (journey.length) {
