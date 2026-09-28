@@ -26,7 +26,6 @@ export const site = {
   honor: {
     title: "Magna Cum Laude",
     detail: "GWA 1.36",
-    rank: "Rank 14 of 2,800+ · Batch 2026",
     school: "Technological University of the Philippines",
     logo: "/images/tup-seal.png",
   },
