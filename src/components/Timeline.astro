@@ -1,9 +1,10 @@
 ---
+// A compact journey line at the bottom of the hero.
 import { experience } from "../data/experience";
 import Icon from "./Icon.astro";
 ---
 
-<section class="shell pt-[clamp(64px,9vw,120px)] pb-[clamp(40px,6vw,80px)]" aria-labelledby="journey-title">
+<div class="mt-[clamp(48px,7vw,96px)]" role="group" aria-labelledby="journey-title">
   <h2 id="journey-title" class="sr-only">Journey</h2>
 
   <!--
@@ -11,27 +12,27 @@ import Icon from "./Icon.astro";
     Mobile: a vertical track with the same dots.
   -->
   <div class="timeline relative">
-  <span class="timeline-rule absolute inset-x-0 top-[39px] hidden h-px origin-left bg-ink lg:block" aria-hidden="true"></span>
-  <ol class="relative grid gap-y-9 border-l border-line pl-7 lg:grid-cols-5 lg:gap-x-[clamp(20px,2.6vw,48px)] lg:border-0 lg:pl-0">
-    {
-      experience.map((item, i) => (
-        <li data-reveal style={`--i:${i}`} class="timeline-item group relative min-w-0 lg:flex lg:flex-col">
-          <span class="mb-1 block text-[14px] tabular-nums text-muted lg:mb-3">{item.year}</span>
-          <span
-            class="absolute top-[7px] -left-[33px] size-[11px] rounded-full border border-ink bg-paper transition-colors duration-300 group-last:border-accent group-last:bg-accent group-hover:bg-ink lg:static lg:mb-4 lg:block"
-            aria-hidden="true"
-          />
-          <h3 class="mb-1.5 text-[16px] font-medium tracking-[0.01em] uppercase">{item.title}</h3>
-          <p class="font-serif text-[15px] leading-[1.4] text-ink-soft italic">
-            {item.icon && <Icon icon={item.icon} class="mr-1.5 text-[12px] text-accent not-italic" />}
-            {item.description}
-          </p>
-        </li>
-      ))
-    }
-  </ol>
+    <span class="timeline-rule absolute inset-x-0 top-[28px] hidden h-px origin-left bg-line lg:block" aria-hidden="true"></span>
+    <ol class="relative grid gap-y-6 border-l border-line pl-6 lg:grid-cols-5 lg:gap-x-[clamp(16px,2vw,36px)] lg:border-0 lg:pl-0">
+      {
+        experience.map((item, i) => (
+          <li data-reveal style={`--i:${i}`} class="timeline-item group relative min-w-0 lg:flex lg:flex-col">
+            <span class="mb-0.5 block text-[12px] leading-4 tabular-nums text-muted lg:mb-2">{item.year}</span>
+            <span
+              class="absolute top-[4px] -left-[28.5px] size-[9px] rounded-full border border-muted bg-paper transition-colors duration-300 group-last:border-accent group-last:bg-accent group-hover:bg-ink lg:static lg:mb-3 lg:block"
+              aria-hidden="true"
+            />
+            <h3 class="mb-1 text-[12px] font-medium tracking-[0.06em] uppercase">{item.title}</h3>
+            <p class="font-serif text-[14px] leading-[1.4] text-muted italic">
+              {item.icon && <Icon icon={item.icon} class="mr-1 text-[11px] text-accent not-italic" />}
+              {item.description}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
   </div>
-</section>
+</div>
 
 <style>
   :global(.js) .timeline-rule {
