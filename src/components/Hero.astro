@@ -38,9 +38,15 @@ const heroLinks = [
         {
           heroLinks.map((l) => (
             <li>
-              <a href={l.href} target="_blank" rel="noopener noreferrer" class="eyebrow inline-flex items-center gap-2 text-[11px] text-ink">
-                {l.icon && <Icon icon={l.icon} class="text-[14px] text-accent" />}
-                <span class="brush">{l.label}</span>
+              {/* No lines: muted at rest, ink on hover (after Linear). */}
+              <a
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group eyebrow inline-flex items-center gap-2 text-[11px] text-muted transition-colors duration-200 hover:text-ink focus-visible:text-ink"
+              >
+                {l.icon && <Icon icon={l.icon} class="text-[14px] transition-colors duration-200 group-hover:text-accent group-focus-visible:text-accent" />}
+                {l.label}
               </a>
             </li>
           ))
