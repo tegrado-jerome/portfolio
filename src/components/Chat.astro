@@ -69,7 +69,7 @@ import OnlineStatus from "./OnlineStatus.astro";
     }
   </ul>
 
-  <form data-chat-form class="composer flex items-end gap-2 rounded-[26px] border border-line py-2 pr-2 pl-5 transition-colors focus-within:border-muted">
+  <form data-chat-form class="composer flex items-end gap-2 rounded-[26px] border border-line py-2 pr-2 pl-5">
     <label for="chat-input" class="sr-only">Your message</label>
     <textarea
       id="chat-input"
@@ -158,8 +158,22 @@ import OnlineStatus from "./OnlineStatus.astro";
     color: var(--color-paper);
     border-bottom-right-radius: 4px;
   }
+  /* Same states as the hero ask bar: idle light border, hover darker, focused ink border with a soft ring. */
   .composer {
     background: color-mix(in srgb, var(--color-paper) 45%, white);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .composer:hover {
+    border-color: var(--color-muted);
+  }
+  .composer:focus-within {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-ink) 8%, transparent);
+  }
+  .composer textarea:focus-visible {
+    outline: none;
   }
   :global([data-theme="dark"]) .composer {
     background: color-mix(in srgb, var(--color-paper) 90%, white);

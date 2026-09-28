@@ -38,7 +38,7 @@ const heroLinks = [
 
       <!-- Ask-my-AI bar (after Perplexity / v0): sends the question straight into the chat. Needs JS, so hidden without it. -->
       <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] in-[.js]:block">
-        <form data-hero-ask class="ask flex items-center gap-2 rounded-full border border-line py-1.5 pr-1.5 pl-5 transition-colors focus-within:border-muted">
+        <form data-hero-ask class="ask flex items-center gap-2 rounded-full border border-line py-1.5 pr-1.5 pl-5">
           <label for="hero-ask" class="sr-only">Ask me about my work</label>
           <input
             id="hero-ask"
@@ -48,7 +48,12 @@ const heroLinks = [
             placeholder="Ask me anything about my work…"
             class="min-w-0 flex-1 bg-transparent py-1.5 text-[16px] text-ink placeholder:text-muted focus:outline-none"
           />
-          <button type="submit" aria-label="Ask" class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-paper transition-colors duration-200 hover:bg-accent">
+          <button
+            type="submit"
+            aria-label="Ask"
+            disabled
+            class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-paper transition-[background-color,opacity] duration-200 not-disabled:hover:bg-accent disabled:opacity-25"
+          >
             <Icon icon={faArrowUp} class="text-[14px]" />
           </button>
         </form>
@@ -196,9 +201,23 @@ const heroLinks = [
       translate: calc(var(--x) * 2) calc(var(--y) * 2);
     }
   }
-  /* Same surface as the chat's composer. */
+  /* Same surface as the chat's composer. Idle: light border. Hover: darker. Active (focused): ink border and a soft ring. */
   .ask {
     background: color-mix(in srgb, var(--color-paper) 45%, white);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .ask:hover {
+    border-color: var(--color-muted);
+  }
+  .ask:focus-within {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-ink) 8%, transparent);
+  }
+  /* The ring replaces the default focus outline on the field itself. */
+  .ask input:focus-visible {
+    outline: none;
   }
   :global([data-theme="dark"]) .ask {
     background: color-mix(in srgb, var(--color-paper) 90%, white);
@@ -223,13 +242,18 @@ const heroLinks = [
   // The ask bar and its quick questions hand the question to the chat (see Chat.astro "chat:ask").
   const askForm = document.querySelector<HTMLFormElement>("[data-hero-ask]");
   const askInput = askForm?.querySelector("input");
+  const askButton = askForm?.querySelector("button");
   const askChat = (question: string) => {
     if (question.trim()) document.dispatchEvent(new CustomEvent("chat:ask", { detail: question }));
   };
+  // The send button only becomes active once there's something to send.
+  const syncAskButton = () => (askButton!.disabled = askInput!.value.trim() === "");
+  askInput?.addEventListener("input", syncAskButton);
   askForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     askChat(askInput!.value);
     askInput!.value = "";
+    syncAskButton();
   });
   document.querySelectorAll<HTMLButtonElement>("[data-hero-ask-chip]").forEach((chip) =>
     chip.addEventListener("click", () => askChat(chip.textContent ?? "")),
