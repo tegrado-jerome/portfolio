@@ -31,7 +31,7 @@ const links = [
               <a
                 href={link.href}
                 data-nav-link
-                class="eyebrow -my-3 inline-block py-3 text-muted transition-colors hover:text-ink aria-[current=true]:text-ink"
+                class="eyebrow -my-3 inline-block py-3 text-muted transition-colors duration-150 ease-in-out hover:text-ink aria-[current=true]:text-ink"
               >
                 {link.label}
               </a>
@@ -95,7 +95,7 @@ const links = [
   const update = () => {
     const y = window.scrollY;
     if (Math.abs(y - last) > 6) {
-      header.classList.toggle("is-hidden", y > last && y > 120);
+      header.classList.toggle("is-hidden", y > last && y > 80);
       last = y;
     }
     header.classList.toggle("is-scrolled", y > 8);
