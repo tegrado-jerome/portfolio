@@ -164,14 +164,57 @@ import Icon from "./Icon.astro";
   [data-state="stop"] :global(.send-icon) {
     display: none;
   }
+  /* "Typing" dots while the reply is on its way. */
+  [data-chat-log] :global(.typing-dots) {
+    display: flex;
+    gap: 4px;
+    padding-block: 16px;
+  }
+  [data-chat-log] :global(.typing-dots span) {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-muted);
+  }
+  /* A caret that follows the reply as it types out. */
+  [data-chat-log] :global(.is-typing::after) {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    background: currentColor;
+  }
   @media (prefers-reduced-motion: no-preference) {
-    :global(.writing) {
-      animation: writing 1.4s ease-in-out infinite;
+    [data-chat-log] :global(.typing-dots span) {
+      animation: typing-dot 1.2s ease-in-out infinite;
+    }
+    [data-chat-log] :global(.typing-dots span:nth-child(2)) {
+      animation-delay: 0.15s;
+    }
+    [data-chat-log] :global(.typing-dots span:nth-child(3)) {
+      animation-delay: 0.3s;
+    }
+    [data-chat-log] :global(.is-typing::after) {
+      animation: caret 0.9s steps(1) infinite;
     }
   }
-  @keyframes writing {
+  @keyframes typing-dot {
+    0%,
+    60%,
+    100% {
+      translate: 0 0;
+      opacity: 0.4;
+    }
+    30% {
+      translate: 0 -4px;
+      opacity: 1;
+    }
+  }
+  @keyframes caret {
     50% {
-      opacity: 0.35;
+      opacity: 0;
     }
   }
   @media (max-width: 639px) {
@@ -190,6 +233,18 @@ import Icon from "./Icon.astro";
 
 <script>
   type Message = { role: "user" | "assistant"; content: string };
+
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const MIN_TYPING_DOTS = 3000; // ms
+
+  // Resolves after `ms`, or straight away once the visitor presses stop.
+  function wait(ms: number, signal: AbortSignal) {
+    return new Promise<void>((resolve) => {
+      if (ms <= 0 || signal.aborted) return resolve();
+      const timer = setTimeout(resolve, ms);
+      signal.addEventListener("abort", () => (clearTimeout(timer), resolve()), { once: true });
+    });
+  }
 
   const sheet = document.getElementById("chat")!;
   const log = sheet.querySelector<HTMLOListElement>("[data-chat-log]")!;
@@ -237,6 +292,43 @@ import Icon from "./Icon.astro";
     return p;
   }
 
+  function typingDots() {
+    const bubble = document.createElement("p");
+    bubble.className = "bubble typing-dots";
+    bubble.setAttribute("aria-label", "Jerome is typing");
+    bubble.append(...Array.from({ length: 3 }, () => document.createElement("span")));
+    return bubble;
+  }
+
+  // Types the reply out at 60 characters a second, speeding up so even long replies finish in about 1.5s.
+  // Timed by the clock, not by frames, so it runs the same on 60 Hz and 120 Hz screens.
+  // Stopping mid-way shows the rest at once: the reply is already complete, only its display is animated.
+  function typeOut(bubble: HTMLElement, text: string, signal: AbortSignal) {
+    const chars = Array.from(text); // whole characters, so emoji never split
+    if (reduceMotion) {
+      bubble.textContent = text;
+      return Promise.resolve();
+    }
+    const perSecond = Math.max(60, chars.length / 1.5);
+    const start = performance.now();
+    bubble.classList.add("is-typing");
+    return new Promise<void>((resolve) => {
+      const frame = (now: number) => {
+        const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+        const shown = signal.aborted ? chars.length : Math.min(chars.length, Math.floor(((now - start) / 1000) * perSecond));
+        bubble.textContent = chars.slice(0, shown).join("");
+        if (atBottom) log.scrollTop = log.scrollHeight;
+        if (shown < chars.length) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        bubble.classList.remove("is-typing");
+        resolve();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
   function message(role: Message["role"], bubble: HTMLElement) {
     const li = document.createElement("li");
     li.className = role === "user" ? "msg-user" : "msg-ai";
@@ -253,11 +345,12 @@ import Icon from "./Icon.astro";
     growInput();
 
     history.push({ role: "user", content: text });
-    const writing = paragraph("bubble writing text-muted", "writing…");
+    const writing = typingDots();
     log.append(message("user", paragraph("bubble", text)), message("assistant", writing));
     writing.scrollIntoView({ block: "end", behavior: "smooth" });
 
     request = new AbortController();
+    const askedAt = performance.now();
     log.setAttribute("aria-busy", "true");
     syncButton();
     try {
@@ -272,7 +365,11 @@ import Icon from "./Icon.astro";
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
       if (!res.ok || !data.reply) throw new Error(data.error ?? "The chat is unavailable right now.");
       history.push({ role: "assistant", content: data.reply });
-      writing.replaceWith(paragraph("bubble", data.reply));
+      // Keep the typing dots up for at least 3s, so a fast reply still reads as being written.
+      await wait(MIN_TYPING_DOTS - (performance.now() - askedAt), request.signal);
+      const reply = paragraph("bubble", "");
+      writing.replaceWith(reply);
+      await typeOut(reply, data.reply, request.signal);
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid
       const stopped = error instanceof DOMException && error.name === "AbortError";
