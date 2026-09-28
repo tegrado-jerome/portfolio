@@ -31,6 +31,8 @@
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+    /* Slides up and down with the header, at the header's speed. */
+    transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
   /* Stops above the status bar where that shows. */
   @media (min-width: 1024px) {
@@ -89,10 +91,11 @@
     const doc = document.documentElement;
     const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
 
-    // The bar starts just under the header. The thumb is sized in whole rows to how much of the page is visible.
+    // The bar starts just under the header, and takes its space while it's hidden on scroll.
+    // The thumb is sized in whole rows to how much of the page is visible.
     const header = document.getElementById("site-header");
     function layout() {
-      if (header) root!.style.top = `${header.offsetHeight + 6}px`;
+      if (header) root!.style.top = `${header.classList.contains("is-hidden") ? 6 : header.offsetHeight + 6}px`;
       trackRows = Math.floor(root!.clientHeight / LINE);
       thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
       thumb.style.height = `${thumbRows * LINE}px`;
@@ -123,7 +126,11 @@
     );
     const resize = new ResizeObserver(layout);
     resize.observe(document.body);
-    if (header) resize.observe(header);
+    resize.observe(root);
+    if (header) {
+      resize.observe(header);
+      new MutationObserver(layout).observe(header, { attributes: true, attributeFilter: ["class"] });
+    }
     addEventListener("resize", layout);
     layout();
 
