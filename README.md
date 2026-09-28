@@ -22,6 +22,7 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 | `experience.ts` | Timeline entries and their icons |
 | `projects.ts` | Selected work (the first project is featured full-width) |
 | `skills.ts` | Skills by category: a tab per category with a turning wheel of logos (in `public/images/skills` or a Font Awesome icon); empty list hides the section |
+| `awards.ts` | Awards and honours (year, award, issuer, optional proof link); empty list hides the section |
 | `testimonials.ts` | "Kind words" quotes — real ones only; empty list hides the section |
 | `assistant.ts` | Facts the AI chat may use about you |
 

@@ -5,6 +5,7 @@ import { experience } from "../src/data/experience";
 import { projects } from "../src/data/projects";
 import { assistant } from "../src/data/assistant";
 import { skillGroups } from "../src/data/skills";
+import { awards } from "../src/data/awards";
 import { isSet, onlySet } from "../src/data/placeholders";
 
 /** Random marker; if it ever appears in a reply, the reply is leaking the system prompt. */
@@ -25,6 +26,10 @@ function knowledge() {
   for (const g of skillGroups) {
     const names = onlySet(g.skills.map((s) => s.name));
     if (names.length) lines.push(`Skills (${g.name}): ${names.join(", ")}`);
+  }
+
+  for (const a of awards.filter((a) => isSet(a.title))) {
+    lines.push(`Award: ${onlySet([a.title, a.detail, a.issuer, a.year]).join(", ")}`);
   }
 
   if (isSet(site.email)) lines.push(`Email: ${site.email}`);

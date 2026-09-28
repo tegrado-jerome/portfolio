@@ -3,11 +3,13 @@
 // Fields still holding a [PLACEHOLDER] are left out automatically.
 import { site, socials } from "../data/site";
 import { projects } from "../data/projects";
+import { awards } from "../data/awards";
 import { isSet, onlySet } from "../data/placeholders";
 
 const home = new URL("/", Astro.site).href;
 const abs = (path: string) => new URL(path, Astro.site).href;
 const personId = `${home}#person`;
+const awardNames = awards.filter((a) => isSet(a.title)).map((a) => onlySet([a.title, a.issuer, a.year]).join(", "));
 
 const person = {
   "@type": "Person",
@@ -18,6 +20,7 @@ const person = {
   ...(isSet(site.intro) && { description: site.intro }),
   ...(isSet(site.email) && { email: `mailto:${site.email}` }),
   ...(isSet(site.portrait) && { image: abs(site.portrait) }),
+  ...(awardNames.length && { award: awardNames }),
   ...(onlySet(socials.map((s) => s.href)).length && { sameAs: onlySet(socials.map((s) => s.href)) }),
 };
 
