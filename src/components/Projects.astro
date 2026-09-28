@@ -14,9 +14,11 @@ function layout(i: number) {
 ---
 
 <section id="work" class="shell section" aria-labelledby="work-title">
-  <SectionHead id="work-title" title="Selected Work" />
+  <div class="pane" data-pane="selected-work">
+  <SectionHead id="work-title" title="Selected Work" meta={`${projects.length} projects`} />
   <div class="gallery grid items-start gap-y-[clamp(48px,6vw,88px)] md:grid-cols-12 md:gap-x-[clamp(24px,4vw,64px)]">
     {projects.map((project, i) => <Project project={project} index={i} class:list={layout(i)} />)}
+  </div>
   </div>
 </section>
 

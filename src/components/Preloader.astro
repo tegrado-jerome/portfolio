@@ -1,27 +1,43 @@
 ---
-import { site } from "../data/site";
-const { preloader } = site;
+// Full-screen boot screen (a TUI boot log, like terminal-style portfolios): boot lines tick off with [ ok ]
+// over a text progress bar, then the screen slides up. Only shown when JS runs.
+const steps = [
+  "loading portfolio",
+  "mounting ~/skills",
+  "mounting ~/selected-work",
+  "mounting ~/awards",
+  "starting ai chat",
+  "status: online",
+];
+const CELLS = 24;
 ---
 
-<!-- Full-screen intro: counts to 100%, then the curtain lifts. Only shown when JS runs. -->
 <div id="preloader" class="preloader" role="status" aria-label="Loading">
-  {preloader.image && <img class="preloader__bg" src={preloader.image} alt="" />}
-  <div class="preloader__scrim"></div>
-  <div class="preloader__inner">
-    <p class="preloader__label">{preloader.label}</p>
-    <p class="preloader__title">{preloader.title}</p>
+  <div class="boot">
+    <p class="boot-title"><span>~/</span>jerome-tegrado</p>
+    <ol class="boot-log">
+      {
+        steps.map((step) => (
+          <li>
+            <span class="ok">[ ok ]</span> {step}
+          </li>
+        ))
+      }
+    </ol>
+    <p class="boot-bar" aria-hidden="true">
+      [<span id="preBar">{"░".repeat(CELLS)}</span>] <span id="preCount">0</span>%
+    </p>
   </div>
-  <div class="preloader__count" aria-hidden="true"><span id="preCount">0</span><span class="preloader__pct">%</span></div>
-  <div class="preloader__bar" aria-hidden="true"><span id="preBar"></span></div>
 </div>
 
-<script is:inline>
+<script is:inline define:vars={{ CELLS }}>
   (function () {
     var root = document.documentElement;
     var pre = document.getElementById("preloader");
     var countEl = document.getElementById("preCount");
     var barEl = document.getElementById("preBar");
     if (!pre) return;
+    var lines = pre.querySelectorAll(".boot-log li");
 
     function done() {
       root.classList.remove("is-preloading");
@@ -51,10 +67,15 @@ const { preloader } = site;
       if (start === null) start = now;
       var t = Math.min((now - start) / duration, 1);
       var pct = Math.round((1 - Math.pow(1 - t, 3)) * 100); // easeOutCubic
+      var filled = Math.round((pct / 100) * CELLS);
       countEl.textContent = pct;
-      barEl.style.width = pct + "%";
+      barEl.textContent = "█".repeat(filled) + "░".repeat(CELLS - filled);
+      // Each boot line ticks off as the bar passes its share.
+      for (var i = 0; i < lines.length; i++) {
+        if (pct >= ((i + 1) / (lines.length + 1)) * 100) lines[i].classList.add("is-on");
+      }
       if (t < 1) requestAnimationFrame(tick);
-      else setTimeout(finish, reduce ? 60 : 260);
+      else setTimeout(finish, reduce ? 60 : 320);
     }
     requestAnimationFrame(tick);
   })();
@@ -66,11 +87,12 @@ const { preloader } = site;
     position: fixed;
     inset: 0;
     z-index: 100;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
     background: var(--color-night);
-    color: #fff;
+    color: #e6e9ee;
+    font-family: var(--font-mono);
     transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
     will-change: transform;
   }
@@ -84,91 +106,50 @@ const { preloader } = site;
     overflow: hidden;
   }
 
-  .preloader__bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .preloader__scrim {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgb(10 10 10 / 0.5), rgb(10 10 10 / 0.35) 45%, rgb(10 10 10 / 0.6));
-  }
-  .preloader__inner {
+  /* A pane like the site's, in the night palette: title on the top border. */
+  .boot {
     position: relative;
-    z-index: 2;
-    text-align: center;
-    padding-inline: clamp(20px, 11vw, 200px);
+    width: min(460px, 100%);
+    padding: 28px 22px 20px;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    border-radius: 2px;
+    font-size: var(--text-body);
+    line-height: 1.9;
   }
-  .preloader__label {
-    margin: 0 0 18px;
-    font: 500 var(--text-label) / var(--text-label--line-height) var(--font-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgb(255 255 255 / 0.55);
-    opacity: 0;
-    animation: pre-fade-up 0.9s ease forwards 0.1s;
-  }
-  .preloader__title {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: var(--text-display);
-    line-height: 1.02;
-    letter-spacing: var(--text-display--letter-spacing);
-    opacity: 0;
-    animation: pre-fade-up 1.1s var(--ease-out-soft) forwards 0.28s;
-  }
-  .preloader__count {
+  .boot-title {
     position: absolute;
-    z-index: 2;
-    right: clamp(20px, 11vw, 200px);
-    bottom: clamp(28px, 5vw, 56px);
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-    font-family: var(--font-serif);
-    font-size: var(--text-title);
-    line-height: 1;
+    top: -0.8em;
+    left: 12px;
+    padding-inline: 8px;
+    background: var(--color-night);
+    font-size: var(--text-small);
+    line-height: 1.6;
+  }
+  .boot-title span {
+    color: #8fb0e0;
+  }
+  .boot-log li {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+  .boot-log li.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  .ok {
+    color: #5cc493;
+  }
+  .boot-bar {
+    margin-top: 10px;
+    color: rgb(255 255 255 / 0.85);
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    color: rgb(255 255 255 / 0.9);
-  }
-  .preloader__pct {
-    font-size: 0.5em;
-    color: rgb(255 255 255 / 0.5);
-  }
-  .preloader__bar {
-    position: absolute;
-    z-index: 2;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 2px;
-    background: rgb(255 255 255 / 0.12);
-  }
-  .preloader__bar span {
-    display: block;
-    height: 100%;
-    width: 0;
-    background: #fff;
   }
 
-  @keyframes pre-fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
   @media (prefers-reduced-motion: reduce) {
-    .preloader__label,
-    .preloader__title {
-      animation-duration: 0.3s !important;
-    }
     .preloader {
       transition-duration: 0.3s !important;
     }

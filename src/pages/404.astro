@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CommandPalette from "../components/CommandPalette.astro";
 import Chat from "../components/Chat.astro";
+import StatusBar from "../components/StatusBar.astro";
 import { site } from "../data/site";
 ---
 
@@ -11,12 +12,18 @@ import { site } from "../data/site";
   <Header />
   <main id="main">
     <section class="shell section" aria-labelledby="not-found-title">
-      <p class="mb-[clamp(14px,2vw,22px)] font-mono text-small text-muted"><span class="text-accent">~/</span>404</p>
-      <h1 id="not-found-title" class="mb-[clamp(18px,2.5vw,28px)] font-serif text-display font-normal">Lost the thread.</h1>
-      <p class="text-body text-ink-soft">This page doesn’t exist. <a href="/" class="link-strong font-medium">Back to the start</a>.</p>
+      <div class="pane" data-pane="404">
+        <div class="absolute inset-x-6 -top-[0.8em] flex text-small" aria-hidden="true">
+          <span class="bg-paper px-2 text-ink"><span class="text-accent">~/</span>404</span>
+        </div>
+        <p class="mb-[clamp(14px,2vw,22px)] text-small text-muted"><span class="text-accent">jerome@ai</span> ~ cd {"<unknown>"}</p>
+        <h1 id="not-found-title" class="mb-[clamp(18px,2.5vw,28px)] text-display font-medium tracking-[-0.045em]">Lost the thread.</h1>
+        <p class="text-body text-ink-soft">This page doesn’t exist. <a href="/" class="link-strong font-medium">cd ~ (back to the start)</a></p>
+      </div>
     </section>
   </main>
   <Footer />
   <CommandPalette />
   <Chat />
+  <StatusBar />
 </Layout>

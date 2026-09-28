@@ -8,14 +8,20 @@ import Timeline from "./Timeline.astro";
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app).
      On phones the portrait comes first, so visitors see who this is before the name. -->
-<section id="top" class="shell pt-[clamp(48px,8vw,110px)]" aria-labelledby="hero-title">
+<section id="top" class="shell pt-[clamp(28px,3.5vw,44px)]" aria-labelledby="hero-title">
+  <!-- The main TUI pane: its title and status sit on the top border. The photo keeps its size and place. -->
+  <div class="pane" data-pane="jerome-tegrado">
+  <div class="absolute inset-x-6 -top-[0.8em] flex justify-between gap-4 text-small" aria-hidden="true">
+    <span class="bg-paper px-2 text-ink"><span class="text-accent">~/</span>jerome-tegrado</span>
+    <span class="flex items-center gap-2 bg-paper px-2 text-muted"><span class="size-1.5 rounded-full bg-online"></span>online</span>
+  </div>
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <div class="max-w-[640px]">
       <!-- Name, then role, then intro, then the main action: the order real portfolios use. -->
       <h1
         id="hero-title"
         data-reveal
-        class="hero-title mb-[clamp(12px,1.6vw,18px)] font-serif text-display font-normal"
+        class="hero-title mb-[clamp(12px,1.6vw,18px)] text-display font-medium tracking-[-0.045em]"
       >
         {
           site.name.split(" ").map((word, i) => (
@@ -107,7 +113,7 @@ import Timeline from "./Timeline.astro";
                 class="size-7 shrink-0"
               />
               <span>
-                <span class="block font-serif text-body leading-tight">{site.honor.title}</span>
+                <span class="block text-body leading-tight">{site.honor.title}</span>
                 {/* Each "·" part stays whole; on narrow photos they stack instead of breaking mid-phrase. */}
                 <span class="eyebrow block text-white/80">
                   {site.honor.detail.split(" · ").map((part, i) => (
@@ -125,6 +131,7 @@ import Timeline from "./Timeline.astro";
     </div>
   </div>
   <Timeline />
+  </div>
 </section>
 
 <style>

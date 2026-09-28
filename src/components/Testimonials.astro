@@ -1,5 +1,5 @@
 ---
-// Quotes as slightly tilted paper notes (after the reference's Atelier collage); hovering one straightens it.
+// Quotes as straight hairline boxes inside the "kind-words" pane.
 import { testimonials } from "../data/testimonials";
 import SectionHead from "./SectionHead.astro";
 ---
@@ -7,13 +7,14 @@ import SectionHead from "./SectionHead.astro";
 {
   testimonials.length > 0 && (
     <section id="testimonials" class="shell section" aria-labelledby="testimonials-title">
+      <div class="pane" data-pane="kind-words">
       <SectionHead id="testimonials-title" title="Kind words" />
       <div class="grid items-start gap-10 md:grid-cols-2 md:gap-x-[clamp(28px,4vw,64px)]">
         {testimonials.map((t, i) => (
-          <figure data-reveal style={`--i:${i}`} class:list={["m-0", i % 2 === 1 && "md:mt-12"]}>
-            <div class="note p-[clamp(22px,2.5vw,32px)]" style={`--tilt:${i % 2 ? 2 : -2.5}deg`}>
+          <figure data-reveal style={`--i:${i}`} class="m-0">
+            <div class="note h-full p-[clamp(18px,2.2vw,26px)]">
               {/* Quote first, then who said it, their role, and when. */}
-              <blockquote class="m-0 font-serif text-heading">
+              <blockquote class="m-0 text-heading">
                 <p>{t.quote}</p>
               </blockquote>
               <figcaption class="mt-5">
@@ -35,29 +36,19 @@ import SectionHead from "./SectionHead.astro";
           </figure>
         ))}
       </div>
+      </div>
     </section>
   )
 }
 
 <style>
+  /* Straight hairline boxes inside the pane; hover darkens the border like a focused TUI box. */
   .note {
-    background: color-mix(in srgb, var(--color-paper) 40%, white);
-    box-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.35);
-    transform: rotate(var(--tilt));
-    transition:
-      transform 0.45s cubic-bezier(0.2, 0.75, 0.2, 1),
-      box-shadow 0.45s ease;
-  }
-  :global([data-theme="dark"]) .note {
-    background: color-mix(in srgb, var(--color-paper) 88%, white);
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+    transition: border-color 0.2s ease;
   }
   .note:hover {
-    transform: rotate(0) translateY(-4px);
-    box-shadow: 0 26px 50px -24px rgb(0 0 0 / 0.4);
-  }
-  @media (max-width: 767px) {
-    .note {
-      transform: rotate(calc(var(--tilt) / 2));
-    }
+    border-color: var(--color-ink);
   }
 </style>

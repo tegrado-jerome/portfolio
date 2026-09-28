@@ -1,5 +1,5 @@
 ---
-// Skills by category: one tab per category, each with its own turning wheel of logos.
+// Skills by category: a TUI list of categories, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
 import SectionHead from "./SectionHead.astro";
 import SkillWheel from "./SkillWheel.astro";
@@ -11,57 +11,64 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 {
   groups.length > 0 && (
     <section id="skills" class="shell section" aria-labelledby="skills-title">
-      <SectionHead id="skills-title" title="Skills" />
+      <div class="pane" data-pane="skills">
+      <SectionHead id="skills-title" title="Skills" meta={`${groups.length} categories`} />
 
-      <!-- Segmented control styled as a radio's band switch, to pair with the tuning dial: a hairline track
-           and an ink tile (the dial's needle colour) that slides onto the picked category. -->
-      <div data-reveal class="mb-[clamp(28px,4vw,48px)]">
-        <div role="tablist" aria-label="Skill categories" class="seg relative inline-flex flex-wrap gap-0.5 rounded-[10px] border border-line p-1">
-          <span class="thumb" aria-hidden="true"></span>
+      <!-- TUI layout (lazygit / btop): a category list with an ink selection bar on the left, the dial on the right. -->
+      <div class="grid gap-[clamp(24px,4vw,56px)] md:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] md:items-center">
+        <div data-reveal>
+          <p class="mb-2 text-small text-muted" aria-hidden="true">categories</p>
+          <div role="tablist" aria-label="Skill categories" aria-orientation="vertical" class="seg relative flex flex-col">
+            <span class="thumb" aria-hidden="true"></span>
+            {groups.map((g, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`skills-tab-${slug(g.name)}`}
+                aria-controls={`skills-${slug(g.name)}`}
+                aria-selected={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+                class="relative z-[1] flex items-center justify-between gap-3 px-3 py-2 text-left text-body text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
+              >
+                <span><span class="caret-mark" aria-hidden="true">▸ </span>{slug(g.name)}</span>
+                <span class="text-small opacity-70 tabular-nums" aria-hidden="true">{String(g.skills.length).padStart(2, "0")}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
           {groups.map((g, i) => (
-            <button
-              type="button"
-              role="tab"
-              id={`skills-tab-${slug(g.name)}`}
-              aria-controls={`skills-${slug(g.name)}`}
-              aria-selected={i === 0 ? "true" : "false"}
-              tabindex={i === 0 ? 0 : -1}
-              class="eyebrow relative z-[1] rounded-[7px] px-3.5 py-2.5 text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
+            <div
+              id={`skills-${slug(g.name)}`}
+              role="tabpanel"
+              aria-labelledby={`skills-tab-${slug(g.name)}`}
+              hidden={i !== 0}
+              data-reveal
             >
-              {g.name}
-            </button>
+              <ul class="sr-only">
+                {g.skills.map((s) => (
+                  <li>{s.name}</li>
+                ))}
+              </ul>
+              <SkillWheel skills={g.skills} />
+            </div>
           ))}
+
+          <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
+            <span class="orbit" />
+            <span class="hint-mouse">Drag in a circle to spin, or click a slot</span>
+            <span class="hint-touch">Swipe in a circle to spin, or tap a slot</span>
+          </p>
         </div>
       </div>
-
-      {groups.map((g, i) => (
-        <div
-          id={`skills-${slug(g.name)}`}
-          role="tabpanel"
-          aria-labelledby={`skills-tab-${slug(g.name)}`}
-          hidden={i !== 0}
-          data-reveal
-        >
-          <ul class="sr-only">
-            {g.skills.map((s) => (
-              <li>{s.name}</li>
-            ))}
-          </ul>
-          <SkillWheel skills={g.skills} />
-        </div>
-      ))}
-
-      <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
-        <span class="orbit" />
-        <span class="hint-mouse">Drag in a circle to spin, or click a slot</span>
-        <span class="hint-touch">Swipe in a circle to spin, or tap a slot</span>
-      </p>
+      </div>
     </section>
   )
 }
 
 <style>
-  /* The ink tile. JS moves it onto the picked tab (it can slide between rows when the tabs wrap on phones). */
+  /* The ink selection bar. JS moves it onto the picked category, sliding up and down the list. */
   .seg {
     --tile: var(--color-ink);
   }
@@ -69,14 +76,20 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     position: absolute;
     top: 0;
     left: 0;
-    border-radius: 7px;
+    border-radius: 2px;
     background: var(--tile);
     transition:
       translate 0.3s var(--ease-out-soft),
       width 0.3s var(--ease-out-soft),
       height 0.3s var(--ease-out-soft);
   }
-  /* Without JS there's no sliding tile, so the picked tab paints its own. */
+  .caret-mark {
+    visibility: hidden;
+  }
+  [aria-selected="true"] .caret-mark {
+    visibility: visible;
+  }
+  /* Without JS there's no sliding bar, so the picked tab paints its own. */
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
   }
@@ -163,8 +176,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   tabs.forEach((tab, i) => {
     tab.addEventListener("click", () => select(tab));
     tab.addEventListener("keydown", (e) => {
-      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      const d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
       if (!d) return;
+      e.preventDefault();
       const next = tabs[(i + d + tabs.length) % tabs.length];
       select(next);
       next.focus();

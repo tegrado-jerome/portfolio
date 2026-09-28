@@ -1,20 +1,20 @@
 ---
-// Every section title: a small terminal path (like the hero prompt's "jerome@ai ~"), then the serif title and a hairline.
+// A pane's title, sitting on its top border like a TUI window (lazygit / btop). Place it first inside a `.pane`.
 interface Props {
   id: string;
   title: string;
+  /** Optional note on the right end of the border, e.g. a count. */
+  meta?: string;
 }
 
-const { id, title } = Astro.props;
+const { id, title, meta } = Astro.props;
 const path = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 ---
 
-<div data-reveal class="mb-[clamp(32px,4.5vw,56px)]">
-  <p class="mb-3 font-mono text-small text-muted" aria-hidden="true"><span class="text-accent">~/</span>{path}</p>
-  <div class="flex items-center gap-7">
-    <h2 id={id} class="font-serif text-title font-normal">
-      {title}
-    </h2>
-    <span class="hidden h-px flex-1 translate-y-[0.3em] bg-line sm:block" aria-hidden="true"></span>
-  </div>
+<div class="absolute inset-x-6 -top-[0.8em] flex justify-between gap-4 text-small">
+  <h2 id={id} class="bg-paper px-2 font-normal text-ink">
+    <span class="sr-only">{title}</span>
+    <span aria-hidden="true"><span class="text-accent">~/</span>{path}</span>
+  </h2>
+  {meta && <span class="bg-paper px-2 text-muted">{meta}</span>}
 </div>

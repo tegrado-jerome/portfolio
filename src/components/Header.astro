@@ -1,55 +1,34 @@
 ---
-import { faCircleHalfStroke } from "@fortawesome/free-solid-svg-icons";
+// TUI title bar (lazygit / btop): the app name with its status on the left, bracketed commands on the right.
 import { contactHref, site } from "../data/site";
-import Icon from "./Icon.astro";
 import OnlineStatus from "./OnlineStatus.astro";
-
-const cta = "Let's Talk";
 ---
 
 <header
   id="site-header"
-  class="sticky top-0 z-40 bg-paper/45 backdrop-blur-lg backdrop-saturate-150 transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(.4,0,.2,1)] [&.is-hidden]:-translate-y-full [&.is-scrolled]:shadow-[0_1px_0_var(--color-line)]"
+  class="sticky top-0 z-40 border-b border-ink bg-paper transition-transform duration-[350ms] ease-[cubic-bezier(.4,0,.2,1)] [&.is-hidden]:-translate-y-full"
 >
-  <div class="flex items-center justify-between px-5 py-4 sm:px-[clamp(20px,10vw,200px)] sm:py-5">
-    <a href="/" data-to-top class="group flex items-center gap-3" aria-label={`${site.name}, home`}>
-      <span class="logo size-11 bg-current text-ink transition-colors duration-300 group-hover:text-accent" aria-hidden="true"></span>
-      <span class="eyebrow hidden sm:inline">{site.name}</span>
-      <OnlineStatus label="Online" hideLabel class="-ml-1" />
+  <div class="flex items-center justify-between gap-3 px-5 py-3 sm:px-[clamp(20px,10vw,200px)]">
+    <a href="/" data-to-top class="group flex items-center gap-3 text-small" aria-label={`${site.name}, home`}>
+      <span class="logo size-8 bg-current text-ink transition-colors duration-200 group-hover:text-accent" aria-hidden="true"></span>
+      <span class="hidden text-ink sm:inline" aria-hidden="true"><span class="text-accent">~/</span>jerome-tegrado</span>
+      <OnlineStatus label="Online" hideLabel />
     </a>
 
-    <!-- Kept to three: search, theme, then the main action. LinkedIn and resume live in the footer and ⌘K menu.
-         The ⌘K and theme buttons need JS, so they stay hidden without it. -->
-    <nav aria-label="Primary" class="ml-auto flex items-center gap-2 sm:gap-3">
+    <!-- Bracketed commands, the main action last. The ⌘K and theme buttons need JS, so they stay hidden without it. -->
+    <nav aria-label="Primary" class="ml-auto flex items-center gap-2">
       <button
         type="button"
         data-palette-open
-        class="eyebrow hidden h-9 items-center rounded-full border border-line px-3 text-muted transition-colors duration-200 hover:border-ink hover:text-ink lg:in-[.js]:inline-flex"
+        class="tui-btn hidden lg:in-[.js]:inline-flex"
         aria-label="Open command menu"
         title="⌘K on Mac, Ctrl K on Windows"
       >
-        <!-- Shown as ⌘ + K everywhere; Ctrl+K works too (see CommandPalette). -->
-        <kbd class="[font:inherit]">⌘ + K</kbd>
+        [ <kbd class="[font:inherit]">⌘ + K</kbd> menu ]
       </button>
-      <button
-        type="button"
-        data-theme-toggle
-        class="hidden size-9 place-items-center rounded-full border border-line text-muted transition-colors duration-200 hover:border-ink hover:text-ink in-[.js]:grid"
-      >
-        <Icon icon={faCircleHalfStroke} class="text-[14px]" />
-      </button>
-      <a
-        href={contactHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${cta} (email me in Gmail)`}
-        class="roll eyebrow inline-flex h-9 items-center rounded-full bg-ink px-4 text-paper transition-colors duration-200 hover:bg-accent"
-      >
-        <span class="roll-word" aria-hidden="true">
-          {[...cta].map((char, i) => (
-            <span style={`--i:${i}`}>{char}</span>
-          ))}
-        </span>
+      <button type="button" data-theme-toggle class="tui-btn hidden in-[.js]:inline-flex">[ ◐ theme ]</button>
+      <a href={contactHref} target="_blank" rel="noopener noreferrer" aria-label="Let's talk (email me in Gmail)" class="tui-btn tui-btn--primary">
+        [ let's talk ↗ ]
       </a>
     </nav>
   </div>
@@ -61,23 +40,13 @@ const cta = "Let's Talk";
     display: block;
     mask: url("/images/logo.png") center / contain no-repeat;
   }
-
-  /* Letters roll up to a copy of themselves on hover (bleibtgleich.dev, art-yakushev.com). */
-  .roll-word {
+  .tui-btn--primary {
     display: inline-flex;
-    overflow: hidden;
-    line-height: 1.2;
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
-  .roll-word > span {
-    display: inline-block;
-    white-space: pre;
-    text-shadow: 0 1.2em currentColor;
-    transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1) calc(var(--i) * 15ms);
-  }
-  @media (hover: hover) {
-    .roll:hover .roll-word > span {
-      transform: translateY(-1.2em);
-    }
+  .tui-btn--primary:hover {
+    background: var(--color-accent);
   }
 </style>
 
@@ -105,7 +74,6 @@ const cta = "Let's Talk";
       header.classList.toggle("is-hidden", y > last && y > 80);
       last = y;
     }
-    header.classList.toggle("is-scrolled", y > 8);
     ticking = false;
   };
   window.addEventListener(

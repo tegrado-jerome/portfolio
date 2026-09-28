@@ -1,103 +1,110 @@
 ---
-import { faArrowRight, faFileLines } from "@fortawesome/free-solid-svg-icons";
+// The last TUI pane, ~/contact: the contact command, a big "let's talk", bracketed links, and the footer photo
+// rendered as ASCII art in the background (the futuristic take on the reference's photo footer).
 import { contactHref, site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
-import Icon from "./Icon.astro";
 
 const year = new Date().getFullYear();
 // LinkedIn and resume sit here beside "Let's talk", where visitors look when they're ready to reach out.
 // Placeholder links point nowhere ("#") until the real URLs are filled in.
 const profileLinks = [
-  ...socials.map((s) => ({ label: s.label, href: isSet(s.href) ? s.href : "#", icon: s.icon })),
-  { label: "Resume", href: isSet(site.resume) ? site.resume : "#", icon: faFileLines },
+  ...socials.map((s) => ({ label: s.label, href: isSet(s.href) ? s.href : "#" })),
+  { label: "Resume", href: isSet(site.resume) ? site.resume : "#" },
 ];
-const photo = site.footerImage;
 ---
 
-<!-- The page fades into a full-bleed photo (after the reference, adikrz.netlify.app). -->
-<footer
-  id="contact"
-  class="footer relative flex min-h-[clamp(420px,46vw,640px)] items-end overflow-hidden px-5 pt-40 pb-[clamp(28px,4vw,48px)] text-white sm:px-[clamp(20px,11vw,200px)]"
-  style={`--photo: url("${photo}")`}
-  data-image={photo}
->
-  <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,44px)]">
-    <div class="flex items-center justify-between gap-6">
-      <a href="/" data-to-top aria-label="Back to top" class="logo-mark size-12 bg-white transition-opacity hover:opacity-80"></a>
-      <a href={contactHref} target="_blank" rel="noopener noreferrer" class="group eyebrow inline-flex items-center gap-2.5 text-white/75 transition-colors duration-200 hover:text-white">
-        Let's talk
-        <Icon
-          icon={faArrowRight}
-          class="-rotate-45 text-[13px] transition-transform duration-300 ease-out-soft group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-        />
-      </a>
+<footer id="contact" data-pane="contact" class="shell pt-[clamp(28px,3.5vw,44px)] pb-[clamp(28px,4vw,48px)]">
+  <div class="pane overflow-hidden">
+    <div class="absolute inset-x-6 -top-[0.8em] z-[2] flex justify-between gap-4 text-small">
+      <span class="bg-paper px-2 text-ink"><span class="text-accent">~/</span>contact</span>
+      <span class="bg-paper px-2 text-muted">© {year} {site.name.toLowerCase().replace(" ", "-")}</span>
     </div>
-    <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <ul class="flex gap-7">
+
+    <canvas class="ascii-art" data-image={site.footerImage} aria-hidden="true"></canvas>
+
+    <div class="relative z-[1] flex flex-col gap-5">
+      <p class="text-small text-muted"><span class="text-accent">jerome@ai</span> ~ <span class="text-ink">contact</span></p>
+      <a href={contactHref} target="_blank" rel="noopener noreferrer" class="link-strong w-fit text-title font-medium tracking-[-0.03em]">
+        let's talk ↗
+      </a>
+      {isSet(site.email) && <p class="text-body text-muted">{site.email}</p>}
+      <ul class="flex flex-wrap gap-2">
         {
-          profileLinks.map((s) => (
+          profileLinks.map((l) => (
             <li>
-              <a
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="eyebrow inline-flex items-center gap-2 text-white/75 transition-colors duration-200 hover:text-white"
-              >
-                <Icon icon={s.icon} class="text-[14px]" />
-                {s.label}
+              <a href={l.href} target="_blank" rel="noopener noreferrer" class="tui-btn inline-flex border border-line">
+                [ {l.label.toLowerCase()} ↗ ]
               </a>
             </li>
           ))
         }
+        <li>
+          <a href="/" data-to-top class="tui-btn inline-flex border border-line">[ ↑ top ]</a>
+        </li>
       </ul>
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-        {
-          site.timezone && (
-            <p class="eyebrow text-white/75">
-              Local time <time data-clock={site.timezone} class="text-white tabular-nums" />
-            </p>
-          )
-        }
-        <p class="eyebrow text-white/75">© {year} {site.name}</p>
-      </div>
     </div>
   </div>
 </footer>
 
 <style>
-  .footer {
-    background:
-      linear-gradient(180deg, var(--color-paper) 0%, transparent 50%),
-      linear-gradient(180deg, rgb(20 20 20 / 0.1), rgb(20 20 20 / 0.55)),
-      var(--photo) center / cover no-repeat,
-      var(--color-night);
+  /* The photo as ASCII art, fading in from the right. */
+  .ascii-art {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 60%;
+    height: 100%;
+    mask-image: linear-gradient(to right, transparent, #000 45%);
+    pointer-events: none;
   }
-  .logo-mark {
-    display: block;
-    mask: url("/images/logo.png") center / contain no-repeat;
-  }
-  .footer:hover > :global(.ascii-lens) {
-    opacity: 0.5;
+  @media (max-width: 767px) {
+    .ascii-art {
+      width: 100%;
+      opacity: 0.35;
+    }
   }
 </style>
 
 <script>
-  import { asciiLens } from "../scripts/ascii-lens";
-
-  const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
-  if (clock) {
-    const format = new Intl.DateTimeFormat("en-GB", { timeZone: clock.dataset.clock, hour: "2-digit", minute: "2-digit" });
-    const tick = () => (clock.textContent = format.format(new Date()));
-    tick();
-    setInterval(tick, 30_000);
-  }
-
-  // Same cursor-following ASCII lens as the reference's footer, sampled from the photo.
-  const footer = document.getElementById("contact")!;
-  const src = footer.dataset.image;
-  if (src) {
+  // Draws the footer photo once as ASCII characters (darker pixels get denser glyphs), redrawn on resize and theme change.
+  const RAMP = " .:-=+*#%@";
+  const canvas = document.querySelector<HTMLCanvasElement>(".ascii-art");
+  if (canvas?.dataset.image) {
     const image = new Image();
-    image.onload = () => asciiLens(footer, { cell: 9, radius: 92, alpha: 0.5, image, className: "z-[1]" });
-    image.src = src;
+    image.onload = () => {
+      const draw = () => {
+        const cell = 9;
+        const { width: w, height: h } = canvas.getBoundingClientRect();
+        if (!w || !h) return;
+        const dpr = Math.min(2, devicePixelRatio || 1);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        const ctx = canvas.getContext("2d")!;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const cols = Math.ceil(w / cell);
+        const rows = Math.ceil(h / cell);
+        const off = document.createElement("canvas");
+        off.width = cols;
+        off.height = rows;
+        const octx = off.getContext("2d", { willReadFrequently: true })!;
+        const s = Math.max(cols / image.naturalWidth, rows / image.naturalHeight);
+        octx.drawImage(image, (cols - image.naturalWidth * s) / 2, (rows - image.naturalHeight * s) / 2, image.naturalWidth * s, image.naturalHeight * s);
+        const px = octx.getImageData(0, 0, cols, rows).data;
+        ctx.font = `${cell + 1}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textBaseline = "top";
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--color-muted");
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const i = (y * cols + x) * 4;
+            const light = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
+            const ch = RAMP[Math.floor((1 - light) * (RAMP.length - 1))];
+            if (ch !== " ") ctx.fillText(ch, x * cell, y * cell);
+          }
+        }
+      };
+      draw();
+      new ResizeObserver(draw).observe(canvas);
+      document.addEventListener("themechange", draw);
+    };
+    image.src = canvas.dataset.image;
   }
 </script>

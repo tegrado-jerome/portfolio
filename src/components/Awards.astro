@@ -8,8 +8,9 @@ import SectionHead from "./SectionHead.astro";
 {
   awards.length > 0 && (
     <section id="awards" class="shell section" aria-labelledby="awards-title">
-      <SectionHead id="awards-title" title="Awards" />
-      <div class="log rounded-[4px] border border-line px-[clamp(16px,2.5vw,28px)] py-[clamp(16px,2.2vw,24px)] font-mono text-small leading-[1.9] sm:text-body">
+      <div class="pane" data-pane="awards">
+      <SectionHead id="awards-title" title="Awards" meta={`${awards.length} total`} />
+      <div class="log font-mono text-small leading-[1.9] sm:text-body">
         <p data-reveal aria-hidden="true">
           <span class="text-accent">jerome@ai</span> <span class="text-muted">~</span> <span class="text-ink">awards --list</span>
         </p>
@@ -38,18 +39,12 @@ import SectionHead from "./SectionHead.astro";
           <span class="text-accent">jerome@ai</span> <span class="text-muted">~</span> <span class="cursor"></span>
         </p>
       </div>
+      </div>
     </section>
   )
 }
 
 <style>
-  /* Same surface as the hero prompt bar and the chat's input. */
-  .log {
-    background: color-mix(in srgb, var(--color-paper) 45%, white);
-  }
-  :global([data-theme="dark"]) .log {
-    background: color-mix(in srgb, var(--color-paper) 90%, white);
-  }
   /* Hovering a line highlights it like a selected row in a terminal. */
   .line {
     margin-inline: -8px;
