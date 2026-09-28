@@ -1,0 +1,15 @@
+---
+interface Props {
+  id: string;
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<div data-reveal class="mb-[clamp(32px,5vw,64px)] flex items-center gap-7">
+  <h2 id={id} class="font-serif text-[clamp(42px,5.4vw,72px)] leading-none font-normal tracking-[-0.005em]">
+    {title}
+  </h2>
+  <span class="hidden h-px flex-1 translate-y-[0.3em] bg-line sm:block" aria-hidden="true"></span>
+</div>
