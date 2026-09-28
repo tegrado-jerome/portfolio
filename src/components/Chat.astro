@@ -3,7 +3,6 @@ import { faArrowUp, faStop, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import { site } from "../data/site";
 import Icon from "./Icon.astro";
-import OnlineStatus from "./OnlineStatus.astro";
 ---
 
 <!-- Floating round trigger (after guillaumemaarek.com) opening an editorial side sheet (after chat-sdk.dev, Mintlify).
@@ -30,12 +29,25 @@ import OnlineStatus from "./OnlineStatus.astro";
 </button>
 
 <aside id="chat" class="sheet" aria-labelledby="chat-title">
-  <header class="flex items-start justify-between border-b border-line pb-4">
-    <div>
-      <h2 id="chat-title" class="font-serif text-heading">
-        Jerome
-      </h2>
-      <OnlineStatus label="Online" class="mt-1.5" />
+  <!-- Laid out like Messenger's chat header: photo with an online dot, name, status underneath. -->
+  <header class="flex items-center justify-between border-b border-line pb-4">
+    <div class="flex items-center gap-3">
+      <span class="relative shrink-0">
+        {
+          site.chatAvatar ? (
+            <img src={site.chatAvatar} alt="" width="80" height="80" class="size-10 rounded-full object-cover" />
+          ) : (
+            <span class="grid size-10 place-items-center rounded-full bg-ink">
+              <span class="chat-logo block size-5 bg-paper" />
+            </span>
+          )
+        }
+        <span class="online-badge" aria-hidden="true"></span>
+      </span>
+      <div>
+        <h2 id="chat-title" class="font-serif text-heading leading-none">Jerome</h2>
+        <p class="mt-1 text-small text-muted">Online</p>
+      </div>
     </div>
     <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
       <Icon icon={faXmark} class="text-[15px]" />
@@ -92,6 +104,16 @@ import OnlineStatus from "./OnlineStatus.astro";
 </aside>
 
 <style>
+  .online-badge {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--color-paper);
+    border-radius: 50%;
+    background: var(--color-online);
+  }
   .chat-logo {
     mask: url("/images/logo.png") center / contain no-repeat;
   }
