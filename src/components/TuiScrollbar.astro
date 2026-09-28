@@ -1,6 +1,6 @@
 ---
 // The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
-// matching the boot screen's progress bar. Mouse devices only; touch screens keep their own thin native bar.
+// matching the boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
 ---
 
@@ -10,27 +10,27 @@
 </div>
 
 <style>
+  /* Same bar on every device and browser. It needs JS, so without it the native scrollbar stays. */
   .tui-scroll {
     display: none;
   }
-  @media (hover: hover) and (pointer: fine) {
-    /* Hide the native page scrollbar only where this one replaces it. */
-    :global(html:has([data-tui-scroll])) {
-      scrollbar-width: none;
-    }
-    :global(html:has([data-tui-scroll])::-webkit-scrollbar) {
-      display: none;
-    }
-    :global(.js) .tui-scroll {
-      position: fixed;
-      top: 6px;
-      right: 3px;
-      bottom: 6px;
-      z-index: 36;
-      display: block;
-      width: 10px;
-      user-select: none;
-    }
+  :global(html.js) {
+    scrollbar-width: none;
+  }
+  :global(html.js::-webkit-scrollbar) {
+    display: none;
+  }
+  :global(.js) .tui-scroll {
+    position: fixed;
+    top: 6px;
+    right: 3px;
+    bottom: 6px;
+    z-index: 41; /* above the header (40), under the chat (45) */
+    display: block;
+    width: 10px;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
   /* Stops above the status bar where that shows. */
   @media (min-width: 1024px) {
@@ -53,6 +53,8 @@
     width: 100%;
     background: repeating-linear-gradient(var(--color-bar) 0 9px, transparent 9px 10px);
     cursor: grab;
+    /* Dragging the thumb on a touch screen moves the bar, not the page. */
+    touch-action: none;
     --color-bar: var(--color-ink);
   }
   .tui-scroll:hover .bar,
@@ -66,7 +68,7 @@
 
 <script>
   const root = document.querySelector<HTMLElement>("[data-tui-scroll]");
-  if (root && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+  if (root) {
     const track = root.querySelector<HTMLElement>("[data-track]")!;
     const thumb = root.querySelector<HTMLElement>("[data-thumb]")!;
     const LINE = 10; // px per block row
