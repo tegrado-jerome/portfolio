@@ -4,6 +4,7 @@ import { faArrowUp, faFileLines, faAt } from "@fortawesome/free-solid-svg-icons"
 import { contactHref, site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
+import SectionHead from "./SectionHead.astro";
 
 const year = new Date().getFullYear();
 // LinkedIn and resume sit here beside "Let's talk", where visitors look when they're ready to reach out,
@@ -14,11 +15,9 @@ const profileLinks = [
 ];
 ---
 
-<footer id="contact" data-pane="contact" class="shell pt-[clamp(80px,10vw,160px)] pb-[clamp(48px,6vw,96px)]">
+<footer id="contact" data-pane="contact" aria-labelledby="contact-title" class="shell section pb-[clamp(48px,6vw,96px)]">
   <div class="pane">
-    <div class="absolute inset-x-0 top-0 z-[2] flex text-small">
-      <span class="text-ink"><span class="text-accent">~/</span>contact</span>
-    </div>
+    <SectionHead id="contact-title" title="Contact" />
 
     <div class="relative z-[1] flex flex-col gap-7">
       <a

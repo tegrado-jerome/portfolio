@@ -16,19 +16,8 @@ function layout(i: number) {
 <section id="work" class="shell section" aria-labelledby="work-title">
   <div class="pane" data-pane="selected-work">
   <SectionHead id="work-title" title="Selected Work" />
-  <div class="gallery grid items-start gap-y-[clamp(48px,6vw,88px)] md:grid-cols-12 md:gap-x-[clamp(24px,4vw,64px)]">
+  <div class="card-grid grid items-start md:grid-cols-12">
     {projects.map((project, i) => <Project project={project} index={i} class:list={layout(i)} />)}
   </div>
   </div>
 </section>
-
-<style>
-  .gallery :global(.project > *) {
-    transition: opacity 0.25s ease;
-  }
-  @media (hover: hover) {
-    .gallery:has(:global(.project:hover)) :global(.project:not(:hover) > *) {
-      opacity: 0.45;
-    }
-  }
-</style>

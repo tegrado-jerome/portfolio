@@ -140,6 +140,12 @@
   padding-top: clamp(80px, 10vw, 160px);
 }
 
+/* The one grid for every card section (work, awards, certifications, kind words), so they all breathe the same. */
+@utility card-grid {
+  column-gap: clamp(24px, 4vw, 64px);
+  row-gap: clamp(40px, 5vw, 72px);
+}
+
 /* A TUI section: no box and no divider, just its ~/path title above the content (see SectionHead).
    Space separates sections, so the page isn't crowded with lines. */
 @utility pane {
@@ -187,6 +193,16 @@
   &:hover,
   &:focus-visible {
     color: var(--color-accent);
+  }
+}
+
+/* The one hover for photo cards (work, awards, certifications): the picture eases in a touch. */
+.card-img {
+  transition: scale 0.6s var(--ease-out-soft);
+}
+@media (hover: hover) {
+  .card:hover .card-img {
+    scale: 1.03;
   }
 }
 

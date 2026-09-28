@@ -18,18 +18,18 @@ const MediaTag = href ? "a" : "div";
 ---
 
 <!-- Reference-style card: cover, title and one line. Other project data feeds structured data. -->
-<article data-reveal class:list={["project flex flex-col", className]}>
+<article data-reveal class:list={["card flex flex-col", className]}>
   <MediaTag
     href={href || undefined}
     {...href && linkAttrs}
     aria-label={href ? project.title : undefined}
     tabindex={href ? -1 : undefined}
-    class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph transition-opacity duration-200 hover:opacity-90"
+    class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph"
     data-locked={project.locked ? "" : undefined}
   >
     {
       project.image ? (
-        <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="size-full object-cover" />
+        <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img size-full object-cover" />
       ) : (
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
           <span class="text-display font-medium tracking-[-0.045em] text-ink/15" aria-hidden="true">
@@ -52,39 +52,21 @@ const MediaTag = href ? "a" : "div";
     }
   </MediaTag>
 
-  <!-- Card order after Brittany Chiang / Rauno Freiberg: meta line, title, description. The tools stay in the data
+  <!-- The same order as every card on the site: title, the muted meta line, then the text. The tools stay in the data
        for structured data, llms.txt and the chat. -->
-  <div class="pt-[18px]">
-    <p class="mb-2 text-small text-muted tabular-nums">
-      <span class="text-accent">{number}</span> · {project.category} · {project.year}
-    </p>
-    <h3 class="mb-1 text-heading font-normal">
+  <div class="pt-4">
+    <h3 class="text-heading font-normal">
       {href ? <a href={href} {...linkAttrs} class="link-strong">{project.title}</a> : project.title}
     </h3>
-    <p class="text-body text-ink-soft">{project.description}</p>
+    <p class="text-small text-muted tabular-nums">
+      <span class="text-accent">{number}</span> · {project.category} · {project.year}
+    </p>
+    <p class="mt-2 text-body text-ink-soft">{project.description}</p>
   </div>
 </article>
 
 <style>
   .media[data-locked]:hover .lock {
     opacity: 1;
-  }
-
-  /* Covers unveil upward with a slight zoom-out as they scroll in (gianlucagradogna.com, olhalazarieva.com). */
-  :global(.js) .media {
-    clip-path: inset(100% 0 0 0);
-    transition:
-      clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1),
-      opacity 0.2s ease;
-  }
-  :global(.js) .media > :not(.lock) {
-    transform: scale(1.12);
-    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-  :global(.js) .project:global(.is-visible) .media {
-    clip-path: inset(0);
-  }
-  :global(.js) .project:global(.is-visible) .media > :not(.lock) {
-    transform: none;
   }
 </style>
