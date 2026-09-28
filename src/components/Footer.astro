@@ -3,68 +3,81 @@ import { site, socials } from "../data/site";
 
 const year = new Date().getFullYear();
 const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
-const linkClass = "brush text-[15px]";
+const photo = site.preloader.image;
 ---
 
-<!-- Light footer with a name block and link columns (after set.studio / editorial studio footers). -->
-<footer id="contact" class="shell border-t border-line pt-[clamp(48px,6vw,80px)] pb-[clamp(28px,4vw,44px)]">
-  <div class="grid gap-10 sm:grid-cols-3 md:grid-cols-[2fr_1fr_1fr_1fr]">
-    <p class="font-serif text-[clamp(36px,4vw,48px)] leading-none sm:col-span-3 md:col-span-1">
-      {site.name.split(" ").map((word, i) => (i ? [<br />, word] : word))}
-    </p>
-
-    <div>
-      <h2 class="eyebrow mb-3 text-[11px] text-muted">Contact</h2>
-      <ul class="space-y-2">
-        <li><a href={emailHref} class={linkClass}>{site.email}</a></li>
-      </ul>
+<!-- The page fades into a full-bleed photo (after the reference, adikrz.netlify.app). -->
+<footer
+  id="contact"
+  class="footer relative flex min-h-[clamp(420px,46vw,640px)] items-end overflow-hidden px-5 pt-40 pb-[clamp(28px,4vw,48px)] text-white sm:px-[clamp(20px,11vw,200px)]"
+  style={`--photo: url("${photo}")`}
+  data-image={photo}
+>
+  <div class="relative z-[2] flex w-full flex-col gap-[clamp(22px,4vw,44px)]">
+    <div class="flex items-center justify-between gap-6">
+      <a href="/" data-to-top aria-label="Back to top" class="logo-mark size-12 bg-white transition-opacity hover:opacity-80"></a>
+      <a href={emailHref} class="eyebrow text-[13px] text-white transition-opacity hover:opacity-80">Let's talk ↗</a>
     </div>
-
-    <div>
-      <h2 class="eyebrow mb-3 text-[11px] text-muted">Social</h2>
-      <ul class="space-y-2">
+    <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <ul class="flex gap-7">
         {
           socials.map((s) => (
             <li>
-              <a href={s.href} target="_blank" rel="noopener noreferrer" class={linkClass}>
-                {s.label} ↗
+              <a href={s.href} target="_blank" rel="noopener noreferrer" class="eyebrow text-[11px] text-white/75 transition-colors hover:text-white">
+                {s.label}
               </a>
             </li>
           ))
         }
       </ul>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        {
+          site.timezone && (
+            <p class="eyebrow text-[11px] text-white/75">
+              Local time <time data-clock={site.timezone} class="text-white tabular-nums" />
+            </p>
+          )
+        }
+        <p class="eyebrow text-[11px] text-white/75">© {year} {site.name}</p>
+      </div>
     </div>
-
-    <div>
-      <h2 class="eyebrow mb-3 text-[11px] text-muted">Site</h2>
-      <ul class="space-y-2">
-        <li><a href="#work" class={linkClass}>Work</a></li>
-        <li><a href="/" data-to-top class={linkClass}>Top ↑</a></li>
-        <li class="hidden in-[.js]:list-item">
-          <button type="button" data-palette-open class={linkClass}>Command menu</button>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="mt-[clamp(48px,7vw,90px)] flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[12px] text-muted">
-    <p class="eyebrow text-[11px]">© {year} {site.name}</p>
-    {
-      site.timezone && (
-        <p class="eyebrow text-[11px]">
-          Local time <time data-clock={site.timezone} class="text-ink tabular-nums" />
-        </p>
-      )
-    }
   </div>
 </footer>
 
+<style>
+  .footer {
+    background:
+      linear-gradient(180deg, var(--color-paper) 0%, transparent 50%),
+      linear-gradient(180deg, rgb(20 20 20 / 0.1), rgb(20 20 20 / 0.55)),
+      var(--photo) center / cover no-repeat,
+      var(--color-night);
+  }
+  .logo-mark {
+    display: block;
+    mask: url("/logo.png") center / contain no-repeat;
+  }
+  .footer:hover > :global(.ascii-lens) {
+    opacity: 0.5;
+  }
+</style>
+
 <script>
+  import { asciiLens } from "../scripts/ascii-lens";
+
   const clock = document.querySelector<HTMLTimeElement>("[data-clock]");
   if (clock) {
     const format = new Intl.DateTimeFormat("en-GB", { timeZone: clock.dataset.clock, hour: "2-digit", minute: "2-digit" });
     const tick = () => (clock.textContent = format.format(new Date()));
     tick();
     setInterval(tick, 30_000);
+  }
+
+  // Same cursor-following ASCII lens as the reference's footer, sampled from the photo.
+  const footer = document.getElementById("contact")!;
+  const src = footer.dataset.image;
+  if (src) {
+    const image = new Image();
+    image.onload = () => asciiLens(footer, { cell: 9, radius: 92, alpha: 0.5, image, className: "z-[1]" });
+    image.src = src;
   }
 </script>
