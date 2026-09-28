@@ -3,7 +3,7 @@ import { site, socials } from "../data/site";
 
 const year = new Date().getFullYear();
 const emailHref = site.email.includes("@") ? `mailto:${site.email}` : "#";
-const photo = site.preloader.image;
+const photo = site.footerImage;
 ---
 
 <!-- The page fades into a full-bleed photo (after the reference, adikrz.netlify.app). -->
@@ -54,7 +54,7 @@ const photo = site.preloader.image;
   }
   .logo-mark {
     display: block;
-    mask: url("/logo.png") center / contain no-repeat;
+    mask: url("/images/logo.png") center / contain no-repeat;
   }
   .footer:hover > :global(.ascii-lens) {
     opacity: 0.5;

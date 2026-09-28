@@ -26,7 +26,7 @@ All content lives in `src/data/`. Replace every `[PLACEHOLDER]`:
 
 Also set your real domain as `site` in `astro.config.mjs`. It's used for canonical URLs, Open Graph, the sitemap, `robots.txt` and `llms.txt`.
 
-Images go in `public/` and are referenced by path (e.g. `"/portrait.jpg"`).
+Images go in `public/images/` and are referenced by path (e.g. `"/images/portrait.jpg"`). Favicons stay at the top of `public/`.
 
 ## Chat (AI version of Jerome)
 

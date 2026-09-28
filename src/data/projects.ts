@@ -9,7 +9,7 @@ export interface Project {
   year: string;
   href?: string;
   github?: string;
-  /** Path to an image in /public, e.g. "/projects/project-01.jpg". */
+  /** Path to an image in public/images, e.g. "/images/project-01.jpg". */
   image?: string;
   imageAlt?: string;
   /** Under NDA: the cover shows a "Classified" overlay on hover and doesn't link anywhere. */
