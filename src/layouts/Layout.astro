@@ -66,7 +66,38 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       class="eyebrow sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-ink focus:px-4 focus:py-3 focus:text-paper"
       >Skip to content</a
     >
+    <div class="scroll-progress" aria-hidden="true"></div>
     <slot />
+
+    <style>
+      /* Hairline that fills as you scroll (elliott.mangham.dev, wodniack.dev). CSS-only; hidden where unsupported. */
+      .scroll-progress {
+        display: none;
+      }
+      @supports (animation-timeline: scroll()) {
+        @media (prefers-reduced-motion: no-preference) {
+          .scroll-progress {
+            display: block;
+            position: fixed;
+            inset: 0 0 auto;
+            z-index: 50;
+            height: 2px;
+            background: var(--color-accent);
+            transform-origin: 0 50%;
+            animation: scroll-progress linear both;
+            animation-timeline: scroll(root);
+          }
+        }
+      }
+      @keyframes scroll-progress {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+    </style>
 
     <script>
       // "Back to top" links point at "/" — on the home page, scroll up instead of reloading,
@@ -92,7 +123,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         const io = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
-              if (entry.isIntersecting) {
+              // Also reveal anything already scrolled past (e.g. after jumping to a #section link).
+              if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
                 entry.target.classList.add("is-visible");
                 io.unobserve(entry.target);
               }
