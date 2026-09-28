@@ -8,7 +8,7 @@ export const site = {
   headline: "[YOUR SHORT PROFESSIONAL HEADLINE]",
   intro: "[YOUR SHORT INTRODUCTION / DESCRIPTION]",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.jpg". Leave empty for a placeholder.
-  // It shows in black & white and turns to colour (with an ASCII lens) on hover.
+  // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.jpg",
   email: "[EMAIL]",
   // Optional: a resume link shown in the header. Leave empty to hide it.

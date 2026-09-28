@@ -39,7 +39,7 @@ import { site } from "../data/site";
               alt={`Portrait of ${site.name}`}
               width="960"
               height="1200"
-              class="size-full object-cover grayscale transition-[filter] duration-150 group-hover:grayscale-0"
+              class="size-full object-cover"
             />
           ) : (
             <span class="eyebrow absolute inset-0 grid place-items-center text-[11px] text-muted">[PORTRAIT]</span>
@@ -53,7 +53,7 @@ import { site } from "../data/site";
                 alt={site.honor.school}
                 width="40"
                 height="40"
-                class="size-7 shrink-0 grayscale transition-[filter] duration-150 group-hover:grayscale-0"
+                class="size-7 shrink-0"
               />
               <span>
                 <span class="block font-serif text-[15px] leading-tight italic">{site.honor.title}</span>
@@ -115,13 +115,13 @@ import { site } from "../data/site";
   .portrait:hover .mark {
     translate: calc(var(--x) * 2) calc(var(--y) * 2);
   }
-  /* Touch screens can't hover, so they get the hover look from the start. */
-  @media (hover: none) {
-    #portrait img {
-      filter: none;
+  /* The crop marks breathe in and out while hovered, and on their own on touch screens. */
+  @media (prefers-reduced-motion: no-preference) {
+    .portrait:hover .mark {
+      translate: var(--x) var(--y);
+      animation: mark-breathe 1.2s ease-in-out infinite alternate;
     }
   }
-  /* ...and the crop marks breathe in and out on their own. */
   @media (hover: none) and (prefers-reduced-motion: no-preference) {
     .mark {
       animation: mark-breathe 2.4s ease-in-out infinite alternate;
