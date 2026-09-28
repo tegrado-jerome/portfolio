@@ -1,0 +1,249 @@
+---
+// A wheel of logos (after the "My Skills" arc the user picked). The logo at the top is the active
+// one and shows large in the middle. Drag or swipe anywhere on it to spin it (it coasts, then
+// snaps a logo to the top), click a logo to bring it up, and it turns on its own when left alone.
+import type { Skill } from "../data/skills";
+import SkillLogo from "./SkillLogo.astro";
+
+interface Props {
+  skills: Skill[];
+}
+
+const { skills } = Astro.props;
+// Repeat the list so the arc always looks full.
+const slots = Array.from({ length: Math.ceil(12 / skills.length) * skills.length }, (_, i) => skills[i % skills.length]);
+const step = 360 / slots.length;
+---
+
+<div class="wheel-wrap" data-skill-wheel aria-hidden="true">
+  <div class="wheel">
+    {
+      slots.map((s, i) => (
+        <div class="slot" style={`--a:${i * step}deg`} data-index={i} data-active={i === 0 ? "" : undefined} title={s.name}>
+          <span class="tile">
+            <SkillLogo skill={s} class="size-[55%] text-[calc(var(--tile)*0.5)]" />
+          </span>
+        </div>
+      ))
+    }
+  </div>
+  <div class="hub">
+    {
+      skills.map((s, i) => (
+        <div class="hub-item" data-active={i === 0 ? "" : undefined}>
+          <SkillLogo skill={s} class="size-[clamp(36px,8vw,88px)] text-[clamp(32px,7vw,80px)]" />
+          <p class="mt-3 font-serif text-[clamp(22px,3.4vw,44px)] leading-none">{s.name}</p>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const AUTO_EVERY = 2400; // ms between automatic turns
+  const IDLE_AFTER_USE = 5000; // ms to wait after the visitor spins or clicks before turning again
+  const TAP_SLOP = 6; // px of movement that still counts as a click
+
+  document.querySelectorAll<HTMLElement>("[data-skill-wheel]").forEach((wrap) => {
+    const wheel = wrap.querySelector<HTMLElement>(".wheel")!;
+    const slots = [...wheel.querySelectorAll<HTMLElement>(".slot")];
+    const hubItems = [...wrap.querySelectorAll<HTMLElement>(".hub-item")];
+    const step = 360 / slots.length;
+    const mod = (a: number, n: number) => ((a % n) + n) % n;
+    const snap = (deg: number) => Math.round(deg / step) * step;
+
+    // The wheel's rotation in degrees. Slot i sits at i * step, so the slot at the top is -angle / step.
+    let angle = 0;
+    let target = 0;
+    let active = 0;
+    let raf = 0;
+
+    function render() {
+      wheel.style.setProperty("--turn", `${angle}deg`);
+      const top = mod(Math.round(-angle / step), slots.length);
+      if (top === active) return;
+      active = top;
+      slots.forEach((s, i) => s.toggleAttribute("data-active", i === top));
+      hubItems.forEach((h, i) => h.toggleAttribute("data-active", i === top % hubItems.length));
+    }
+
+    // Ease towards the target every frame; the same loop handles snapping, coasting and auto-turns.
+    function tick() {
+      const diff = target - angle;
+      if (reduceMotion || Math.abs(diff) < 0.02) {
+        angle = target;
+        render();
+        raf = 0;
+        return;
+      }
+      angle += diff * 0.14;
+      render();
+      raf = requestAnimationFrame(tick);
+    }
+    function moveTo(deg: number) {
+      target = deg;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+
+    let lastUse = 0;
+    let dragging = false;
+    let startX = 0, lastX = 0, lastT = 0, velocity = 0, moved = 0;
+    let pressedSlot: HTMLElement | null = null;
+    // Degrees per pixel dragged, as if grabbing the rim at the top, so the logos follow the finger.
+    const degPerPx = () => 360 / (Math.PI * parseFloat(getComputedStyle(wheel, "::before").width));
+
+    wrap.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      // read before pointer capture, which retargets later events to the wrapper
+      pressedSlot = (e.target as Element).closest<HTMLElement>(".slot");
+      moved = 0;
+      velocity = 0;
+      startX = lastX = e.clientX;
+      lastT = e.timeStamp;
+      target = angle; // stop any coasting where it is
+      wrap.setPointerCapture(e.pointerId);
+      wrap.classList.add("is-dragging");
+    });
+    wrap.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dt = Math.max(1, e.timeStamp - lastT);
+      moved = Math.max(moved, Math.abs(e.clientX - startX));
+      const delta = dx * degPerPx();
+      velocity = 0.8 * (delta / dt) + 0.2 * velocity; // deg per ms, smoothed
+      angle += delta;
+      target = angle;
+      lastX = e.clientX;
+      lastT = e.timeStamp;
+      render();
+    });
+    function release() {
+      if (!dragging) return;
+      dragging = false;
+      wrap.classList.remove("is-dragging");
+      lastUse = performance.now();
+      if (moved < TAP_SLOP) {
+        // A click: bring the clicked logo to the top the short way round.
+        if (pressedSlot) {
+          let d = mod(Number(pressedSlot.dataset.index) + angle / step, slots.length);
+          if (d > slots.length / 2) d -= slots.length;
+          moveTo(snap(angle - d * step));
+        }
+        return;
+      }
+      // Coast with the release speed, then settle on the nearest logo.
+      moveTo(snap(angle + velocity * 260));
+    }
+    wrap.addEventListener("pointerup", release);
+    wrap.addEventListener("pointercancel", release);
+
+    if (reduceMotion) return;
+    let hovered = false;
+    let visible = false;
+    wrap.addEventListener("pointerenter", (e) => (hovered = e.pointerType === "mouse"));
+    wrap.addEventListener("pointerleave", () => (hovered = false));
+    // Also false while this wheel's tab is hidden.
+    new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(wrap);
+    setInterval(() => {
+      const idle = performance.now() - lastUse > IDLE_AFTER_USE;
+      if (visible && idle && !hovered && !dragging && !document.hidden) moveTo(snap(target) - step);
+    }, AUTO_EVERY);
+  });
+</script>
+
+<style>
+  .wheel-wrap {
+    --r: clamp(110px, 30vw, 320px);
+    --tile: clamp(44px, 6vw, 64px);
+    --below: calc(var(--tile) * 0.9);
+    position: relative;
+    height: calc(var(--r) + var(--tile) + var(--below));
+    overflow: hidden;
+    /* Logos fade out as they turn under the ring's middle instead of being cut off. */
+    mask-image: linear-gradient(to top, transparent, #000 var(--below));
+    cursor: grab;
+    user-select: none;
+    /* Vertical swipes still scroll the page; horizontal ones spin the wheel. */
+    touch-action: pan-y;
+  }
+  .wheel-wrap.is-dragging {
+    cursor: grabbing;
+  }
+  /* A zero-size point below the ring's middle; the ring and the logos hang off it. */
+  .wheel {
+    --turn: 0deg;
+    position: absolute;
+    left: 50%;
+    bottom: var(--below);
+    rotate: var(--turn);
+  }
+  .wheel::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--r) * -1);
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+  }
+  .slot {
+    position: absolute;
+    left: calc(var(--tile) / -2);
+    top: calc(var(--tile) / -2);
+    width: var(--tile);
+    height: var(--tile);
+    /* Out to the ring, then turned back upright against the wheel's own rotation. */
+    transform: rotate(var(--a)) translateY(calc(var(--r) * -1)) rotate(calc(var(--a) * -1 - var(--turn)));
+  }
+  .tile {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--color-paper) 45%, white);
+    transition:
+      scale 0.35s var(--ease-out-soft),
+      border-color 0.35s ease;
+  }
+  :global([data-theme="dark"]) .tile {
+    background: color-mix(in srgb, var(--color-paper) 90%, white);
+  }
+  .slot img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+  .slot[data-active] .tile {
+    scale: 1.25;
+    border-color: var(--color-ink);
+  }
+  .hub {
+    position: absolute;
+    left: 50%;
+    bottom: var(--below);
+    translate: -50% 0;
+    width: calc(var(--r) * 1.6);
+    /* Stays clear of the enlarged logo at the top of the ring. */
+    height: calc(var(--r) - var(--tile) * 0.75);
+    pointer-events: none;
+  }
+  .hub-item {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 0;
+    translate: 0 8px;
+    transition:
+      opacity 0.25s ease,
+      translate 0.4s var(--ease-out-soft);
+  }
+  .hub-item[data-active] {
+    opacity: 1;
+    translate: none;
+  }
+</style>

@@ -1,45 +1,75 @@
 ---
-// Logo tiles, each with the tool's own logo above its name (after the "What I do" skills grid the user picked).
-import { skills } from "../data/skills";
-import Icon from "./Icon.astro";
+// Skills by category: one tab per category, each with its own turning wheel of logos.
+import { skillGroups } from "../data/skills";
+import SkillWheel from "./SkillWheel.astro";
+
+const groups = skillGroups.filter((g) => g.skills.length > 0);
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 ---
 
 {
-  skills.length > 0 && (
+  groups.length > 0 && (
     <section id="skills" class="shell py-[clamp(56px,8vw,110px)]" aria-labelledby="skills-title">
-      <h2 id="skills-title" data-reveal class="eyebrow mb-[clamp(28px,4vw,48px)] text-[11px] text-muted">
+      <h2 id="skills-title" data-reveal class="eyebrow mb-[clamp(20px,3vw,32px)] text-[11px] text-muted">
         Skills
       </h2>
-      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4">
-        {skills.map((s, i) => (
-          <li data-reveal style={`--i:${i}`}>
-            <div class="tile flex aspect-[5/4] flex-col items-center justify-center gap-4 rounded-xl border border-line p-4 text-center">
-              {typeof s.logo === "string" ? (
-                <img src={s.logo} alt="" width="48" height="48" loading="lazy" class="size-11 object-contain" />
-              ) : (
-                <Icon icon={s.logo} class="text-[44px] text-accent" />
-              )}
-              <span class="eyebrow text-[10px] text-ink">{s.name}</span>
-            </div>
-          </li>
+
+      <div data-reveal role="tablist" aria-label="Skill categories" class="mb-[clamp(28px,4vw,48px)] flex flex-wrap gap-2">
+        {groups.map((g, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`skills-tab-${slug(g.name)}`}
+            aria-controls={`skills-${slug(g.name)}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+            class="eyebrow rounded-full border border-line px-4 py-2 text-[10px] text-muted transition-colors hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
+          >
+            {g.name}
+          </button>
         ))}
-      </ul>
+      </div>
+
+      {groups.map((g, i) => (
+        <div
+          id={`skills-${slug(g.name)}`}
+          role="tabpanel"
+          aria-labelledby={`skills-tab-${slug(g.name)}`}
+          hidden={i !== 0}
+          data-reveal
+        >
+          <ul class="sr-only">
+            {g.skills.map((s) => (
+              <li>{s.name}</li>
+            ))}
+          </ul>
+          <SkillWheel skills={g.skills} />
+        </div>
+      ))}
     </section>
   )
 }
 
-<style>
-  .tile {
-    background: color-mix(in srgb, var(--color-paper) 45%, white);
-    transition:
-      translate 0.4s var(--ease-out-soft),
-      border-color 0.4s var(--ease-out-soft);
+<script>
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>("#skills [role=tab]")];
+
+  function select(tab: HTMLButtonElement) {
+    for (const t of tabs) {
+      const selected = t === tab;
+      t.setAttribute("aria-selected", String(selected));
+      t.tabIndex = selected ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")!)!.hidden = !selected;
+    }
   }
-  :global([data-theme="dark"]) .tile {
-    background: color-mix(in srgb, var(--color-paper) 90%, white);
-  }
-  .tile:hover {
-    translate: 0 -4px;
-    border-color: var(--color-ink);
-  }
-</style>
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => select(tab));
+    tab.addEventListener("keydown", (e) => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!d) return;
+      const next = tabs[(i + d + tabs.length) % tabs.length];
+      select(next);
+      next.focus();
+    });
+  });
+</script>

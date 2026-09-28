@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
 import { site, socials } from "../data/site";
 import { experience } from "../data/experience";
 import { projects } from "../data/projects";
-import { skills } from "../data/skills";
+import { skillGroups } from "../data/skills";
 import { isSet, onlySet } from "../data/placeholders";
 
 export const GET: APIRoute = ({ site: siteUrl }) => {
@@ -32,8 +32,11 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
     lines.push("");
   }
 
-  const skillNames = onlySet(skills.map((s) => s.name));
-  if (skillNames.length) lines.push("## Skills and tools", "", skillNames.join(", "), "");
+  const skillLines = skillGroups
+    .map((g) => ({ group: g.name, names: onlySet(g.skills.map((s) => s.name)) }))
+    .filter((g) => g.names.length)
+    .map((g) => `- ${g.group}: ${g.names.join(", ")}`);
+  if (skillLines.length) lines.push("## Skills", "", ...skillLines, "");
 
   lines.push("## Contact", "", `- Website: ${home}`);
   if (isSet(site.email)) lines.push(`- Email: ${site.email}`);

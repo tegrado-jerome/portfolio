@@ -1,0 +1,19 @@
+---
+import type { Skill } from "../data/skills";
+import Icon from "./Icon.astro";
+
+interface Props {
+  skill: Skill;
+  class?: string;
+}
+
+const { skill, class: className } = Astro.props;
+---
+
+{
+  typeof skill.logo === "string" ? (
+    <img src={skill.logo} alt="" width="96" height="96" loading="lazy" class:list={["object-contain", className]} />
+  ) : (
+    <Icon icon={skill.logo} class:list={["text-accent", className]} />
+  )
+}
