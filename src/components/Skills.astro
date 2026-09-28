@@ -15,9 +15,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       <SectionHead id="skills-title" title="Skills" meta={`${groups.length} categories`} />
 
       <!-- TUI layout (lazygit / btop): a category list with an ink selection bar on the left, the dial on the right. -->
-      <div class="grid gap-[clamp(24px,4vw,56px)] md:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] md:items-center">
+      <div class="grid gap-[clamp(40px,6vw,96px)] md:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] md:items-center">
         <div data-reveal>
-          <p class="mb-2 text-small text-muted" aria-hidden="true">categories</p>
+          <p class="mb-4 text-small text-muted" aria-hidden="true">categories</p>
           <div role="tablist" aria-label="Skill categories" aria-orientation="vertical" class="seg relative flex flex-col">
             <span class="thumb" aria-hidden="true"></span>
             {groups.map((g, i) => (
@@ -28,7 +28,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
                 aria-controls={`skills-${slug(g.name)}`}
                 aria-selected={i === 0 ? "true" : "false"}
                 tabindex={i === 0 ? 0 : -1}
-                class="relative z-[1] flex items-center justify-between gap-3 px-3 py-2 text-left text-body text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
+                class="relative z-[1] flex items-center justify-between gap-3 px-3 py-3 text-left text-body text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
               >
                 <span><span class="caret-mark" aria-hidden="true">▸ </span>{slug(g.name)}</span>
                 <span class="text-small opacity-70 tabular-nums" aria-hidden="true">{String(g.skills.length).padStart(2, "0")}</span>
@@ -55,7 +55,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             </div>
           ))}
 
-          <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
+          <p class="eyebrow mt-8 flex items-center justify-center gap-2.5 text-muted" aria-hidden="true">
             <span class="orbit" />
             <span class="hint-mouse">Drag in a circle to spin, or click a slot</span>
             <span class="hint-touch">Swipe in a circle to spin, or tap a slot</span>
