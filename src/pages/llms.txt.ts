@@ -10,13 +10,13 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
   const home = new URL("/", siteUrl).href;
   const lines: string[] = [`# ${site.name}`, ""];
 
-  const summary = onlySet([site.headline, site.intro]).join(" — ");
+  const summary = onlySet([site.headline, site.intro]).join(". ");
   if (summary) lines.push(`> ${summary}`, "");
 
   const journey = experience.filter((e) => isSet(e.description));
   if (journey.length) {
     lines.push("## Experience", "");
-    journey.forEach((e) => lines.push(`- ${onlySet([e.year, e.title]).join(" — ")}: ${e.description}`));
+    journey.forEach((e) => lines.push(`- ${onlySet([e.year, e.title]).join(", ")}: ${e.description}`));
     lines.push("");
   }
 

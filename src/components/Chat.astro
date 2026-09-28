@@ -34,7 +34,7 @@ import Icon from "./Icon.astro";
   <ol data-chat-log aria-live="polite" class="flex-1 divide-y divide-line overflow-y-auto">
     <li class="py-6">
       <p class="font-serif text-[18px] leading-[1.45]">{assistant.greeting}</p>
-      <p class="mt-2 font-serif text-muted italic">— J. (AI)</p>
+      <p class="mt-2 font-serif text-muted italic">J. (AI)</p>
     </li>
   </ol>
 
@@ -215,7 +215,7 @@ import Icon from "./Icon.astro";
       history.push({ role: "assistant", content: data.reply });
       writing.replaceWith(
         paragraph("font-serif text-[18px] leading-[1.45] whitespace-pre-line", data.reply),
-        paragraph("mt-2 font-serif text-muted italic", "— J. (AI)"),
+        paragraph("mt-2 font-serif text-muted italic", "J. (AI)"),
       );
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid

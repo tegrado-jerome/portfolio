@@ -13,7 +13,7 @@ export interface Testimonial {
 
 export const testimonials: Testimonial[] = [
   {
-    quote: "[A REAL QUOTE FROM A CLIENT OR COLLEAGUE — ONE OR TWO SENTENCES]",
+    quote: "[A REAL QUOTE FROM A CLIENT OR COLLEAGUE, ONE OR TWO SENTENCES]",
     name: "[NAME]",
     role: "[ROLE]",
     company: "[COMPANY]",
@@ -21,7 +21,7 @@ export const testimonials: Testimonial[] = [
     href: "", // [LINK TO THEIR LINKEDIN OR SITE]
   },
   {
-    quote: "[A REAL QUOTE FROM A CLIENT OR COLLEAGUE — ONE OR TWO SENTENCES]",
+    quote: "[A REAL QUOTE FROM A CLIENT OR COLLEAGUE, ONE OR TWO SENTENCES]",
     name: "[NAME]",
     role: "[ROLE]",
     company: "[COMPANY]",
