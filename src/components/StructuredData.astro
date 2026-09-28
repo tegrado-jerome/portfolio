@@ -1,0 +1,77 @@
+---
+// schema.org JSON-LD: tells search engines and AI answer engines who you are and what you've made.
+// Fields still holding a [PLACEHOLDER] are left out automatically.
+import { capabilities, site, socials } from "../data/site";
+import { projects } from "../data/projects";
+import { isSet, onlySet } from "../lib/content";
+
+const home = new URL("/", Astro.site).href;
+const abs = (path: string) => new URL(path, Astro.site).href;
+const personId = `${home}#person`;
+
+const person = {
+  "@type": "Person",
+  "@id": personId,
+  name: site.name,
+  url: home,
+  ...(isSet(site.headline) && { jobTitle: site.headline }),
+  ...(isSet(site.intro) && { description: site.intro }),
+  ...(isSet(site.email) && { email: `mailto:${site.email}` }),
+  ...(isSet(site.portrait) && { image: abs(site.portrait) }),
+  ...(onlySet(socials.map((s) => s.href)).length && { sameAs: onlySet(socials.map((s) => s.href)) }),
+  ...(onlySet(capabilities.flatMap((c) => c.items)).length && {
+    knowsAbout: onlySet(capabilities.flatMap((c) => c.items)),
+  }),
+};
+
+const works = projects.filter((p) => isSet(p.title));
+
+const graph = [
+  {
+    "@type": "WebSite",
+    "@id": `${home}#website`,
+    url: home,
+    name: site.name,
+    ...(isSet(site.description) && { description: site.description }),
+    inLanguage: "en",
+    publisher: { "@id": personId },
+  },
+  {
+    "@type": "ProfilePage",
+    "@id": `${home}#profile`,
+    url: home,
+    name: site.title,
+    isPartOf: { "@id": `${home}#website` },
+    mainEntity: { "@id": personId },
+    dateModified: new Date().toISOString(),
+  },
+  person,
+  ...(works.length
+    ? [
+        {
+          "@type": "ItemList",
+          name: "Selected Work",
+          itemListElement: works.map((p, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "CreativeWork",
+              name: p.title,
+              ...(isSet(p.description) && { description: p.description }),
+              ...(isSet(p.href) && { url: p.href }),
+              ...(isSet(p.year) && { dateCreated: p.year }),
+              ...(isSet(p.category) && { genre: p.category }),
+              ...(onlySet(p.technologies).length && { keywords: onlySet(p.technologies).join(", ") }),
+              ...(isSet(p.image) && { image: abs(p.image) }),
+              creator: { "@id": personId },
+            },
+          })),
+        },
+      ]
+    : []),
+];
+
+const json = JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c");
+---
+
+<script type="application/ld+json" set:html={json} />

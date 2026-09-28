@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import StructuredData from "../components/StructuredData.astro";
 import Preloader from "../components/Preloader.astro";
 import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
@@ -13,6 +14,7 @@ import Footer from "../components/Footer.astro";
 ---
 
 <Layout>
+  <StructuredData slot="head" />
   <Preloader />
   <Header />
   <main id="main">
