@@ -1,8 +1,6 @@
 ---
 // Skills by category: one tab per category, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
-import { faComputerMouse, faHandPointer } from "@fortawesome/free-solid-svg-icons";
-import Icon from "./Icon.astro";
 import SkillWheel from "./SkillWheel.astro";
 
 const groups = skillGroups.filter((g) => g.skills.length > 0);
@@ -49,32 +47,59 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
         </div>
       ))}
 
-      <p class="eyebrow mt-5 flex items-center justify-center gap-2 text-[10px] text-muted" aria-hidden="true">
-        <span class="hint-mouse items-center gap-2">
-          <Icon icon={faComputerMouse} class="text-[12px]" /> Point at a slot to pick it
-        </span>
-        <span class="hint-touch items-center gap-2">
-          <Icon icon={faHandPointer} class="text-[12px]" /> Tap or drag around the wheel
-        </span>
+      <p class="eyebrow mt-5 flex items-center justify-center gap-2.5 text-[10px] text-muted" aria-hidden="true">
+        <span class="orbit" />
+        <span class="hint-mouse">Drag in a circle to spin, or click a slot</span>
+        <span class="hint-touch">Swipe in a circle to spin, or tap a slot</span>
       </p>
     </section>
   )
 }
 
 <style>
-  /* The guide matches the device: pointing with a mouse, tapping on touch screens. */
+  /* The guide's gesture: a dot circling a small ring, the motion that spins the wheel. */
+  .orbit {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border: 1px dashed currentColor;
+    border-radius: 50%;
+  }
+  .orbit::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+    border-radius: 50%;
+    background: var(--color-ink);
+    transform-origin: 2.5px 10px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .orbit::after {
+      animation: orbit 1.8s linear infinite;
+    }
+  }
+  @keyframes orbit {
+    to {
+      rotate: 360deg;
+    }
+  }
+  /* The guide's words match the device. */
   .hint-mouse,
   .hint-touch {
     display: none;
   }
   @media (hover: hover) and (pointer: fine) {
     .hint-mouse {
-      display: inline-flex;
+      display: inline;
     }
   }
   @media not ((hover: hover) and (pointer: fine)) {
     .hint-touch {
-      display: inline-flex;
+      display: inline;
     }
   }
 </style>

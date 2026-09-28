@@ -1,7 +1,7 @@
 ---
-// A minimal game-style skill wheel (after the GTA V weapon wheel the user picked): a ring of slots
-// around a centre that shows the picked skill. Point at a slot (or tap / drag around it on touch)
-// to pick it; left alone, it steps through the skills. Empty slots stay dashed until filled.
+// A minimal game-style skill wheel (after the GTA V weapon wheel the user picked) that turns like a
+// real dial: drag in a circle to spin the ring, and whichever slot stops under the marker at the top
+// is picked and shown in the centre. A tap or click turns a slot to the top; left alone, it steps round.
 import type { Skill } from "../data/skills";
 import SkillLogo from "./SkillLogo.astro";
 
@@ -10,7 +10,9 @@ interface Props {
 }
 
 const { skills } = Astro.props;
+// Every slot holds a logo: short lists repeat round the ring so it never looks empty.
 const N = Math.max(8, skills.length);
+const slotSkills = Array.from({ length: N }, (_, i) => skills[i % skills.length]);
 const S = 460; // viewBox size; the wheel scales to fit
 const C = S / 2;
 const INNER = 128;
@@ -34,24 +36,27 @@ function slotPath(i: number) {
 const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<div class="gw" data-skill-wheel data-slots={N} aria-hidden="true">
-  <svg viewBox={`0 0 ${S} ${S}`} class="block size-full overflow-visible">
+<div class="gw" data-skill-wheel aria-hidden="true">
+  <div class="dial">
+    <svg viewBox={`0 0 ${S} ${S}`} class="block size-full overflow-visible">
+      {
+        Array.from({ length: N }, (_, i) => (
+          <path d={slotPath(i)} class="slot" data-index={i} data-active={i === 0 ? "" : undefined} />
+        ))
+      }
+    </svg>
     {
-      Array.from({ length: N }, (_, i) => (
-        <path d={slotPath(i)} class="slot" data-filled={i < skills.length ? "" : undefined} data-active={i === 0 ? "" : undefined} />
-      ))
+      slotSkills.map((s, i) => {
+        const [x, y] = point((INNER + OUTER) / 2, i * step);
+        return (
+          <span class="slot-logo" data-active={i === 0 ? "" : undefined} style={`left:${(x / S) * 100}%;top:${(y / S) * 100}%`}>
+            <SkillLogo skill={s} class="size-[58%] text-[clamp(16px,4.5vw,24px)]" />
+          </span>
+        );
+      })
     }
-  </svg>
-  {
-    skills.map((s, i) => {
-      const [x, y] = point((INNER + OUTER) / 2, i * step);
-      return (
-        <span class="slot-logo" data-active={i === 0 ? "" : undefined} style={`left:${(x / S) * 100}%;top:${(y / S) * 100}%`}>
-          <SkillLogo skill={s} class="size-[58%] text-[clamp(16px,4.5vw,24px)]" />
-        </span>
-      );
-    })
-  }
+  </div>
+  <span class="marker"></span>
   <div class="hub">
     {
       skills.map((s, i) => (
@@ -70,67 +75,122 @@ const pad = (n: number) => String(n).padStart(2, "0");
 <script>
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const AUTO_EVERY = 2400; // ms between automatic steps
-  const IDLE_AFTER_USE = 5000; // ms to wait after the visitor picks before stepping again
+  const IDLE_AFTER_USE = 5000; // ms to wait after the visitor spins or picks before stepping again
+  const TAP_SLOP = 6; // px of movement that still counts as a tap
 
   document.querySelectorAll<HTMLElement>("[data-skill-wheel]").forEach((wheel) => {
-    const total = Number(wheel.dataset.slots);
-    const slots = [...wheel.querySelectorAll<SVGPathElement>(".slot")];
-    const logos = [...wheel.querySelectorAll<HTMLElement>(".slot-logo")];
+    const dial = wheel.querySelector<HTMLElement>(".dial")!;
+    const slots = [...dial.querySelectorAll<SVGPathElement>(".slot")];
+    const logos = [...dial.querySelectorAll<HTMLElement>(".slot-logo")];
     const hubItems = [...wheel.querySelectorAll<HTMLElement>(".hub-item")];
-    const filled = logos.length;
-    let current = 0;
-    let lastUse = 0;
-    let pressed = false;
-    let hovered = false;
+    const total = slots.length;
+    const step = 360 / total;
+    const mod = (a: number, n: number) => ((a % n) + n) % n;
+    const snap = (deg: number) => Math.round(deg / step) * step;
 
-    function select(i: number) {
-      if (i === current) return;
-      current = i;
-      slots.forEach((s, j) => s.toggleAttribute("data-active", j === i));
-      logos.forEach((l, j) => l.toggleAttribute("data-active", j === i));
-      hubItems.forEach((h, j) => h.toggleAttribute("data-active", j === i));
+    // The dial's rotation in degrees. Slot i sits at i * step, so the slot under the marker is -angle / step.
+    let angle = 0;
+    let target = 0;
+    let active = 0;
+    let raf = 0;
+
+    function render() {
+      wheel.style.setProperty("--turn", `${angle}deg`);
+      const top = mod(Math.round(-angle / step), total);
+      if (top === active) return;
+      active = top;
+      slots.forEach((s, i) => s.toggleAttribute("data-active", i === top));
+      logos.forEach((l, i) => l.toggleAttribute("data-active", i === top));
+      hubItems.forEach((h, i) => h.toggleAttribute("data-active", i === top % hubItems.length));
+    }
+    // Ease towards the target every frame; the same loop handles snapping, coasting and auto-steps.
+    function tick() {
+      const diff = target - angle;
+      if (reduceMotion || Math.abs(diff) < 0.02) {
+        angle = target;
+        render();
+        raf = 0;
+        return;
+      }
+      angle += diff * 0.16;
+      render();
+      raf = requestAnimationFrame(tick);
+    }
+    function moveTo(deg: number) {
+      target = deg;
+      if (!raf) raf = requestAnimationFrame(tick);
     }
 
-    // The slot in the pointer's direction from the centre, like aiming a game wheel's stick.
-    // Ignored near the centre (the direction jumps around there) and on empty slots.
-    function slotAt(e: PointerEvent) {
+    // The pointer's angle around the centre, clockwise from the top, and its distance from it.
+    function polar(e: PointerEvent) {
       const r = wheel.getBoundingClientRect();
       const x = e.clientX - (r.left + r.width / 2);
       const y = e.clientY - (r.top + r.height / 2);
-      if (Math.hypot(x, y) < r.width * 0.14) return -1;
-      const deg = ((Math.atan2(x, -y) * 180) / Math.PI + 360) % 360;
-      const i = Math.round(deg / (360 / total)) % total;
-      return i < filled ? i : -1;
-    }
-    function pick(e: PointerEvent) {
-      const i = slotAt(e);
-      if (i < 0) return;
-      lastUse = performance.now();
-      select(i);
+      return { deg: (Math.atan2(x, -y) * 180) / Math.PI, dist: Math.hypot(x, y), size: r.width };
     }
 
-    wheel.addEventListener("pointerenter", (e) => (hovered = e.pointerType === "mouse"));
-    wheel.addEventListener("pointerleave", () => {
-      hovered = false;
-      pressed = false;
-    });
+    let lastUse = 0;
+    let dragging = false;
+    let hovered = false;
+    let startX = 0, startY = 0, lastDeg = 0, lastT = 0, velocity = 0, moved = 0;
+
     wheel.addEventListener("pointerdown", (e) => {
-      pressed = true;
-      pick(e);
+      const p = polar(e);
+      // Grab only the ring; the centre is left for scrolling the page on touch screens.
+      if (e.button !== 0 || p.dist < p.size * 0.26) return;
+      dragging = true;
+      moved = 0;
+      velocity = 0;
+      startX = e.clientX;
+      startY = e.clientY;
+      lastDeg = p.deg;
+      lastT = e.timeStamp;
+      target = angle; // stop any coasting where it is
+      wheel.setPointerCapture(e.pointerId);
+      wheel.classList.add("is-dragging");
     });
     wheel.addEventListener("pointermove", (e) => {
-      if (hovered || pressed) pick(e);
+      if (!dragging) return;
+      const p = polar(e);
+      // unwrap across the -180/180 seam so a full circle keeps turning the same way
+      const delta = ((p.deg - lastDeg + 540) % 360) - 180;
+      const dt = Math.max(1, e.timeStamp - lastT);
+      moved = Math.max(moved, Math.hypot(e.clientX - startX, e.clientY - startY));
+      velocity = 0.8 * (delta / dt) + 0.2 * velocity; // deg per ms, smoothed
+      angle += delta;
+      target = angle;
+      lastDeg = p.deg;
+      lastT = e.timeStamp;
+      render();
     });
-    wheel.addEventListener("pointerup", () => (pressed = false));
-    wheel.addEventListener("pointercancel", () => (pressed = false));
+    function release(e: PointerEvent) {
+      if (!dragging) return;
+      dragging = false;
+      wheel.classList.remove("is-dragging");
+      lastUse = performance.now();
+      if (moved < TAP_SLOP) {
+        // A tap: turn the tapped slot to the top the short way round.
+        const tapped = mod(Math.round((polar(e).deg - angle) / step), total);
+        let d = mod(tapped + snap(angle) / step, total); // steps clockwise from the marker
+        if (d > total / 2) d -= total;
+        moveTo(snap(angle) - d * step);
+        return;
+      }
+      // Coast with the release speed, then settle a slot under the marker.
+      moveTo(snap(angle + velocity * 260));
+    }
+    wheel.addEventListener("pointerup", release);
+    wheel.addEventListener("pointercancel", release);
+    wheel.addEventListener("pointerenter", (e) => (hovered = e.pointerType === "mouse"));
+    wheel.addEventListener("pointerleave", () => (hovered = false));
 
-    if (reduceMotion || filled < 2) return;
+    if (reduceMotion) return;
     let visible = false;
     // Also false while this wheel's tab is hidden.
     new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(wheel);
     setInterval(() => {
       const idle = performance.now() - lastUse > IDLE_AFTER_USE;
-      if (visible && idle && !hovered && !pressed && !document.hidden) select((current + 1) % filled);
+      if (visible && idle && !hovered && !dragging && !document.hidden) moveTo(snap(target) - step);
     }, AUTO_EVERY);
   });
 </script>
@@ -138,29 +198,36 @@ const pad = (n: number) => String(n).padStart(2, "0");
 <style>
   .gw {
     --slot-bg: color-mix(in srgb, var(--color-paper) 45%, white);
+    --turn: 0deg;
     position: relative;
     width: min(100%, 460px);
     aspect-ratio: 1;
     margin-inline: auto;
     user-select: none;
-    /* Vertical swipes still scroll the page. */
-    touch-action: pan-y;
+    /* The ring spins under a finger instead of scrolling the page; the centre still scrolls. */
+    touch-action: none;
+    cursor: grab;
+  }
+  .gw.is-dragging {
+    cursor: grabbing;
   }
   :global([data-theme="dark"]) .gw {
     --slot-bg: color-mix(in srgb, var(--color-paper) 90%, white);
   }
+  .dial {
+    position: absolute;
+    inset: 0;
+    rotate: var(--turn);
+  }
   .slot {
-    fill: transparent;
+    fill: var(--slot-bg);
     stroke: var(--color-line);
-    stroke-dasharray: 3 4;
     transition:
       fill 0.2s ease,
       stroke 0.2s ease;
   }
-  .slot[data-filled] {
-    fill: var(--slot-bg);
-    stroke-dasharray: none;
-    cursor: pointer;
+  .slot:hover {
+    stroke: var(--color-ink);
   }
   .slot[data-active] {
     fill: var(--color-ink);
@@ -173,6 +240,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
     width: 11%;
     aspect-ratio: 1;
     translate: -50% -50%;
+    /* Stays upright while the dial turns. */
+    rotate: calc(var(--turn) * -1);
     border-radius: 50%;
     pointer-events: none;
     transition: background-color 0.2s ease;
@@ -183,10 +252,23 @@ const pad = (n: number) => String(n).padStart(2, "0");
   .slot-logo :global(img) {
     -webkit-user-drag: none;
   }
+  /* The selector: a small notch above the ring pointing at the picked slot. */
+  .marker {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50% -60%;
+    width: 0;
+    height: 0;
+    border-inline: 7px solid transparent;
+    border-top: 9px solid var(--color-ink);
+    pointer-events: none;
+  }
   .hub {
     position: absolute;
     inset: 30%;
-    pointer-events: none;
+    border-radius: 50%;
+    touch-action: pan-y;
   }
   .hub-item {
     position: absolute;
@@ -196,6 +278,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     align-items: center;
     justify-content: center;
     text-align: center;
+    pointer-events: none;
     opacity: 0;
     translate: 0 6px;
     transition:
