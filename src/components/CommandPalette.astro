@@ -11,9 +11,10 @@ const commands: Command[] = [
   { label: "Selected Work", group: "Go to", action: "goto", value: "work" },
   ...(site.archive.show ? [{ label: site.archive.title, group: "Go to", action: "goto", value: "archive" }] : []),
   { label: "Contact", group: "Go to", action: "goto", value: "contact" },
+  { label: "Chat with me (AI)", group: "Action", action: "chat", value: "" },
   ...(isSet(site.email) ? [{ label: "Copy email address", group: "Action", action: "copy", value: site.email }] : []),
-  { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
   { label: "Light theme", group: "Theme", action: "theme", value: "light" },
+  { label: "Dark theme", group: "Theme", action: "theme", value: "dark" },
   ...socials.filter((s) => isSet(s.href)).map((s) => ({ label: s.label, group: "Link", action: "link", value: s.href })),
 ];
 ---
@@ -142,6 +143,8 @@ const commands: Command[] = [
     } else if (action === "theme") {
       const theme = themes.find((t) => t === value);
       if (theme) setTheme(theme);
+    } else if (action === "chat") {
+      document.dispatchEvent(new Event("chat:open"));
     } else if (action === "link") {
       window.open(value, value.startsWith("/") ? "_self" : "_blank", "noopener");
     }
