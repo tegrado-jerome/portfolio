@@ -1,8 +1,7 @@
 ---
-// The page scrollbar drawn as a terminal block (btop / lazygit): a █-style thumb on an invisible track, matching the
-// boot screen's progress bar. The same on every device and browser.
+// The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
+// matching the boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
-// It shows while scrolling and fades out a second after.
 ---
 
 <div class="tui-scroll" data-tui-scroll aria-hidden="true">
@@ -28,7 +27,7 @@
     bottom: 6px;
     z-index: 36;
     display: block;
-    width: 10px;
+    width: 6px;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -39,11 +38,13 @@
       bottom: 38px;
     }
   }
-  /* Only the thumb shows. The track is invisible but still takes clicks. The thumb is drawn in CSS rather than
-     with █ glyphs, which the web font doesn't have: solid rows with a 1px gap. */
+  /* Drawn in CSS rather than with ░ █ glyphs, which the web font doesn't have: a 2px dither for the track,
+     solid rows with a 1px gap for the thumb. */
   .track {
     position: absolute;
     inset: 0;
+    background: repeating-conic-gradient(var(--color-muted) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+    opacity: 0.3;
     cursor: pointer;
   }
   .bar {
@@ -55,14 +56,12 @@
     /* Dragging the thumb on a touch screen moves the bar, not the page. */
     touch-action: none;
     --color-bar: var(--color-ink);
-    /* Hidden at rest, like macOS and phone scrollbars: it only shows while the page scrolls or the thumb is dragged. */
-    opacity: 0;
-    transition: opacity 0.4s ease;
   }
-  .tui-scroll.is-active .bar,
-  .bar.is-dragging {
-    opacity: 1;
-    transition-duration: 0.15s;
+  /* A wider invisible grab area, since the bar itself is thin. */
+  .bar::before {
+    content: "";
+    position: absolute;
+    inset: 0 -6px;
   }
   .bar.is-dragging {
     --color-bar: var(--color-accent);
@@ -110,13 +109,9 @@
     }
 
     let queued = false;
-    let idle = 0;
     addEventListener(
       "scroll",
       () => {
-        root!.classList.add("is-active");
-        clearTimeout(idle);
-        idle = window.setTimeout(() => root!.classList.remove("is-active"), 1000);
         if (queued) return;
         queued = true;
         requestAnimationFrame(() => {
