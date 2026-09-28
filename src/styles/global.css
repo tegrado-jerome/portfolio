@@ -37,9 +37,13 @@
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--color-ink) 30%, transparent) transparent;
   }
+  /* The page only ever scrolls vertically: nothing can pan it sideways on any screen,
+     and touch gestures (like spinning the skill wheel) can't drag it left or right. */
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    overflow-x: clip;
+    touch-action: pan-y pinch-zoom;
   }
   body {
     @apply bg-paper text-ink font-sans antialiased;
