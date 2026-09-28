@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { site } from "../data/site";
+---
+
+<Layout title={`Page not found — ${site.name}`}>
+  <main id="main" class="shell grid min-h-svh content-center gap-6">
+    <h1 class="font-serif text-[clamp(56px,10vw,144px)] leading-[0.9] font-normal">Lost the thread.</h1>
+    <p class="text-[15px] text-ink-soft">This page doesn’t exist. <a href="/" class="brush">Back to the start</a>.</p>
+  </main>
+</Layout>

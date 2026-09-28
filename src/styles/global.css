@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #faf8f4;
+  --color-ink: #13151b;
+  --color-ink-soft: #3b3d44;
+  --color-muted: #75736d;
+  --color-line: #e4e0d8;
+  --color-ph: #ece8e0;
+  --color-accent: #c2461f;
+  --color-night: #15171c;
+
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.55;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    @apply bg-ink text-paper;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@utility shell {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 11vw, 200px);
+}
+
+/* Small uppercase label used in nav, metadata and footer */
+@utility eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Hand-painted brush underline; turns accent on hover */
+@utility brush {
+  padding-bottom: 0.12em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23c9c3b8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 100% 0.42em;
+  transition: color 0.2s ease;
+  &:hover {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M5 9C45 5 85 10 120 7c30-2 62 2 77 0l-1 3c-30 2-70-1-97 1-36 2-66-1-94 0Z' fill='%23c2461f'/%3E%3C/svg%3E");
+  }
+}
+
+/* Canvas injected by src/scripts/ascii-lens.ts */
+.ascii-lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+:hover > .ascii-lens {
+  opacity: 1;
+}
+
+/* Scroll reveal — only active when JS has run, so content is never hidden without it */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
