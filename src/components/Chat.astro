@@ -1,5 +1,5 @@
 ---
-import { faArrowTurnDown, faChevronUp, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowTurnDown, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import { site } from "../data/site";
 import Icon from "./Icon.astro";
@@ -30,9 +30,19 @@ import Icon from "./Icon.astro";
 
 <aside id="chat" class="sheet" role="dialog" aria-labelledby="chat-title" tabindex="-1">
   <p id="chat-keys" class="sr-only">Enter to send, Shift and Enter for a new line, Escape to close.</p>
-  <!-- Phones: when a reply shows part of the page, the sheet drops to half height (like Apple and Google Maps);
-       this handle brings it back up. -->
-  <button type="button" data-chat-expand class="grab" aria-label="Show the whole chat"><span></span></button>
+  <!-- Phones: when a reply shows part of the page, the chat shrinks to this bar (a tmux-style status line), the latest
+       reply and the input, and the page shows above. Tapping the bar brings the whole chat back. -->
+  <div class="peek-bar">
+    <button type="button" data-chat-expand class="peek-open">
+      <span class="peek-dot" aria-hidden="true"></span>
+      <span class="truncate">showing <span data-peek-path>~/</span></span>
+      <span class="peek-more" aria-hidden="true">▲ full chat</span>
+      <span class="sr-only">, show the whole chat</span>
+    </button>
+    <button type="button" data-chat-close class="peek-close" aria-label="Close chat">
+      <Icon icon={faXmark} class="text-[13px]" />
+    </button>
+  </div>
   <!-- Laid out like Messenger's chat header: photo with an online dot, name, status underneath. -->
   <header class="flex items-center justify-between border-b border-line pb-4">
     <div class="flex items-center gap-3">
@@ -54,10 +64,6 @@ import Icon from "./Icon.astro";
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <!-- Phones, while the chat is at half height: back to full screen. -->
-      <button type="button" data-chat-expand class="expand -m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Full screen chat">
-        <Icon icon={faChevronUp} class="text-[14px]" />
-      </button>
       <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
         <Icon icon={faXmark} class="text-[15px]" />
       </button>
@@ -483,15 +489,20 @@ import Icon from "./Icon.astro";
     }
     /* Room under the page while the sheet is down, so even the last section (contact) can scroll up above it. */
     :global(html.chat-peek body) {
-      padding-bottom: 50vh;
+      padding-bottom: 40vh;
     }
     .sheet[data-peek] {
-      top: 50%;
+      top: 64%;
       padding-top: 0;
-      border-top: 1px solid var(--color-line);
       box-shadow: 0 -16px 40px -24px rgb(0 0 0 / 0.35);
     }
-    /* Growing and shrinking between full and half height eases like the slide in. */
+    .sheet[data-peek] > header {
+      display: none;
+    }
+    .sheet[data-peek] .peek-bar {
+      display: flex;
+    }
+    /* Growing and shrinking between full height and the bar eases like the slide in. */
     .sheet.is-resizing {
       transition:
         transform 0.5s var(--ease-sheet),
@@ -499,35 +510,46 @@ import Icon from "./Icon.astro";
         height 0.45s var(--ease-sheet),
         visibility 0s;
     }
-    .sheet[data-peek] .grab,
-    .sheet[data-peek] .expand {
-      display: block;
-    }
   }
-  .expand {
+  /* Inverted like the site's status bar: a green dot, what the page is showing, and the way back up. */
+  .peek-bar {
     display: none;
+    margin-inline: -20px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: var(--text-small);
   }
-  .grab {
-    display: none;
-    width: 100%;
-    padding: 10px 0 12px;
+  .peek-open {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 12px 8px 12px 20px;
+    text-align: left;
     cursor: pointer;
   }
-  .grab span {
-    display: block;
-    width: 36px;
-    height: 4px;
-    margin: 0 auto;
-    border-radius: 2px;
-    background: var(--color-line);
-    transition: background 0.2s ease;
+  .peek-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-online);
   }
-  .grab:hover span,
-  .grab:focus-visible span {
-    background: var(--color-muted);
+  .peek-more {
+    flex: none;
+    margin-left: auto;
+    opacity: 0.8;
   }
-  .grab:focus-visible {
-    outline: none;
+  .peek-close {
+    padding: 0 20px 0 12px;
+    opacity: 0.8;
+    cursor: pointer;
+  }
+  .peek-open:focus-visible,
+  .peek-close:focus-visible {
+    outline: 2px solid var(--color-online);
+    outline-offset: -2px;
   }
   @media (prefers-reduced-motion: reduce) {
     .sheet.is-resizing {
@@ -590,11 +612,13 @@ import Icon from "./Icon.astro";
     fitToViewport();
   }
 
-  // Phones: half height with the page showing above (Apple and Google Maps do this for results on the map), or
-  // back to full screen. While it's down the page scrolls freely, and scrolling to a part of it keeps clear of the
-  // sheet.
-  const PEEK = 0.5; // share of the screen the sheet keeps
-  function setPeek(peek: boolean) {
+  // Phones: shrunk to the status bar with the page showing above (Apple and Google Maps do this for results on the
+  // map), or back to full screen. While it's down the page scrolls freely, and scrolling to a part of it keeps clear
+  // of the sheet.
+  const PEEK = 0.36; // share of the screen the sheet keeps
+  const peekPath = sheet.querySelector<HTMLElement>("[data-peek-path]")!;
+  function setPeek(peek: boolean, target?: string) {
+    if (target) peekPath.textContent = target === "top" ? "~/" : `~/${target}`;
     if (sheet.hasAttribute("data-peek") === peek) return;
     sheet.classList.add("is-resizing");
     setTimeout(() => sheet.classList.remove("is-resizing"), 500);
@@ -754,12 +778,12 @@ import Icon from "./Icon.astro";
     chip.className = "show-chip tui-btn inline-flex";
     chip.textContent = `[ cd ~/${target === "top" ? "" : target} ]`;
     chip.addEventListener("click", () => {
-      if (phone.matches) setPeek(true);
+      if (phone.matches) setPeek(true, target);
       pointTo(target);
     });
     bubble.append(chip);
     if (!auto) return;
-    if (phone.matches) setPeek(true);
+    if (phone.matches) setPeek(true, target);
     pointTo(target);
   }
 
@@ -881,17 +905,15 @@ import Icon from "./Icon.astro";
   );
 
   openers.forEach((b) => b.addEventListener("click", () => setOpen(!sheet.hasAttribute("data-open"))));
-  sheet.querySelector("[data-chat-close]")!.addEventListener("click", () => setOpen(false));
+  sheet.querySelectorAll("[data-chat-close]").forEach((b) => b.addEventListener("click", () => setOpen(false)));
   sheet.querySelectorAll("[data-chat-expand]").forEach((b) => b.addEventListener("click", () => setPeek(false)));
-  // Swiping up on the top of the half-height sheet (handle or header) brings it back to full screen.
-  const top = sheet.querySelector<HTMLElement>("header")!;
+  // Swiping up on the status bar brings the chat back to full screen too.
+  const bar = sheet.querySelector<HTMLElement>(".peek-bar")!;
   let swipeY = 0;
-  for (const el of [sheet.querySelector<HTMLElement>(".grab")!, top]) {
-    el.addEventListener("touchstart", (e) => (swipeY = e.touches[0].clientY), { passive: true });
-    el.addEventListener("touchend", (e) => {
-      if (swipeY - e.changedTouches[0].clientY > 30) setPeek(false);
-    });
-  }
+  bar.addEventListener("touchstart", (e) => (swipeY = e.touches[0].clientY), { passive: true });
+  bar.addEventListener("touchend", (e) => {
+    if (swipeY - e.changedTouches[0].clientY > 30) setPeek(false);
+  });
   sheet.addEventListener("keydown", (e) => {
     if (e.key === "Escape") setOpen(false);
   });
