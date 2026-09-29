@@ -212,25 +212,64 @@
   }
 }
 
-/* A card the chat or the hero prompt points at (src/scripts/point.ts): a thin accent frame blinks twice and fades. */
-.is-pointed {
-  animation: pointed 2.4s var(--ease-out-soft);
+/* A card the chat points at (src/scripts/point.ts): accent crop marks fly in from outside, frame it with a faint
+   tint, then fade. Same marks as the hero portrait's. */
+.point-frame {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-accent) 0%, transparent);
+  animation: point-frame 3.2s var(--ease-out-soft) forwards;
 }
-@keyframes pointed {
-  0%,
-  100% {
-    outline: 1px solid transparent;
-    outline-offset: 10px;
+.point-frame span {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid var(--color-accent);
+  animation: point-mark 0.9s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+.point-frame .tl {
+  top: -10px;
+  left: -10px;
+  border-width: 2px 0 0 2px;
+  --x: -40px;
+  --y: -40px;
+}
+.point-frame .tr {
+  top: -10px;
+  right: -10px;
+  border-width: 2px 2px 0 0;
+  --x: 40px;
+  --y: -40px;
+}
+.point-frame .bl {
+  bottom: -10px;
+  left: -10px;
+  border-width: 0 0 2px 2px;
+  --x: -40px;
+  --y: 40px;
+}
+.point-frame .br {
+  right: -10px;
+  bottom: -10px;
+  border-width: 0 2px 2px 0;
+  --x: 40px;
+  --y: 40px;
+}
+@keyframes point-mark {
+  from {
+    opacity: 0;
+    translate: var(--x) var(--y);
   }
+}
+@keyframes point-frame {
   15%,
-  45%,
   70% {
-    outline: 1px solid var(--color-accent);
-    outline-offset: 8px;
+    background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+    opacity: 1;
   }
-  30% {
-    outline: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
-    outline-offset: 8px;
+  to {
+    opacity: 0;
   }
 }
 

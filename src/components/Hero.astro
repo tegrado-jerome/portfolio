@@ -10,8 +10,10 @@ import Icon from "./Icon.astro";
      On phones the portrait comes first, so visitors see who this is before the name. -->
 <!-- Fills the first screen below the header, so nothing else shows until you scroll. -->
 <section id="top" class="hero relative shell flex min-h-[calc(100svh-65px)] flex-col justify-center py-[clamp(32px,5vw,72px)] sm:min-h-[calc(100svh-73px)]" aria-labelledby="hero-title">
-  <!-- A faint dot grid that only lights up around the mouse (after brittanychiang.com's spotlight). Mouse only. -->
-  <div class="dots" aria-hidden="true"></div>
+  <!-- A faint dot grid behind the hero that lights up around the mouse (after brittanychiang.com's spotlight).
+       The glow is mouse only; the faint grid shows everywhere. -->
+  <div class="dots dots-base" aria-hidden="true"></div>
+  <div class="dots dots-lit" aria-hidden="true"><div class="dots dots-core"></div></div>
   <!-- The status bar names this pane "jerome-tegrado". -->
   <div data-pane="jerome-tegrado" class="relative">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
@@ -291,12 +293,26 @@ import Icon from "./Icon.astro";
     left: calc(50% - 50vw);
     width: 100vw;
     pointer-events: none;
+    --dot: color-mix(in srgb, var(--color-ink) 16%, transparent);
+    background: radial-gradient(circle, var(--dot) 1.2px, transparent 1.6px) 0 0 / 24px 24px;
+  }
+  /* Fades out toward the edges, so the grid sits behind the name and portrait instead of filling the screen. */
+  .dots-base {
+    mask: radial-gradient(ellipse 75% 70% at 50% 50%, #000 20%, transparent 80%);
+  }
+  /* Around the mouse: darker dots, and accent-blue ones right at the centre. */
+  .dots-lit {
+    --dot: color-mix(in srgb, var(--color-ink) 65%, transparent);
+    mask: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), #000, rgb(0 0 0 / 0.4) 45%, transparent 80%);
     opacity: 0;
     transition: opacity 0.8s var(--ease-out-soft);
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-ink) 45%, transparent) 1.2px, transparent 1.6px) 0 0 / 24px 24px;
-    mask: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), #000, rgb(0 0 0 / 0.35) 45%, transparent 75%);
   }
-  .dots.is-lit {
+  .dots-core {
+    left: 0;
+    --dot: var(--color-accent);
+    mask: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), #000, transparent);
+  }
+  .dots-lit.is-lit {
     opacity: 1;
   }
   .out :global(button),
@@ -340,13 +356,16 @@ import Icon from "./Icon.astro";
   const askChat = (question: string) => {
     if (question.trim()) document.dispatchEvent(new CustomEvent("chat:ask", { detail: question }));
   };
-  // Guide text: types "type here!", holds, erases, and repeats. Reduced motion shows it still.
+  // Guide text: types each line, holds, erases, and moves on to the next, hinting at the shell commands too.
+  // Reduced motion shows the first line still.
   const guide = document.querySelector<HTMLElement>("[data-guide-text]");
   if (guide) {
-    const text = "type here!";
+    const lines = ["type here!", "ask me anything", "or type help"];
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      guide.textContent = text;
+      guide.textContent = lines[0];
     } else {
+      let line = 0;
+      let text = lines[0];
       let i = 0;
       let deleting = false;
       const step = () => {
@@ -358,6 +377,7 @@ import Icon from "./Icon.astro";
           delay = 2200;
         } else if (deleting && i === 0) {
           deleting = false;
+          text = lines[++line % lines.length];
           delay = 700;
         }
         setTimeout(step, delay);
@@ -431,7 +451,7 @@ import Icon from "./Icon.astro";
 
   // The dot grid follows the mouse, at most once per frame.
   const hero = document.querySelector<HTMLElement>(".hero");
-  const dots = hero?.querySelector<HTMLElement>(".dots");
+  const dots = hero?.querySelector<HTMLElement>(".dots-lit");
   if (hero && dots && matchMedia("(hover: hover) and (pointer: fine)").matches) {
     let queued = false;
     let x = 0;

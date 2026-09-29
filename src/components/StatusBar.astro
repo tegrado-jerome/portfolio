@@ -14,7 +14,7 @@ const builtAt = new Date().toISOString();
     <span aria-hidden="true"><kbd>↑↓</kbd> panes</span>
     <button type="button" data-status-ask aria-label="Ask my AI"><kbd aria-hidden="true">/</kbd> ask</button>
     <button type="button" data-palette-open aria-label="Open command menu"><kbd aria-hidden="true">⌘K</kbd> menu</button>
-    <span aria-hidden="true" title="My local time">ph <time data-status-clock class="text-ink tabular-nums"></time></span>
+    <span aria-hidden="true" title="My local time"><span class="live"></span>ph <time data-status-clock class="text-ink tabular-nums"></time></span>
   </span>
 </div>
 
@@ -56,6 +56,30 @@ const builtAt = new Date().toISOString();
     border-radius: 2px;
     color: var(--color-ink);
     font: inherit;
+  }
+  /* A small "live" dot next to my local time that pulses slowly, like a status LED. */
+  .live {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--color-online);
+    vertical-align: 1px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .live {
+      animation: live 2.4s ease-in-out infinite;
+    }
+  }
+  @keyframes live {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-online) 50%, transparent);
+    }
+    60% {
+      box-shadow: 0 0 0 5px transparent;
+    }
   }
   button:hover {
     color: var(--color-ink);
