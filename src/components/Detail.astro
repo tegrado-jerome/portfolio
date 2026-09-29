@@ -1,0 +1,63 @@
+---
+// The full view of one card (project, award, certification), kept in a <template> inside the card and shown in
+// DetailModal when the card is clicked.
+import { faArrowUpRightFromSquare, faLock } from "@fortawesome/free-solid-svg-icons";
+import Icon from "./Icon.astro";
+
+interface Props {
+  /** ~/path shown at the top, e.g. "projects/website-redesign". */
+  path: string;
+  title: string;
+  meta: string[];
+  image?: string;
+  imageAlt?: string;
+  placeholder: string;
+  text?: string[];
+  tags?: string[];
+  locked?: boolean;
+  lockedNote?: string;
+  link?: { href: string; label: string };
+}
+
+const { path, title, meta, image, imageAlt, placeholder, text = [], tags = [], locked, lockedNote, link } = Astro.props;
+---
+
+<template data-detail>
+  <p class="detail-path text-small"><span class="text-accent">~/</span>{path}</p>
+  <figure class="relative m-0 mt-4 grid aspect-[16/10] place-items-center overflow-hidden rounded-[2px] bg-ph">
+    {
+      image ? (
+        <img src={image} alt={imageAlt ?? ""} decoding="async" class="size-full object-contain" />
+      ) : (
+        <span class="eyebrow text-muted">[{placeholder}]</span>
+      )
+    }
+  </figure>
+  <h2 data-detail-title class="mt-6 text-heading font-normal">{title}</h2>
+  <p class="text-small text-muted tabular-nums">{meta.filter(Boolean).join(" · ")}</p>
+  {
+    locked && (
+      <p class="mt-4 inline-flex items-center gap-1.5 rounded-[2px] bg-ink px-3 py-1.5 eyebrow text-paper">
+        <Icon icon={faLock} class="text-[11px]" />
+        Classified{lockedNote && ` · ${lockedNote}`}
+      </p>
+    )
+  }
+  {text.map((t) => <p class="mt-3 text-body text-ink-soft">{t}</p>)}
+  {
+    tags.length > 0 && (
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {tags.map((t) => (
+          <li class="rounded-[2px] border border-line px-2 py-1 eyebrow text-muted">{t}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    link && (
+      <a href={link.href} target="_blank" rel="noopener noreferrer" class="detail-link tui-btn mt-6 inline-flex">
+        [ {link.label} <Icon icon={faArrowUpRightFromSquare} class="text-[11px]" /> ]
+      </a>
+    )
+  }
+</template>

@@ -1,5 +1,6 @@
 ---
 import { certifications } from "../data/certifications";
+import { isSet } from "../data/placeholders";
 import CredentialGrid from "./CredentialGrid.astro";
 
 const entries = certifications.map((c) => ({
@@ -9,7 +10,9 @@ const entries = certifications.map((c) => ({
   image: c.image,
   imageAlt: c.imageAlt,
   caption: c.issuer,
+  issuer: c.issuer,
+  details: isSet(c.credentialId) ? [`Credential ID: ${c.credentialId}`] : [],
 }));
 ---
 
-<CredentialGrid id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" />
+<CredentialGrid id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" linkLabel="verify" />

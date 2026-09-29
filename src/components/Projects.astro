@@ -13,11 +13,11 @@ function layout(i: number) {
 }
 ---
 
-<section id="work" class="shell section" aria-labelledby="work-title">
-  <div class="pane" data-pane="selected-work">
-  <SectionHead id="work-title" title="Selected Work" />
+<section id="projects" class="shell section" aria-labelledby="projects-title">
+  <div class="pane" data-pane="projects">
+  <SectionHead id="projects-title" title="Projects" />
   <div class="card-grid grid items-start md:grid-cols-12">
-    {projects.map((project, i) => <Project project={project} index={i} class:list={layout(i)} />)}
+    {projects.map((project, i) => <Project project={project} class:list={layout(i)} />)}
   </div>
   </div>
 </section>

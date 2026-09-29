@@ -1,42 +1,28 @@
 ---
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import type { Project } from "../data/projects";
+import { isSet } from "../data/placeholders";
+import Detail from "./Detail.astro";
 import Icon from "./Icon.astro";
 
 interface Props {
   project: Project;
-  index: number;
   class?: string;
 }
 
-const { project, index, class: className } = Astro.props;
-const number = String(index + 1).padStart(2, "0");
-const isExternal = !!project.href && /^https?:\/\//.test(project.href);
-const linkAttrs = isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
-const href = project.locked ? "" : project.href;
-const MediaTag = href ? "a" : "div";
+const { project, class: className } = Astro.props;
+const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
+const href = !project.locked && isSet(project.href) ? project.href : undefined;
 ---
 
-<!-- Reference-style card: cover, title and one line. Other project data feeds structured data. -->
-<article data-reveal class:list={["card flex flex-col", className]}>
-  <MediaTag
-    href={href || undefined}
-    {...href && linkAttrs}
-    aria-label={href ? project.title : undefined}
-    tabindex={href ? -1 : undefined}
-    class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph"
-    data-locked={project.locked ? "" : undefined}
-  >
+<!-- Reference-style card: cover, title and one line. The whole card opens the full project in a modal. -->
+<article data-reveal class:list={["card relative flex flex-col", className]}>
+  <div class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph">
     {
       project.image ? (
         <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img size-full object-cover" />
       ) : (
-        <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <span class="text-display font-medium tracking-[-0.045em] text-ink/15" aria-hidden="true">
-            {number}
-          </span>
-          <span class="eyebrow text-muted">[PROJECT IMAGE]</span>
-        </div>
+        <span class="eyebrow absolute inset-0 grid place-items-center text-muted">[PROJECT IMAGE]</span>
       )
     }
     {
@@ -50,23 +36,36 @@ const MediaTag = href ? "a" : "div";
         </span>
       )
     }
-  </MediaTag>
+  </div>
 
-  <!-- The same order as every card on the site: title, the muted meta line, then the text. The tools stay in the data
-       for structured data, llms.txt and the chat. -->
+  <!-- The same order as every card on the site: title, the muted meta line, then the text. -->
   <div class="pt-4">
     <h3 class="text-heading font-normal">
-      {href ? <a href={href} {...linkAttrs} class="link-strong">{project.title}</a> : project.title}
+      <button type="button" data-detail-open class="link-strong cursor-pointer text-left after:absolute after:inset-0 after:content-['']">
+        {project.title}
+      </button>
     </h3>
-    <p class="text-small text-muted tabular-nums">
-      <span class="text-accent">{number}</span> · {project.category} · {project.year}
-    </p>
+    <p class="text-small text-muted tabular-nums">{project.category} · {project.year}</p>
     <p class="mt-2 text-body text-ink-soft">{project.description}</p>
   </div>
+
+  <Detail
+    path={`projects/${slug}`}
+    title={project.title}
+    meta={[project.category, project.year]}
+    image={project.image}
+    imageAlt={project.imageAlt}
+    placeholder="PROJECT IMAGE"
+    text={[project.description]}
+    tags={project.technologies.filter(Boolean)}
+    locked={project.locked}
+    lockedNote={project.lockedNote}
+    link={href ? { href, label: "visit" } : undefined}
+  />
 </article>
 
 <style>
-  .media[data-locked]:hover .lock {
+  .card:hover .lock {
     opacity: 1;
   }
 </style>

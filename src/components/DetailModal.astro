@@ -1,0 +1,110 @@
+---
+// One modal for every card (projects, awards, certifications): a click copies that card's <template data-detail>
+// (see Detail.astro) in here. Styled like the command menu; closes with the button, Escape or a click outside.
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import Icon from "./Icon.astro";
+---
+
+<dialog id="detail" class="detail" aria-labelledby="detail-title">
+  <div class="detail-panel">
+    <button type="button" data-detail-close class="tui-btn absolute top-3 right-3 inline-flex" aria-label="Close">
+      [ <Icon icon={faXmark} class="text-[12px]" /> esc ]
+    </button>
+    <div data-detail-body></div>
+  </div>
+</dialog>
+
+<style>
+  .detail {
+    width: min(640px, calc(100% - 32px));
+    max-width: none;
+    max-height: calc(100svh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: 0 24px 60px -20px rgb(20 20 20 / 0.3);
+    overscroll-behavior: contain;
+  }
+  .detail-panel {
+    position: relative;
+    padding: clamp(20px, 4vw, 32px);
+  }
+  /* The path line leaves room for the close button on its right. */
+  .detail :global(.detail-path) {
+    padding-right: 96px;
+    overflow-wrap: anywhere;
+  }
+  .detail :global(.detail-link) {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .detail :global(.detail-link:hover) {
+    background: var(--color-accent);
+  }
+  .detail::backdrop {
+    background: rgb(20 20 20 / 0.35);
+  }
+  /* The page behind stays put while the modal is open. */
+  :global(html:has(.detail[open])) {
+    overflow: hidden;
+  }
+  /* Rises and fades in, and fades back out on close. */
+  @media (prefers-reduced-motion: no-preference) {
+    .detail,
+    .detail::backdrop {
+      transition:
+        opacity 0.3s var(--ease-out-soft),
+        translate 0.3s var(--ease-out-soft),
+        scale 0.3s var(--ease-out-soft),
+        overlay 0.3s allow-discrete,
+        display 0.3s allow-discrete;
+      opacity: 0;
+    }
+    .detail {
+      translate: 0 12px;
+      scale: 0.98;
+    }
+    .detail[open],
+    .detail[open]::backdrop {
+      opacity: 1;
+      translate: 0 0;
+      scale: 1;
+    }
+    @starting-style {
+      .detail[open],
+      .detail[open]::backdrop {
+        opacity: 0;
+      }
+      .detail[open] {
+        translate: 0 12px;
+        scale: 0.98;
+      }
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("#detail")!;
+  const body = dialog.querySelector<HTMLElement>("[data-detail-body]")!;
+
+  document.querySelectorAll<HTMLElement>("[data-detail-open]").forEach((trigger) =>
+    trigger.addEventListener("click", () => {
+      const template = trigger.closest(".card")?.querySelector<HTMLTemplateElement>("template[data-detail]");
+      if (!template) return;
+      body.replaceChildren(template.content.cloneNode(true));
+      body.querySelector("[data-detail-title]")!.id = "detail-title";
+      dialog.showModal();
+      dialog.scrollTop = 0;
+      // Focus the close button without the ring a mouse click shouldn't show.
+      dialog.querySelector<HTMLElement>("[data-detail-close]")!.focus({ focusVisible: false } as FocusOptions);
+    }),
+  );
+  dialog.querySelector("[data-detail-close]")!.addEventListener("click", () => dialog.close());
+  // A click on the dimmed area outside the panel closes it.
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>
