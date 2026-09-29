@@ -1,16 +1,19 @@
 ---
 import { faArrowTurnDown } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
-import { site } from "../data/site";
+import { contactHref, site } from "../data/site";
+import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
 ---
 
 <!-- Text on the left, portrait on the right, top-aligned: the reference's layout (adikrz.netlify.app).
      On phones the portrait comes first, so visitors see who this is before the name. -->
 <!-- Fills the first screen below the header, so nothing else shows until you scroll. -->
-<section id="top" class="shell flex min-h-[calc(100svh-65px)] flex-col justify-center py-[clamp(32px,5vw,72px)] sm:min-h-[calc(100svh-73px)]" aria-labelledby="hero-title">
+<section id="top" class="hero relative shell flex min-h-[calc(100svh-65px)] flex-col justify-center py-[clamp(32px,5vw,72px)] sm:min-h-[calc(100svh-73px)]" aria-labelledby="hero-title">
+  <!-- A faint dot grid that only lights up around the mouse (after brittanychiang.com's spotlight). Mouse only. -->
+  <div class="dots" aria-hidden="true"></div>
   <!-- The status bar names this pane "jerome-tegrado". -->
-  <div data-pane="jerome-tegrado">
+  <div data-pane="jerome-tegrado" class="relative">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
     <!-- One column (phones and small tablets): everything centred on the portrait's axis. -->
     <div class="max-w-[640px] max-md:mx-auto max-md:text-center">
@@ -39,7 +42,13 @@ import Icon from "./Icon.astro";
       <!-- Ask-my-AI bar as a terminal line (after Warp / v0): a mono prompt with a blinking block cursor.
            It sends the question straight into the chat. Needs JS, so it stays hidden without it. -->
       <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] max-md:mx-auto in-[.js]:block">
-        <form data-hero-ask class="ask term flex text-left items-center gap-2 rounded-[4px] border border-line py-1.5 pr-1.5 pl-4 font-mono text-[16px]">
+        <!-- The data-* values feed the prompt's shell commands (whoami, cat resume, sudo hire jerome). -->
+        <form
+          data-hero-ask
+          data-headline={site.headline}
+          data-contact={contactHref}
+          data-resume={isSet(site.resume) ? site.resume : ""}
+          class="ask term flex text-left items-center gap-2 rounded-[4px] border border-line py-1.5 pr-1.5 pl-4 font-mono text-[16px]">
           <span class="inline-flex shrink-0 gap-[1ch] whitespace-nowrap" aria-hidden="true">
             <span class="text-accent">jerome@ai</span>
             <span class="text-muted">~</span>
@@ -69,7 +78,9 @@ import Icon from "./Icon.astro";
             <kbd class="key"><Icon icon={faArrowTurnDown} class="rotate-90 text-[12px]" /></kbd>
           </button>
         </form>
-        <p class="mt-2.5 font-mono text-small text-muted">
+        <!-- Output of the prompt's few shell commands (help, ls, cd…); it takes the "try" hint's place. -->
+        <p data-hero-out hidden aria-live="polite" class="out mt-2.5 font-mono text-small text-muted"></p>
+        <p data-hero-try class="mt-2.5 font-mono text-small text-muted">
           try:
           {
             assistant.suggestions.slice(0, 1).map((q) => (
@@ -78,6 +89,7 @@ import Icon from "./Icon.astro";
               </button>
             ))
           }
+          <span class="max-sm:hidden"> · or <button type="button" data-hero-cmd class="try link-strong">help</button></span>
         </p>
       </div>
 
@@ -273,6 +285,29 @@ import Icon from "./Icon.astro";
   .send:not(:disabled):hover .key {
     border-color: var(--color-ink);
   }
+  .dots {
+    position: absolute;
+    inset-block: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-out-soft);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-ink) 45%, transparent) 1.2px, transparent 1.6px) 0 0 / 24px 24px;
+    mask: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), #000, rgb(0 0 0 / 0.35) 45%, transparent 75%);
+  }
+  .dots.is-lit {
+    opacity: 1;
+  }
+  .out :global(button),
+  .out :global(a) {
+    color: var(--color-ink);
+    transition: color 0.2s ease;
+  }
+  .out :global(button:hover),
+  .out :global(a:hover) {
+    color: var(--color-accent);
+  }
   /* The quick question reads as a "try" hint with a dotted underline. */
   .try {
     border-bottom: 1px dotted var(--color-muted);
@@ -284,6 +319,7 @@ import Icon from "./Icon.astro";
 
 <script>
   import { asciiLens } from "../scripts/ascii-lens";
+  import { pointTo } from "../scripts/point";
 
   const portrait = document.getElementById("portrait");
   const img = portrait?.querySelector("img");
@@ -330,15 +366,102 @@ import Icon from "./Icon.astro";
     }
   }
 
+  // A few shell commands work in the prompt, as a small easter egg for the terminal look. Anything else goes to the chat.
+  const out = document.querySelector<HTMLElement>("[data-hero-out]")!;
+  const tryLine = document.querySelector<HTMLElement>("[data-hero-try]")!;
+  const { headline = "", contact = "", resume = "" } = askForm?.dataset ?? {};
+  const sections = [...document.querySelectorAll<HTMLElement>("main section[id], footer[id]")]
+    .map((el) => el.id)
+    .filter((id) => id !== "top");
+
+  const cmd = (label: string, line = label) => {
+    const b = Object.assign(document.createElement("button"), { type: "button", textContent: label });
+    b.addEventListener("click", () => run(line));
+    return b;
+  };
+  const link = (label: string, href: string) =>
+    Object.assign(document.createElement("a"), { href, textContent: label, target: "_blank", rel: "noopener noreferrer" });
+  const join = (nodes: Node[], gap: string) => nodes.flatMap((n, i) => (i ? [gap, n] : [n]));
+
+  function print(...parts: (string | Node)[]) {
+    out.replaceChildren(...parts);
+    out.hidden = parts.length === 0;
+    tryLine.hidden = !out.hidden;
+  }
+
+  // Returns false when the line isn't a command, so it's sent to the chat instead.
+  function run(line: string) {
+    const input = line.trim().toLowerCase().replace(/\s+/g, " ");
+    const [name, ...args] = input.split(" ");
+    const arg = args.join(" ").replace(/^(~\/|\.\/)/, "").replace(/\/$/, "");
+    switch (name) {
+      case "help":
+        print(...join(["ls", "cd projects", "whoami", "cat resume", "sudo hire jerome"].map((c) => cmd(c)), " · "));
+        return true;
+      case "ls":
+        print(...join(sections.map((id) => cmd(`${id}/`, `cd ${id}`)), "  "));
+        return true;
+      case "cd":
+        if (!arg || arg === "~" || arg === "..") pointTo("top");
+        else if (!sections.includes(arg) || !pointTo(arg)) {
+          print(`cd: no such section: ${arg}. try `, cmd("ls"));
+          return true;
+        }
+        print();
+        return true;
+      case "pwd":
+        print("~/jerome-tegrado");
+        return true;
+      case "whoami":
+        print(headline.toLowerCase());
+        return true;
+      case "cat":
+        if (!arg.startsWith("resume")) return false;
+        print(...(resume ? ["resume.pdf: ", link("open", resume)] : ["resume.pdf is still compiling. my inbox isn't: ", link("let's talk", contact)]));
+        return true;
+      case "sudo":
+        print(...(arg === "hire jerome" ? ["access granted. ", link("[ let's talk ]", contact)] : ["nice try. this incident will be reported."]));
+        return true;
+      case "clear":
+        print();
+        return true;
+    }
+    return false;
+  }
+
+  // The dot grid follows the mouse, at most once per frame.
+  const hero = document.querySelector<HTMLElement>(".hero");
+  const dots = hero?.querySelector<HTMLElement>(".dots");
+  if (hero && dots && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    let queued = false;
+    let x = 0;
+    let y = 0;
+    hero.addEventListener("pointermove", (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const r = dots.getBoundingClientRect();
+        dots.style.setProperty("--mx", `${x - r.left}px`);
+        dots.style.setProperty("--my", `${y - r.top}px`);
+        dots.classList.add("is-lit");
+      });
+    });
+    hero.addEventListener("pointerleave", () => dots.classList.remove("is-lit"));
+  }
+
   // The send button only becomes active once there's something to send.
   const syncAskButton = () => (askButton!.disabled = askInput!.value.trim() === "");
   askInput?.addEventListener("input", syncAskButton);
   askForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    askChat(askInput!.value);
+    if (!run(askInput!.value)) askChat(askInput!.value);
     askInput!.value = "";
     syncAskButton();
   });
+  document.querySelector("[data-hero-cmd]")?.addEventListener("click", () => run("help"));
   document.querySelectorAll<HTMLButtonElement>("[data-hero-ask-chip]").forEach((chip) =>
     chip.addEventListener("click", () => askChat(chip.textContent ?? "")),
   );
