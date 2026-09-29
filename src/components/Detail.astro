@@ -22,7 +22,7 @@ interface Props {
 const { path, title, meta, image, imageAlt, placeholder, text = [], tags = [], locked, lockedNote, link } = Astro.props;
 ---
 
-<template data-detail>
+<template data-detail data-path={path}>
   <p class="detail-path text-small"><span class="text-accent">~/</span>{path}</p>
   <figure class="relative m-0 mt-4 grid aspect-[16/10] place-items-center overflow-hidden rounded-[2px] bg-ph">
     {

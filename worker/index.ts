@@ -1,6 +1,6 @@
 // Cloudflare Worker: serves the static site and the chat endpoint (/api/chat).
 // The Gemini API key lives only here, as a Worker secret — it never reaches the browser.
-import { CANARY, systemPrompt } from "./prompt";
+import { CANARY, showTargets, systemPrompt } from "./prompt";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -29,6 +29,8 @@ const SAFETY_CATEGORIES = [
 const RETRY_STATUSES = new Set([429, 500, 503, 504]);
 const RETRY_DELAYS_MS = [300, 800, 1500];
 const SYSTEM_PROMPT = systemPrompt();
+const SHOW_TARGETS = new Set(showTargets());
+const SHOW = /\[\[\s*show\s*:\s*([\w/-]+)\s*\]\]/gi;
 
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -90,7 +92,11 @@ async function chat(request: Request, env: Env): Promise<Response> {
   const reply = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("").trim();
   // Blocked prompts, empty replies and anything echoing the system prompt get a safe fallback.
   if (!reply || data.promptFeedback?.blockReason || reply.includes(CANARY)) return json({ reply: FALLBACK });
-  return json({ reply: withoutDashes(reply) });
+  // The page part to scroll to, only if it's one the site really has. The tag itself never reaches the visitor.
+  const show = [...reply.matchAll(SHOW)].map((m) => m[1].toLowerCase()).findLast((t) => SHOW_TARGETS.has(t));
+  const text = withoutDashes(reply.replace(SHOW, "").trim());
+  if (!text) return json({ reply: FALLBACK });
+  return json(show ? { reply: text, show } : { reply: text });
 }
 
 /** The site never shows em or en dashes; this catches any the model writes anyway. */

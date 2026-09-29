@@ -212,6 +212,28 @@
   }
 }
 
+/* A card the chat or the hero prompt points at (src/scripts/point.ts): a thin accent frame blinks twice and fades. */
+.is-pointed {
+  animation: pointed 2.4s var(--ease-out-soft);
+}
+@keyframes pointed {
+  0%,
+  100% {
+    outline: 1px solid transparent;
+    outline-offset: 10px;
+  }
+  15%,
+  45%,
+  70% {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 8px;
+  }
+  30% {
+    outline: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+    outline-offset: 8px;
+  }
+}
+
 /* Canvas injected by src/scripts/ascii-lens.ts */
 .ascii-lens {
   position: absolute;

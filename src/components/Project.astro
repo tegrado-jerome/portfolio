@@ -2,6 +2,7 @@
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import type { Project } from "../data/projects";
 import { isSet } from "../data/placeholders";
+import { slug as toSlug } from "../data/slug";
 import Detail from "./Detail.astro";
 import Icon from "./Icon.astro";
 
@@ -11,7 +12,7 @@ interface Props {
 }
 
 const { project, class: className } = Astro.props;
-const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
+const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
 ---
 

@@ -299,6 +299,11 @@ import Icon from "./Icon.astro";
   [data-chat-log] :global(.bubble th) {
     font-weight: 600;
   }
+  [data-chat-log] :global(.show-chip) {
+    height: 28px;
+    margin-left: -8px;
+    color: var(--color-accent);
+  }
   [data-chat-log] :global(.md-link) {
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -442,6 +447,7 @@ import Icon from "./Icon.astro";
 
 <script>
   import { markdown } from "../scripts/markdown";
+  import { findTarget, pointTo } from "../scripts/point";
 
   type Message = { role: "user" | "assistant"; content: string };
 
@@ -602,6 +608,22 @@ import Icon from "./Icon.astro";
     });
   }
 
+  // A reply that's about part of the page scrolls there (laptops and up, where the page shows beside the chat) and
+  // gets a chip to go back to it. On phones the chat covers the page, so the chip closes it first.
+  function showChip(bubble: HTMLElement, target: string, auto: boolean) {
+    if (!findTarget(target)) return;
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "show-chip tui-btn inline-flex";
+    chip.textContent = `[ cd ~/${target === "top" ? "" : target} ]`;
+    chip.addEventListener("click", () => {
+      if (phone.matches) setOpen(false);
+      pointTo(target);
+    });
+    bubble.append(chip);
+    if (auto && !phone.matches) pointTo(target);
+  }
+
   function message(role: Message["role"], bubble: HTMLElement) {
     const li = document.createElement("li");
     li.className = role === "user" ? "msg-user" : "msg-ai";
@@ -645,7 +667,7 @@ import Icon from "./Icon.astro";
         body: JSON.stringify({ messages: history.slice(-11) }),
         signal,
       });
-      const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
+      const data: { reply?: string; show?: string; error?: string } = await res.json().catch(() => ({}));
       if (!res.ok || !data.reply) throw new Error(data.error ?? "Chat's down right now. Try again later.");
       history.push({ role: "assistant", content: data.reply });
       await wait(MIN_REPLY_DELAY - (performance.now() - askedAt), signal);
@@ -655,6 +677,7 @@ import Icon from "./Icon.astro";
       text.className = "bubble";
       bubble().replaceWith(text);
       await typeOut(text, data.reply, signal);
+      if (data.show) showChip(text, data.show, !signal.aborted);
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid
       clearTimeout(showDots);
