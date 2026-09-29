@@ -503,6 +503,8 @@ import Icon from "./Icon.astro";
   const history: Message[] = [];
   let request: AbortController | null = null;
   let returnFocus: HTMLElement | null = null;
+  // Phones: the part of the page my last reply was about, shown as soon as the chat closes.
+  let showOnClose: string | null = null;
 
   function setOpen(open: boolean) {
     sheet.toggleAttribute("data-open", open);
@@ -516,7 +518,10 @@ import Icon from "./Icon.astro";
       returnFocus = document.activeElement as HTMLElement | null;
       sheet.focus({ preventScroll: true });
     } else {
-      returnFocus?.focus();
+      // Focusing would scroll the page back to the opener, so skip that scroll when a reply's target is waiting.
+      returnFocus?.focus({ preventScroll: showOnClose !== null });
+      if (showOnClose) pointTo(showOnClose);
+      showOnClose = null;
     }
     fitToViewport();
   }
@@ -660,7 +665,8 @@ import Icon from "./Icon.astro";
   }
 
   // A reply that's about part of the page scrolls there (laptops and up, where the page shows beside the chat) and
-  // gets a chip to go back to it. On phones the chat covers the page, so the chip closes it first.
+  // gets a chip to go back to it. On phones the chat covers the page, so the page goes there once the chat closes,
+  // and the chip closes it straight away.
   function showChip(bubble: HTMLElement, target: string, auto: boolean) {
     if (!findTarget(target)) return;
     const chip = document.createElement("button");
@@ -668,11 +674,16 @@ import Icon from "./Icon.astro";
     chip.className = "show-chip tui-btn inline-flex";
     chip.textContent = `[ cd ~/${target === "top" ? "" : target} ]`;
     chip.addEventListener("click", () => {
-      if (phone.matches) setOpen(false);
+      if (phone.matches) {
+        showOnClose = null;
+        setOpen(false);
+      }
       pointTo(target);
     });
     bubble.append(chip);
-    if (auto && !phone.matches) pointTo(target);
+    if (!auto) return;
+    if (phone.matches) showOnClose = target;
+    else pointTo(target);
   }
 
   function message(role: Message["role"], bubble: HTMLElement) {
