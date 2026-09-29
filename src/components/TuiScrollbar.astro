@@ -2,7 +2,8 @@
 // The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
 // matching the boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
-// Beside it, the section you're in shows as its ~/path, at that section's spot on the bar; click it to go to its top.
+// While you scroll, the section you're in rides beside the thumb as its ~/path, like a fast-scroll label on Android or
+// Google Photos, and fades a moment after you stop. It's decorative: the section headings already say where you are.
 ---
 
 <div class="tui-scroll" data-tui-scroll aria-hidden="true">
@@ -79,38 +80,42 @@
   .bar.is-dragging {
     cursor: grabbing;
   }
-  /* The current section's ~/path, in the same inverted look as the site's active tab. It glides between spots. */
+  /* The current section's ~/path, in the same inverted look as the site's active tab, centred on the thumb.
+     It fades in quickly and out slowly, and never catches the pointer while hidden. */
   .here {
     position: absolute;
-    right: 9px;
-    padding: 3px 5px;
+    top: 0;
+    right: 12px;
+    padding: 3px 6px;
     background: var(--color-ink);
     color: var(--color-paper);
     font: var(--text-label) / 1 var(--font-mono);
     white-space: nowrap;
-    cursor: pointer;
-    transition:
-      top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.2s ease;
-  }
-  .here:empty {
+    pointer-events: none;
     opacity: 0;
+    translate: 4px -50%;
+    transition:
+      opacity 0.5s ease,
+      translate 0.5s ease;
   }
-  @media (hover: hover) {
-    .here:hover {
-      background: var(--color-accent);
-    }
+  .here.is-on {
+    opacity: 1;
+    translate: 0 -50%;
+    transition-duration: 0.15s;
+  }
+  .bar.is-dragging ~ .here {
+    background: var(--color-accent);
   }
   @media (prefers-reduced-motion: reduce) {
-    .here {
+    .here,
+    .here.is-on {
+      translate: 0 -50%;
       transition: none;
     }
   }
 </style>
 
 <script>
-  import { pointTo } from "../scripts/point";
-
   const root = document.querySelector<HTMLElement>("[data-tui-scroll]");
   if (root) {
     const track = root.querySelector<HTMLElement>("[data-track]")!;
@@ -143,12 +148,14 @@
       const steps = Math.max(1, trackRows - thumbRows);
       const step = Math.round(Math.min(1, scrollY / maxScroll()) * steps);
       const space = Math.max(0, root!.clientHeight - thumbRows * LINE);
-      thumb.style.transform = `translateY(${Math.round((step / steps) * space)}px)`;
+      const y = Math.round((step / steps) * space);
+      thumb.style.transform = `translateY(${y}px)`;
       mark();
+      here.style.transform = `translateY(${y + (thumbRows * LINE) / 2}px)`;
     }
 
     // The section you're in is the last one whose top has passed a third of the way down the screen, or the last
-    // one at the very bottom. Its label sits at that section's spot, the sections spread evenly down the bar.
+    // one at the very bottom.
     function mark() {
       if (!sections.length) return;
       let i = 0;
@@ -156,14 +163,23 @@
         if (s.getBoundingClientRect().top <= innerHeight / 3) i = j;
       });
       if (scrollY >= maxScroll() - 2) i = sections.length - 1;
-      if (i !== current) {
-        current = i;
-        here.textContent = sections[i].id === "top" ? "~/" : `~/${sections[i].id}`;
-      }
-      const slot = sections.length > 1 ? i / (sections.length - 1) : 0;
-      here.style.top = `${Math.round(slot * (root!.clientHeight - here.offsetHeight))}px`;
+      if (i === current) return;
+      current = i;
+      here.textContent = sections[i].id === "top" ? "~/" : `~/${sections[i].id}`;
     }
-    here.addEventListener("click", () => pointTo(sections[current]?.id ?? "top"));
+
+    // Shows the label, and hides it again once scrolling, dragging and hovering have all stopped for a second.
+    let hideTimer = 0;
+    let holding = false;
+    function wake() {
+      here.classList.add("is-on");
+      clearTimeout(hideTimer);
+      if (!holding) hideTimer = window.setTimeout(() => here.classList.remove("is-on"), 1000);
+    }
+    function hold(on: boolean) {
+      holding = on;
+      wake();
+    }
 
     let queued = false;
     addEventListener(
@@ -174,6 +190,7 @@
         requestAnimationFrame(() => {
           queued = false;
           position();
+          wake();
         });
       },
       { passive: true },
@@ -201,6 +218,7 @@
       startScroll = scrollY;
       thumb.setPointerCapture(e.pointerId);
       thumb.classList.add("is-dragging");
+      hold(true);
       doc.style.scrollBehavior = "auto"; // follow the pointer exactly while dragging
     });
     thumb.addEventListener("pointermove", (e) => {
@@ -211,8 +229,13 @@
     const stop = (e: PointerEvent) => {
       if (thumb.hasPointerCapture(e.pointerId)) thumb.releasePointerCapture(e.pointerId);
       thumb.classList.remove("is-dragging");
+      hold(false);
       doc.style.removeProperty("scroll-behavior");
     };
+    if (matchMedia("(hover: hover)").matches) {
+      root.addEventListener("pointerenter", () => hold(true));
+      root.addEventListener("pointerleave", () => hold(false));
+    }
     thumb.addEventListener("pointerup", stop);
     thumb.addEventListener("pointercancel", stop);
   }
