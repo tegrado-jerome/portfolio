@@ -92,22 +92,23 @@
     const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
 
     // The bar starts just under the header, and takes its space while it's hidden on scroll.
-    // The thumb is sized in whole rows to how much of the page is visible.
+    // The thumb is sized in whole rows to how much of the page is visible. Rows are counted on the bar's full height
+    // (header hidden), so while the bar grows or shrinks with the header the thumb keeps its size and only glides.
     const header = document.getElementById("site-header");
     function layout() {
       if (header) root!.style.top = `${header.classList.contains("is-hidden") ? 6 : header.offsetHeight + 6}px`;
-      trackRows = Math.floor(root!.clientHeight / LINE);
+      trackRows = Math.floor((root!.getBoundingClientRect().bottom - 6) / LINE);
       thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
       thumb.style.height = `${thumbRows * LINE}px`;
       root!.style.visibility = doc.scrollHeight > innerHeight + 1 ? "visible" : "hidden";
       position();
     }
-    // Move the thumb in row steps, like a real terminal bar. The steps are stretched to the bar's real height
+    // Move the thumb in row steps, like a real terminal bar. The steps are stretched to the bar's current height
     // (rarely a whole number of rows) so the last one lands flush with the bottom.
     function position() {
       const steps = Math.max(1, trackRows - thumbRows);
       const step = Math.round(Math.min(1, scrollY / maxScroll()) * steps);
-      const space = root!.clientHeight - thumbRows * LINE;
+      const space = Math.max(0, root!.clientHeight - thumbRows * LINE);
       thumb.style.transform = `translateY(${Math.round((step / steps) * space)}px)`;
     }
 

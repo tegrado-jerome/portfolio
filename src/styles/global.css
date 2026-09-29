@@ -79,10 +79,16 @@
 }
 
 @layer base {
-  /* Thin, palette-coloured scrollbars (page, chat log, command menu) that stay native and usable. */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--color-ink) 30%, transparent) transparent;
+  /* One scrollbar on the whole site: the page's own TUI bar (TuiScrollbar). Everything inside the page (chat log,
+     command menu, modals, text fields) still scrolls, just without a native bar, in every browser and in-app webview.
+     The page itself keeps its native bar only when JS is off and the TUI bar can't run. */
+  body *,
+  body {
+    scrollbar-width: none;
+  }
+  body *::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
   }
   /* The page only ever scrolls vertically: nothing can pan it sideways on any screen,
      and touch gestures (like spinning the skill wheel) can't drag it left or right. */
@@ -140,7 +146,7 @@
   padding-top: clamp(80px, 10vw, 160px);
 }
 
-/* The one grid for every card section (work, awards, certifications, kind words), so they all breathe the same. */
+/* The one grid for every card section (projects, awards, certifications, testimonials), so they all breathe the same. */
 @utility card-grid {
   column-gap: clamp(24px, 4vw, 64px);
   row-gap: clamp(40px, 5vw, 72px);

@@ -61,15 +61,38 @@ import Icon from "./Icon.astro";
   document.addEventListener("themechange", syncToggle);
   syncToggle();
 
+  // Hide on the way down, show on the way up, but only after a real stretch in one direction: quick up-and-down
+  // flicks (trackpads, thumbs) no longer toggle the header, and a toggle runs its full slide before the next one.
+  const HIDE_AFTER = 24; // px scrolled down
+  const SHOW_AFTER = 64; // px scrolled up
+  const SLIDE_MS = 350;
   let last = window.scrollY;
+  let turnedAt = last;
+  let direction = 0;
+  let settledAt = 0;
   let ticking = false;
   const update = () => {
-    const y = window.scrollY;
-    if (Math.abs(y - last) > 6) {
-      header.classList.toggle("is-hidden", y > last && y > 80);
-      last = y;
-    }
     ticking = false;
+    const y = window.scrollY;
+    const moved = Math.sign(y - last);
+    if (moved && moved !== direction) {
+      direction = moved;
+      turnedAt = last;
+    }
+    last = y;
+    const hidden = header.classList.contains("is-hidden");
+    if (y <= 80) {
+      if (hidden) header.classList.remove("is-hidden");
+      return;
+    }
+    if (performance.now() < settledAt) return;
+    const travelled = Math.abs(y - turnedAt);
+    const hide = direction > 0 && travelled > HIDE_AFTER;
+    const show = direction < 0 && travelled > SHOW_AFTER;
+    if ((hide && !hidden) || (show && hidden)) {
+      header.classList.toggle("is-hidden", hide);
+      settledAt = performance.now() + SLIDE_MS;
+    }
   };
   window.addEventListener(
     "scroll",
