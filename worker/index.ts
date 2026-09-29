@@ -26,6 +26,8 @@ const SAFETY_CATEGORIES = [
   "HARM_CATEGORY_SEXUALLY_EXPLICIT",
   "HARM_CATEGORY_DANGEROUS_CONTENT",
 ];
+const RETRY_STATUSES = new Set([429, 500, 503, 504]);
+const RETRY_DELAYS_MS = [300, 800, 1500];
 const SYSTEM_PROMPT = systemPrompt();
 
 const json = (body: unknown, status = 200) =>
@@ -58,16 +60,25 @@ async function chat(request: Request, env: Env): Promise<Response> {
   if (!messages) return json({ error: "Invalid request." }, 400);
 
   const model = env.GEMINI_MODEL || "gemini-3.1-flash-lite";
-  const upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
-      generationConfig: { maxOutputTokens: 1024, thinkingConfig: { thinkingLevel: "low" } },
-      safetySettings: SAFETY_CATEGORIES.map((category) => ({ category, threshold: "BLOCK_MEDIUM_AND_ABOVE" })),
-    }),
+  const payload = JSON.stringify({
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
+    generationConfig: { maxOutputTokens: 1024, thinkingConfig: { thinkingLevel: "low" } },
+    safetySettings: SAFETY_CATEGORIES.map((category) => ({ category, threshold: "BLOCK_MEDIUM_AND_ABOVE" })),
   });
+
+  // Gemini often answers 503 "high demand" for a moment, so a busy model gets a few quick retries.
+  let upstream: Response;
+  for (let attempt = 0; ; attempt++) {
+    upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: payload,
+    });
+    if (upstream.ok || !RETRY_STATUSES.has(upstream.status) || attempt >= RETRY_DELAYS_MS.length) break;
+    await upstream.body?.cancel();
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+  }
 
   if (!upstream.ok) {
     // Log details for the owner; never forward provider errors to visitors.
