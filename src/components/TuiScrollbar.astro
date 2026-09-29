@@ -2,11 +2,13 @@
 // The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
 // matching the boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
+// Beside it, the section you're in shows as its ~/path, at that section's spot on the bar; click it to go to its top.
 ---
 
 <div class="tui-scroll" data-tui-scroll aria-hidden="true">
   <div class="track" data-track></div>
   <div class="bar" data-thumb></div>
+  <span class="here" data-here></span>
 </div>
 
 <style>
@@ -77,13 +79,45 @@
   .bar.is-dragging {
     cursor: grabbing;
   }
+  /* The current section's ~/path, in the same inverted look as the site's active tab. It glides between spots. */
+  .here {
+    position: absolute;
+    right: 9px;
+    padding: 3px 5px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font: var(--text-label) / 1 var(--font-mono);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.2s ease;
+  }
+  .here:empty {
+    opacity: 0;
+  }
+  @media (hover: hover) {
+    .here:hover {
+      background: var(--color-accent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .here {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
+  import { pointTo } from "../scripts/point";
+
   const root = document.querySelector<HTMLElement>("[data-tui-scroll]");
   if (root) {
     const track = root.querySelector<HTMLElement>("[data-track]")!;
     const thumb = root.querySelector<HTMLElement>("[data-thumb]")!;
+    const here = root.querySelector<HTMLElement>("[data-here]")!;
+    const sections = [...document.querySelectorAll<HTMLElement>("#top, main section[id], #contact")];
+    let current = -1;
     const LINE = 10; // px per block row
     let thumbRows = 0;
     let trackRows = 0;
@@ -110,7 +144,26 @@
       const step = Math.round(Math.min(1, scrollY / maxScroll()) * steps);
       const space = Math.max(0, root!.clientHeight - thumbRows * LINE);
       thumb.style.transform = `translateY(${Math.round((step / steps) * space)}px)`;
+      mark();
     }
+
+    // The section you're in is the last one whose top has passed a third of the way down the screen, or the last
+    // one at the very bottom. Its label sits at that section's spot, the sections spread evenly down the bar.
+    function mark() {
+      if (!sections.length) return;
+      let i = 0;
+      sections.forEach((s, j) => {
+        if (s.getBoundingClientRect().top <= innerHeight / 3) i = j;
+      });
+      if (scrollY >= maxScroll() - 2) i = sections.length - 1;
+      if (i !== current) {
+        current = i;
+        here.textContent = sections[i].id === "top" ? "~/" : `~/${sections[i].id}`;
+      }
+      const slot = sections.length > 1 ? i / (sections.length - 1) : 0;
+      here.style.top = `${Math.round(slot * (root!.clientHeight - here.offsetHeight))}px`;
+    }
+    here.addEventListener("click", () => pointTo(sections[current]?.id ?? "top"));
 
     let queued = false;
     addEventListener(
