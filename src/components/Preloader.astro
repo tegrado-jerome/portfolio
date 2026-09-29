@@ -3,7 +3,7 @@
 // the path and a block progress bar sit on the bottom line, then the screen slides up. Only shown when JS runs.
 const steps = [
   "loading portfolio",
-  "mounting ~/selected-work",
+  "mounting ~/projects",
   "mounting ~/skills",
   "mounting ~/awards",
   "starting ai chat",
@@ -54,7 +54,7 @@ const CELLS = 12;
     }
     if (!location.hash) window.scrollTo(0, 0);
 
-    // Plays on every load; skipped only when arriving on a section link (e.g. /#work).
+    // Plays on every load; skipped only when arriving on a section link (e.g. /#projects).
     if (location.hash && location.hash !== "#top") {
       pre.remove();
       return;
@@ -70,10 +70,10 @@ const CELLS = 12;
 
     // The boot does real work: each line waits for its part of the page to load, including the images further
     // down that would otherwise load lazily on scroll, so the site is ready once the screen lifts.
-    // Line order matches the steps: hero + fonts, work, skills, awards (and the rest), chat, then the full page.
+    // Line order matches the steps: hero + fonts, projects, skills, awards (and the rest), chat, then the full page.
     var groups = [
       { sel: "#top img", waits: [document.fonts ? document.fonts.ready : null] },
-      { sel: "#work img" },
+      { sel: "#projects img" },
       { sel: "#skills img" },
       { sel: "#awards img, #certifications img, #testimonials img" },
       { sel: "#chat img, [data-chat-open] img" },

@@ -1,4 +1,4 @@
-// Selected work, shown in a staggered two-column grid.
+// Projects, shown in a staggered two-column grid.
 // Leave `href` or `image` empty to hide them.
 
 export interface Project {

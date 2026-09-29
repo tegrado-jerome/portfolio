@@ -1,5 +1,5 @@
 ---
-// Quotes as straight hairline boxes inside the "kind-words" pane.
+// Quotes as straight hairline boxes inside the "testimonials" pane.
 import { testimonials } from "../data/testimonials";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
@@ -9,8 +9,8 @@ import SectionHead from "./SectionHead.astro";
 {
   testimonials.length > 0 && (
     <section id="testimonials" class="shell section" aria-labelledby="testimonials-title">
-      <div class="pane" data-pane="kind-words">
-      <SectionHead id="testimonials-title" title="Kind words" />
+      <div class="pane" data-pane="testimonials">
+      <SectionHead id="testimonials-title" title="Testimonials" />
       <div class="card-grid grid items-start md:grid-cols-2">
         {testimonials.map((t, i) => (
           <figure data-reveal style={`--i:${i}`} class="m-0">

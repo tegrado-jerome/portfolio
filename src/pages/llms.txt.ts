@@ -25,7 +25,7 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
 
   const work = projects.filter((p) => isSet(p.title));
   if (work.length) {
-    lines.push("## Selected work", "");
+    lines.push("## Projects", "");
     work.forEach((p) => {
       const title = isSet(p.href) ? `[${p.title}](${p.href})` : p.title;
       const meta = onlySet([p.category, p.year, onlySet(p.technologies).join(", ")]).join(" · ");
