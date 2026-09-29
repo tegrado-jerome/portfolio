@@ -453,6 +453,7 @@ import Icon from "./Icon.astro";
 <script>
   import { markdown } from "../scripts/markdown";
   import { findTarget, pointTo } from "../scripts/point";
+  import { play } from "../scripts/sound";
 
   type Message = { role: "user" | "assistant"; content: string };
 
@@ -646,6 +647,7 @@ import Icon from "./Icon.astro";
     input.value = "";
     growInput();
 
+    play("send");
     history.push({ role: "user", content: text });
     const reply = message("assistant", typingDots());
     log.append(message("user", paragraph("bubble", text)));
@@ -759,6 +761,7 @@ import Icon from "./Icon.astro";
   });
   input.addEventListener("keydown", (e) => {
     // Enter sends, Shift+Enter is a new line. Not while an IME (Chinese, Japanese, Korean) is composing a word.
+    if (e.key.length === 1 || e.key === "Backspace") play("key");
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       ask(input.value);

@@ -14,6 +14,7 @@ const builtAt = new Date().toISOString();
     <span aria-hidden="true"><kbd>↑↓</kbd> panes</span>
     <button type="button" data-status-ask aria-label="Ask my AI"><kbd aria-hidden="true">/</kbd> ask</button>
     <button type="button" data-palette-open aria-label="Open command menu"><kbd aria-hidden="true">⌘K</kbd> menu</button>
+    <button type="button" data-sound aria-pressed="false">sound <span data-sound-state>off</span></button>
     <span aria-hidden="true" title="My local time"><span class="live"></span>ph <time data-status-clock class="text-ink tabular-nums"></time></span>
   </span>
 </div>
@@ -87,6 +88,21 @@ const builtAt = new Date().toISOString();
 </style>
 
 <script>
+  import { play, setSound, soundOn } from "../scripts/sound";
+
+  // Sound switch: off by default, remembered on this browser. Turning it on plays the send blip as a sample.
+  const soundButton = document.querySelector<HTMLButtonElement>("[data-sound]");
+  const syncSound = (on: boolean) => {
+    soundButton?.setAttribute("aria-pressed", String(on));
+    soundButton!.querySelector("[data-sound-state]")!.textContent = on ? "on" : "off";
+  };
+  syncSound(soundOn());
+  soundButton?.addEventListener("click", () => {
+    const on = soundButton.getAttribute("aria-pressed") !== "true";
+    setSound(on);
+    syncSound(on);
+    play("send");
+  });
   const panes = [...document.querySelectorAll<HTMLElement>("[data-pane]")];
   const paneLabel = document.querySelector<HTMLElement>("[data-status-pane]");
   const clock = document.querySelector<HTMLTimeElement>("[data-status-clock]");

@@ -336,6 +336,7 @@ import Icon from "./Icon.astro";
 <script>
   import { asciiLens } from "../scripts/ascii-lens";
   import { pointTo } from "../scripts/point";
+  import { play } from "../scripts/sound";
 
   const portrait = document.getElementById("portrait");
   const img = portrait?.querySelector("img");
@@ -475,8 +476,13 @@ import Icon from "./Icon.astro";
   // The send button only becomes active once there's something to send.
   const syncAskButton = () => (askButton!.disabled = askInput!.value.trim() === "");
   askInput?.addEventListener("input", syncAskButton);
+  askInput?.addEventListener("keydown", (e) => {
+    if (e.key.length === 1 || e.key === "Backspace") play("key");
+  });
   askForm?.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!askInput!.value.trim()) return;
+    play("send");
     if (!run(askInput!.value)) askChat(askInput!.value);
     askInput!.value = "";
     syncAskButton();

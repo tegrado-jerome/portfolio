@@ -1,6 +1,7 @@
 // Scrolls the page to a section ("projects") or a single card ("awards/magna-cum-laude", its ~/path) and gives a
 // card a short highlight: accent crop marks, like the hero portrait's, snap onto it and fade.
 // Used by the chat's [[show:…]] replies and the hero prompt's `cd`.
+import { play } from "./sound";
 
 export function findTarget(target: string) {
   if (target === "top" || target === "~") return document.getElementById("top");
@@ -15,6 +16,7 @@ export function pointTo(target: string) {
   const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
   el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: card ? "center" : "start" });
   if (card) frame(el);
+  play("point");
   return true;
 }
 
