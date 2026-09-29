@@ -241,10 +241,13 @@ import Icon from "./Icon.astro";
   .ask input:focus-visible {
     outline: none;
   }
+  /* Never wider than the field, so it can't run under the send key. */
   .guide {
     display: none;
     position: absolute;
     left: 0;
+    max-width: 100%;
+    overflow: hidden;
     align-items: center;
     color: var(--color-muted);
     white-space: pre;
@@ -358,15 +361,23 @@ import Icon from "./Icon.astro";
     if (question.trim()) document.dispatchEvent(new CustomEvent("chat:ask", { detail: question }));
   };
   // Guide text: types each line, holds, erases, and moves on to the next, hinting at the shell commands too.
+  // Narrow phones get the short version of a line when the long one wouldn't fit the field (plus the caret).
   // Reduced motion shows the first line still.
   const guide = document.querySelector<HTMLElement>("[data-guide-text]");
   if (guide) {
-    const lines = ["type here!", "ask me anything", "or type help"];
+    const field = document.getElementById("hero-ask")!;
+    const lines = [
+      ["type here!", "type here!"],
+      ["ask me anything", "ask me!"],
+      ["or type help", "try help"],
+    ];
+    const chWidth = () => parseFloat(getComputedStyle(field).fontSize) * 0.6; // Geist Mono's advance width
+    const pick = ([long, short]: string[]) => ((long.length + 1) * chWidth() <= field.clientWidth ? long : short);
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      guide.textContent = lines[0];
+      guide.textContent = lines[0][0];
     } else {
       let line = 0;
-      let text = lines[0];
+      let text = pick(lines[0]);
       let i = 0;
       let deleting = false;
       const step = () => {
@@ -378,7 +389,7 @@ import Icon from "./Icon.astro";
           delay = 2200;
         } else if (deleting && i === 0) {
           deleting = false;
-          text = lines[++line % lines.length];
+          text = pick(lines[++line % lines.length]);
           delay = 700;
         }
         setTimeout(step, delay);
