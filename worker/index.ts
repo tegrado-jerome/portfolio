@@ -61,7 +61,7 @@ async function chat(request: Request, env: Env, ctx: { waitUntil(promise: Promis
   const messages = parseMessages(body);
   if (!messages) return json({ error: "Invalid request." }, 400);
 
-  const model = env.GEMINI_MODEL || "gemini-3-flash-preview";
+  const model = env.GEMINI_MODEL || "gemini-3.1-flash-lite";
   const payload = JSON.stringify({
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
