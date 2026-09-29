@@ -489,7 +489,7 @@ import Icon from "./Icon.astro";
     }
     /* Room under the page while the sheet is down, so even the last section (contact) can scroll up above it. */
     :global(html.chat-peek body) {
-      padding-bottom: 40vh;
+      padding-bottom: 60vh;
     }
     .sheet[data-peek] {
       top: 64%;
@@ -615,18 +615,42 @@ import Icon from "./Icon.astro";
   // Phones: shrunk to the status bar with the page showing above (Apple and Google Maps do this for results on the
   // map), or back to full screen. While it's down the page scrolls freely, and scrolling to a part of it keeps clear
   // of the sheet.
-  const PEEK = 0.36; // share of the screen the sheet keeps
+  // The sheet is sized to fit the visitor's last question and my whole reply, between about a third and 60% of the
+  // screen, and the log starts at that question, so the exchange reads top to bottom with the page above it.
+  const PEEK_MIN = 0.36;
+  const PEEK_MAX = 0.6;
+  const BAR = 44; // the status bar's height, which replaces the header while the sheet is down
+  const header = sheet.querySelector<HTMLElement>(":scope > header")!;
   const peekPath = sheet.querySelector<HTMLElement>("[data-peek-path]")!;
+  let peekHeight = 0;
+  const lastQuestion = () => [...log.querySelectorAll<HTMLElement>(".msg-user")].at(-1);
+  const offsetInLog = (el: HTMLElement) => el.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop;
+  function measurePeek() {
+    const screen = viewport?.height ?? innerHeight;
+    const question = lastQuestion();
+    const exchange = question ? log.scrollHeight - offsetInLog(question) + 12 : 0;
+    // Everything around the log (padding, composer, note), with the bar in the header's place.
+    const around = sheet.clientHeight - log.clientHeight - header.offsetHeight - 20 + BAR;
+    peekHeight = Math.round(Math.min(screen * PEEK_MAX, Math.max(screen * PEEK_MIN, around + exchange)));
+  }
+  function showExchange() {
+    const question = lastQuestion();
+    if (question) log.scrollTop = offsetInLog(question) - 12;
+  }
   function setPeek(peek: boolean, target?: string) {
     if (target) peekPath.textContent = target === "top" ? "~/" : `~/${target}`;
     if (sheet.hasAttribute("data-peek") === peek) return;
+    if (peek) measurePeek();
     sheet.classList.add("is-resizing");
     setTimeout(() => sheet.classList.remove("is-resizing"), 500);
     sheet.toggleAttribute("data-peek", peek);
     document.documentElement.classList.toggle("chat-peek", peek);
-    document.documentElement.style.scrollPaddingBottom = peek ? `${Math.round(PEEK * 100)}vh` : "";
+    document.documentElement.style.scrollPaddingBottom = peek ? `${peekHeight}px` : "";
     fitToViewport();
-    if (stickToBottom) setTimeout(() => toBottom(), 460);
+    if (peek) {
+      showExchange();
+      setTimeout(showExchange, 460);
+    } else if (stickToBottom) setTimeout(() => toBottom(), 460);
   }
 
   // "Stick to bottom", like ChatGPT and Messenger: the log follows new text only while the visitor is at the
@@ -652,10 +676,11 @@ import Icon from "./Icon.astro";
       sheet.style.removeProperty("top");
       return;
     }
-    const height = sheet.hasAttribute("data-peek") ? Math.round(viewport.height * PEEK) : viewport.height;
+    const peek = sheet.hasAttribute("data-peek");
+    const height = peek ? peekHeight : viewport.height;
     sheet.style.top = `${viewport.offsetTop + viewport.height - height}px`;
     sheet.style.height = `${height}px`;
-    if (stickToBottom) toBottom();
+    if (stickToBottom && !peek) toBottom();
   }
   viewport?.addEventListener("resize", fitToViewport);
   viewport?.addEventListener("scroll", fitToViewport);
