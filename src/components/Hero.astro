@@ -12,7 +12,8 @@ import Icon from "./Icon.astro";
   <!-- The status bar names this pane "jerome-tegrado". -->
   <div data-pane="jerome-tegrado">
   <div class="grid items-start gap-[clamp(32px,6vw,90px)] md:grid-cols-[minmax(0,1fr)_clamp(200px,18vw,260px)]">
-    <div class="max-w-[640px]">
+    <!-- One column (phones and small tablets): everything centred on the portrait's axis. -->
+    <div class="max-w-[640px] max-md:mx-auto max-md:text-center">
       <!-- Name, then intro, then the main action. The headline isn't shown; it's the page title's role for search. -->
       <h1
         id="hero-title"
@@ -31,14 +32,14 @@ import Icon from "./Icon.astro";
         }
       </h1>
       <!-- One line on phones: no wrapping, and the size follows the screen width so it always fits. -->
-      <p data-reveal style="--i:1" class="max-w-[52ch] text-body text-ink-soft max-sm:text-[clamp(11px,3.6vw,15px)] max-sm:whitespace-nowrap">
+      <p data-reveal style="--i:1" class="max-w-[52ch] max-md:mx-auto text-body text-ink-soft max-sm:text-[clamp(11px,3.6vw,15px)] max-sm:whitespace-nowrap">
         {site.intro}
       </p>
 
       <!-- Ask-my-AI bar as a terminal line (after Warp / v0): a mono prompt with a blinking block cursor.
            It sends the question straight into the chat. Needs JS, so it stays hidden without it. -->
-      <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] in-[.js]:block">
-        <form data-hero-ask class="ask term flex items-center gap-2 rounded-[4px] border border-line py-1.5 pr-1.5 pl-4 font-mono text-[16px]">
+      <div data-reveal style="--i:2" class="mt-[clamp(20px,3vw,32px)] hidden max-w-[460px] max-md:mx-auto in-[.js]:block">
+        <form data-hero-ask class="ask term flex text-left items-center gap-2 rounded-[4px] border border-line py-1.5 pr-1.5 pl-4 font-mono text-[16px]">
           <span class="inline-flex shrink-0 gap-[1ch] whitespace-nowrap" aria-hidden="true">
             <span class="text-accent">jerome@ai</span>
             <span class="text-muted">~</span>
@@ -68,7 +69,7 @@ import Icon from "./Icon.astro";
             <kbd class="key"><Icon icon={faArrowTurnDown} class="rotate-90 text-[12px]" /></kbd>
           </button>
         </form>
-        <p class="mt-2.5 font-mono text-small text-muted">
+        <p class="mt-2.5 text-center font-mono text-small text-muted">
           try:
           {
             assistant.suggestions.slice(0, 1).map((q) => (
@@ -315,7 +316,7 @@ import Icon from "./Icon.astro";
       const step = () => {
         i += deleting ? -1 : 1;
         guide.textContent = text.slice(0, i);
-        let delay = deleting ? 45 : 95;
+        let delay = deleting ? 55 : 115;
         if (!deleting && i === text.length) {
           deleting = true;
           delay = 2200;
