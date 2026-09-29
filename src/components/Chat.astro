@@ -1,5 +1,5 @@
 ---
-import { faArrowTurnDown, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowTurnDown, faChevronUp, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { assistant } from "../data/assistant";
 import { site } from "../data/site";
 import Icon from "./Icon.astro";
@@ -53,9 +53,15 @@ import Icon from "./Icon.astro";
         <p class="mt-1 text-small text-muted">Online</p>
       </div>
     </div>
-    <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
-      <Icon icon={faXmark} class="text-[15px]" />
-    </button>
+    <div class="flex items-center gap-3">
+      <!-- Phones, while the chat is at half height: back to full screen. -->
+      <button type="button" data-chat-expand class="expand -m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Full screen chat">
+        <Icon icon={faChevronUp} class="text-[14px]" />
+      </button>
+      <button type="button" data-chat-close class="-m-2 p-2 text-muted transition-colors hover:text-ink" aria-label="Close chat">
+        <Icon icon={faXmark} class="text-[15px]" />
+      </button>
+    </div>
   </header>
 
   <ol data-chat-log aria-live="polite" class="mb-3 flex flex-1 flex-col gap-4 overflow-y-auto py-6">
@@ -470,6 +476,10 @@ import Icon from "./Icon.astro";
     :global(html.chat-open:not(.chat-peek) body) {
       overflow: hidden;
     }
+    /* Room under the page while the sheet is down, so even the last section (contact) can scroll up above it. */
+    :global(html.chat-peek body) {
+      padding-bottom: 50vh;
+    }
     .sheet[data-peek] {
       top: 50%;
       padding-top: 0;
@@ -484,9 +494,13 @@ import Icon from "./Icon.astro";
         height 0.45s var(--ease-sheet),
         visibility 0s;
     }
-    .sheet[data-peek] .grab {
+    .sheet[data-peek] .grab,
+    .sheet[data-peek] .expand {
       display: block;
     }
+  }
+  .expand {
+    display: none;
   }
   .grab {
     display: none;
@@ -863,7 +877,16 @@ import Icon from "./Icon.astro";
 
   openers.forEach((b) => b.addEventListener("click", () => setOpen(!sheet.hasAttribute("data-open"))));
   sheet.querySelector("[data-chat-close]")!.addEventListener("click", () => setOpen(false));
-  sheet.querySelector("[data-chat-expand]")!.addEventListener("click", () => setPeek(false));
+  sheet.querySelectorAll("[data-chat-expand]").forEach((b) => b.addEventListener("click", () => setPeek(false)));
+  // Swiping up on the top of the half-height sheet (handle or header) brings it back to full screen.
+  const top = sheet.querySelector<HTMLElement>("header")!;
+  let swipeY = 0;
+  for (const el of [sheet.querySelector<HTMLElement>(".grab")!, top]) {
+    el.addEventListener("touchstart", (e) => (swipeY = e.touches[0].clientY), { passive: true });
+    el.addEventListener("touchend", (e) => {
+      if (swipeY - e.changedTouches[0].clientY > 30) setPeek(false);
+    });
+  }
   sheet.addEventListener("keydown", (e) => {
     if (e.key === "Escape") setOpen(false);
   });
