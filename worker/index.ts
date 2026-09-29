@@ -36,14 +36,14 @@ const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
     if (new URL(request.url).pathname !== "/api/chat") return env.ASSETS.fetch(request);
     if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
-    return chat(request, env);
+    return chat(request, env, ctx);
   },
 };
 
-async function chat(request: Request, env: Env): Promise<Response> {
+async function chat(request: Request, env: Env, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
   const allowed = (env.ALLOWED_ORIGINS ?? "").split(",").map((o) => o.trim()).filter(Boolean);
   const origin = request.headers.get("Origin");
   if (allowed.length && (!origin || !allowed.includes(origin))) return json({ error: "Forbidden." }, 403);
@@ -61,18 +61,18 @@ async function chat(request: Request, env: Env): Promise<Response> {
   const messages = parseMessages(body);
   if (!messages) return json({ error: "Invalid request." }, 400);
 
-  const model = env.GEMINI_MODEL || "gemini-3.1-flash-lite";
+  const model = env.GEMINI_MODEL || "gemini-3-flash-preview";
   const payload = JSON.stringify({
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
-    generationConfig: { maxOutputTokens: 1024, thinkingConfig: { thinkingLevel: "low" } },
+    generationConfig: { maxOutputTokens: 1024, thinkingConfig: { thinkingLevel: "minimal" } },
     safetySettings: SAFETY_CATEGORIES.map((category) => ({ category, threshold: "BLOCK_MEDIUM_AND_ABOVE" })),
   });
 
   // Gemini often answers 503 "high demand" for a moment, so a busy model gets a few quick retries.
   let upstream: Response;
   for (let attempt = 0; ; attempt++) {
-    upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
       body: payload,
@@ -88,15 +88,74 @@ async function chat(request: Request, env: Env): Promise<Response> {
     return json({ error: "Chat's down right now. Try again later." }, 502);
   }
 
-  const data: GeminiResponse = await upstream.json();
-  const reply = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("").trim();
-  // Blocked prompts, empty replies and anything echoing the system prompt get a safe fallback.
-  if (!reply || data.promptFeedback?.blockReason || reply.includes(CANARY)) return json({ reply: FALLBACK });
-  // The page part to scroll to, only if it's one the site really has. The tag itself never reaches the visitor.
-  const show = [...reply.matchAll(SHOW)].map((m) => m[1].toLowerCase()).findLast((t) => SHOW_TARGETS.has(t));
-  const text = withoutDashes(reply.replace(SHOW, "").trim());
-  if (!text) return json({ reply: FALLBACK });
-  return json(show ? { reply: text, show } : { reply: text });
+  // The reply streams to the visitor as newline-separated JSON: {text} pieces as Gemini writes them, then
+  // {show} when it points at part of the page. {replace} swaps out everything sent so far (the safe fallback).
+  const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
+  const send = (line: object) => writer.write(encoder.encode(`${JSON.stringify(line)}\n`));
+
+  const relay = async () => {
+    let raw = "";
+    let sent = "";
+    let blocked = false;
+    try {
+      for await (const chunk of events(upstream.body!)) {
+        if (chunk.promptFeedback?.blockReason) blocked = true;
+        raw += (chunk.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("");
+        // Anything echoing the system prompt is cut off at once.
+        if (blocked || raw.includes(CANARY)) break;
+        const text = visible(raw, false);
+        if (text.length > sent.length && text.startsWith(sent)) {
+          await send({ text: text.slice(sent.length) });
+          sent = text;
+        }
+      }
+    } catch (error) {
+      console.error("Gemini stream failed", error);
+    }
+    const text = blocked || raw.includes(CANARY) ? "" : visible(raw, true);
+    if (!text) await send({ replace: FALLBACK });
+    else if (!text.startsWith(sent)) await send({ replace: text });
+    else if (text.length > sent.length) await send({ text: text.slice(sent.length) });
+    // The page part to scroll to, only if it's one the site really has. The tag itself never reaches the visitor.
+    const show = [...raw.matchAll(SHOW)].map((m) => m[1].toLowerCase()).findLast((t) => SHOW_TARGETS.has(t));
+    if (text && show) await send({ show });
+    await writer.close();
+  };
+  ctx.waitUntil(relay());
+  return new Response(readable, {
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
+  });
+}
+
+/** The parsed `data:` events of Gemini's server-sent event stream. */
+async function* events(body: ReadableStream<Uint8Array<ArrayBuffer>>): AsyncGenerator<GeminiResponse> {
+  let buffer = "";
+  for await (const piece of body.pipeThrough(new TextDecoderStream())) {
+    buffer += piece;
+    const blocks = buffer.split(/\r?\n\r?\n/);
+    buffer = blocks.pop() ?? "";
+    for (const block of blocks) {
+      const data = block.split(/\r?\n/).filter((l) => l.startsWith("data:")).map((l) => l.slice(5)).join("");
+      if (data.trim()) yield JSON.parse(data);
+    }
+  }
+}
+
+/**
+ * The text a visitor may see. Mid-stream it holds back the tail, which could still turn into a [[show]] tag,
+ * the canary or a dash that needs fixing, so what's sent never has to change.
+ */
+function visible(raw: string, done: boolean) {
+  let text = raw;
+  if (!done) {
+    text = text.slice(0, Math.max(0, text.length - CANARY.length));
+    const tag = text.lastIndexOf("[[");
+    if (tag !== -1 && !text.slice(tag).includes("]]")) text = text.slice(0, tag);
+    text = text.replace(/[\s[—–-]+$/, "");
+  }
+  return withoutDashes(text.replace(SHOW, "").trim());
 }
 
 /** The site never shows em or en dashes; this catches any the model writes anyway. */

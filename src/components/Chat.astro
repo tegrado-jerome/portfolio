@@ -187,24 +187,47 @@ import Icon from "./Icon.astro";
     border-left: 1px solid var(--color-line);
     visibility: hidden;
     /* Slides in from the edge on the iOS sheet curve (as in Vaul): quick to start, long soft landing.
-       Closing runs a little faster than opening. */
+       Closing runs a little faster than opening. Only transform animates, so it stays on the GPU; the shadow is
+       fixed and simply rides along off screen. */
     transform: translateX(100%);
-    box-shadow: 0 0 0 transparent;
+    box-shadow: -24px 0 60px -30px rgb(0 0 0 / 0.25);
     transition:
       transform 0.38s var(--ease-sheet),
-      box-shadow 0.38s var(--ease-sheet),
       visibility 0s linear 0.38s;
     will-change: transform;
+    contain: layout style;
     --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
   }
   .sheet[data-open] {
     visibility: visible;
     transform: none;
-    box-shadow: -24px 0 60px -30px rgb(0 0 0 / 0.25);
     transition:
       transform 0.5s var(--ease-sheet),
-      box-shadow 0.5s var(--ease-sheet),
       visibility 0s;
+  }
+  /* The contents settle in just behind the sheet, one after another. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet > * {
+      opacity: 0;
+      translate: 0 8px;
+      transition:
+        opacity 0.15s ease,
+        translate 0s linear 0.15s;
+    }
+    .sheet[data-open] > * {
+      opacity: 1;
+      translate: none;
+      transition:
+        opacity 0.45s var(--ease-sheet) var(--in, 0.1s),
+        translate 0.45s var(--ease-sheet) var(--in, 0.1s);
+    }
+    .sheet[data-open] > [data-chat-log] {
+      --in: 0.16s;
+    }
+    .sheet[data-open] > form,
+    .sheet[data-open] > form + p {
+      --in: 0.22s;
+    }
   }
   /* The sheet itself takes focus on open (so phones don't raise the keyboard); it needs no ring. */
   .sheet:focus {
@@ -396,10 +419,7 @@ import Icon from "./Icon.astro";
     border-radius: 50%;
     background: var(--color-muted);
   }
-  /* The reply fades in word by word. A word (and the blocks around it) stays out of the layout until its turn. */
-  [data-chat-log] :global(.pending) {
-    display: none;
-  }
+  /* The reply fades in word by word as it streams in. */
   @media (prefers-reduced-motion: no-preference) {
     [data-chat-log] :global(.typing-dots span) {
       animation: typing-dot 1.2s ease-in-out infinite;
@@ -458,11 +478,10 @@ import Icon from "./Icon.astro";
   type Message = { role: "user" | "assistant"; content: string };
 
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // A reply never shows sooner than 4s after sending, and the typing dots wait half a second before they appear,
-  // like a person reading then answering. Sending is locked until the reply is done, so this also paces visitors
-  // to one message every few seconds at most.
-  const MIN_REPLY_DELAY = 4000; // ms
-  const TYPING_DOTS_DELAY = 500; // ms
+  // A reply never starts sooner than 0.6s after sending, so it never feels canned, and the typing dots wait a
+  // moment before they appear. The server's rate limit does the pacing.
+  const MIN_REPLY_DELAY = 600; // ms
+  const TYPING_DOTS_DELAY = 300; // ms
 
   // Resolves after `ms`, or straight away once the visitor presses stop.
   function wait(ms: number, signal: AbortSignal) {
@@ -566,8 +585,7 @@ import Icon from "./Icon.astro";
     return bubble;
   }
 
-  // Wraps every word of the rendered reply in a hidden span, and hides the blocks around it too, so nothing
-  // (not even an empty bullet) shows before its first word. Returns the words in reading order.
+  // Wraps every word of the rendered reply in a span so it can fade in. Returns the words in reading order.
   function wrapWords(root: Node) {
     const texts: Text[] = [];
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -577,41 +595,68 @@ import Icon from "./Icon.astro";
       if (!node.data.trim()) continue;
       const parts = node.data.split(/(\s+)/).map((part) => {
         if (!part || /^\s+$/.test(part)) return part;
-        const word = Object.assign(document.createElement("span"), { className: "word pending", textContent: part });
+        const word = Object.assign(document.createElement("span"), { className: "word", textContent: part });
         words.push(word);
         return word;
       });
-      for (let el = node.parentElement; el && el !== root; el = el.parentElement) el.classList.add("pending");
       node.replaceWith(...parts.filter(Boolean));
     }
     return words;
   }
 
-  // Shows a word, and the blocks it sits in.
-  function reveal(word: HTMLElement, root: HTMLElement) {
-    for (let el: HTMLElement | null = word; el && el !== root; el = el.parentElement) el.classList.remove("pending");
+  // Shows the reply as it streams in. Each word eases in from a soft blur, at least WORD_GAP after the one before,
+  // so a burst of text still reads like typing. The bubble is re-rendered as text arrives (Markdown can change
+  // shape mid-reply); every word keeps its own start time, so one already fading in carries on, never restarts.
+  const WORD_GAP = 18; // ms
+  const WORD_FADE = 600; // ms, the length of the word-in animation
+  function streamInto(bubble: HTMLElement) {
+    const born: number[] = [];
+    let text = "";
+    let frame = 0;
+    const render = () => {
+      frame = 0;
+      bubble.replaceChildren(markdown(text));
+      if (!reduceMotion) {
+        const now = performance.now();
+        wrapWords(bubble).forEach((word, i) => {
+          born[i] ??= Math.max(now, (born[i - 1] ?? 0) + WORD_GAP);
+          const age = now - born[i];
+          if (age >= WORD_FADE) word.classList.remove("word");
+          else word.style.animationDelay = `${-age}ms`;
+        });
+      }
+      if (stickToBottom) toBottom();
+    };
+    return {
+      get text() {
+        return text;
+      },
+      set(next: string) {
+        text = next;
+        frame ||= requestAnimationFrame(render);
+      },
+      flush() {
+        if (!frame) return;
+        cancelAnimationFrame(frame);
+        render();
+      },
+    };
   }
 
-  // Fades the reply in word by word, about 25 words a second, speeding up so even long replies finish in about 3s.
-  // Each word eases in from a soft blur. Timed by the clock, not by frames, so it runs the same on 60 Hz and 120 Hz.
-  // Stopping mid-way shows the rest at once: the reply is already complete, only its display is animated.
-  function typeOut(bubble: HTMLElement, text: string, signal: AbortSignal) {
-    bubble.replaceChildren(markdown(text));
-    if (reduceMotion) return Promise.resolve();
-    const words = wrapWords(bubble);
-    const step = Math.min(40, 3000 / words.length); // ms per word
-    const start = performance.now();
-    let shown = 0;
-    return new Promise<void>((resolve) => {
-      const frame = (now: number) => {
-        const target = signal.aborted ? words.length : Math.min(words.length, Math.floor((now - start) / step) + 1);
-        for (; shown < target; shown++) reveal(words[shown], bubble);
-        if (stickToBottom) toBottom();
-        if (shown >= words.length) resolve();
-        else requestAnimationFrame(frame);
-      };
-      requestAnimationFrame(frame);
-    });
+  type Line = { text?: string; replace?: string; show?: string };
+
+  // The reply arrives as newline-separated JSON (see worker/index.ts).
+  async function* lines(body: ReadableStream<Uint8Array<ArrayBuffer>>): AsyncGenerator<Line> {
+    const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += value;
+      const parts = buffer.split("\n");
+      buffer = parts.pop() ?? "";
+      for (const part of parts) if (part.trim()) yield JSON.parse(part);
+    }
   }
 
   // A reply that's about part of the page scrolls there (laptops and up, where the page shows beside the chat) and
@@ -674,17 +719,36 @@ import Icon from "./Icon.astro";
         body: JSON.stringify({ messages: history.slice(-11) }),
         signal,
       });
-      const data: { reply?: string; show?: string; error?: string } = await res.json().catch(() => ({}));
-      if (!res.ok || !data.reply) throw new Error(data.error ?? "Chat's down right now. Try again later.");
-      history.push({ role: "assistant", content: data.reply });
-      await wait(MIN_REPLY_DELAY - (performance.now() - askedAt), signal);
-      clearTimeout(showDots);
-      if (!reply.isConnected) log.append(reply);
+      const down = "Chat's down right now. Try again later.";
+      if (!res.ok || !res.body) {
+        const data: { error?: string } = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? down);
+      }
       const text = document.createElement("div");
       text.className = "bubble";
-      bubble().replaceWith(text);
-      await typeOut(text, data.reply, signal);
-      if (data.show) showChip(text, data.show, !signal.aborted);
+      let out: ReturnType<typeof streamInto> | null = null;
+      let show: string | undefined;
+      try {
+        for await (const line of lines(res.body)) {
+          show = line.show ?? show;
+          if (line.text === undefined && line.replace === undefined) continue;
+          if (!out) {
+            await wait(MIN_REPLY_DELAY - (performance.now() - askedAt), signal);
+            clearTimeout(showDots);
+            if (!reply.isConnected) log.append(reply);
+            bubble().replaceWith(text);
+            out = streamInto(text);
+          }
+          out.set(line.replace ?? out.text + line.text);
+        }
+      } catch (error) {
+        // Stopping mid-reply keeps what's there so far.
+        if (!signal.aborted || !out?.text) throw error;
+      }
+      if (!out?.text) throw new Error(down);
+      out.flush();
+      history.push({ role: "assistant", content: out.text });
+      if (show) showChip(text, show, !signal.aborted);
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid
       clearTimeout(showDots);
@@ -746,7 +810,9 @@ import Icon from "./Icon.astro";
   }
   document.addEventListener("chat:ask", (e) => {
     setOpen(true);
-    ask((e as CustomEvent<string>).detail);
+    // Let the sheet start sliding before the message goes in, so the first frames stay smooth.
+    const question = (e as CustomEvent<string>).detail;
+    requestAnimationFrame(() => requestAnimationFrame(() => ask(question)));
   });
 
   suggestions.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent ?? "")));
