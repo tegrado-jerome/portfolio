@@ -304,6 +304,11 @@ import Icon from "./Icon.astro";
     margin-left: -8px;
     color: var(--color-accent);
   }
+  /* The chip's accent text would otherwise win over tui-btn's inverted hover and turn unreadable. */
+  [data-chat-log] :global(.show-chip:hover),
+  [data-chat-log] :global(.show-chip:focus-visible) {
+    color: var(--color-paper);
+  }
   [data-chat-log] :global(.md-link) {
     text-decoration: underline;
     text-underline-offset: 2px;
