@@ -19,7 +19,7 @@ import Icon from "./Icon.astro";
     <!-- Bracketed commands, the main action last. The theme button needs JS, so it stays hidden without it.
          The command menu opens from the status bar and with ⌘K / Ctrl K. -->
     <nav aria-label="Primary" class="ml-auto flex items-center gap-2">
-      <button type="button" data-theme-toggle class="tui-btn hidden in-[.js]:inline-flex">
+      <button type="button" data-theme-toggle class="theme-btn tui-btn hidden in-[.js]:inline-flex">
         [ <Icon icon={faCircleHalfStroke} class="text-[12px]" /> theme ]
       </button>
       <a href={contactHref} target="_blank" rel="noopener noreferrer" aria-label="Let's talk (email me in Gmail)" class="group tui-btn tui-btn--primary">
@@ -34,6 +34,16 @@ import Icon from "./Icon.astro";
   .logo {
     display: block;
     mask: url("/images/logo.png") center / contain no-repeat;
+  }
+  /* The theme button looks the same on hover and click, on every screen (the theme change is the feedback).
+     Keyboard users still get the site's focus outline. */
+  .theme-btn:hover,
+  .theme-btn:focus-visible {
+    background: transparent;
+    color: var(--color-muted);
+  }
+  .theme-btn {
+    -webkit-tap-highlight-color: transparent;
   }
   .tui-btn--primary {
     display: inline-flex;
