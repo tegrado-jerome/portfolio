@@ -1,6 +1,7 @@
 ---
 // One modal for every card (projects, awards, certifications): a click copies that card's <template data-detail>
 // (see Detail.astro) in here. Styled like the command menu; closes with the button, Escape or a click outside.
+// Where the browser supports View Transitions, the card's picture grows into the modal's picture and back.
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
 ---
@@ -84,27 +85,80 @@ import Icon from "./Icon.astro";
       }
     }
   }
+  /* The picture's morph: the same soft curve as the modal. Both pictures fill the moving box, cropped, so the
+     card's 5:4 cover and the modal's 16:10 frame blend without stretching. */
+  :global(::view-transition-group(detail-media)) {
+    animation-duration: 0.45s;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  :global(::view-transition-old(detail-media)),
+  :global(::view-transition-new(detail-media)) {
+    height: 100%;
+    object-fit: cover;
+  }
+  :global(::view-transition-old(root)),
+  :global(::view-transition-new(root)) {
+    animation-duration: 0.3s;
+  }
 </style>
 
 <script>
   const dialog = document.querySelector<HTMLDialogElement>("#detail")!;
   const body = dialog.querySelector<HTMLElement>("[data-detail-body]")!;
 
-  document.querySelectorAll<HTMLElement>("[data-detail-open]").forEach((trigger) =>
-    trigger.addEventListener("click", () => {
-      const template = trigger.closest(".card")?.querySelector<HTMLTemplateElement>("template[data-detail]");
-      if (!template) return;
+  const morphs = "startViewTransition" in document && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let source: HTMLElement | null = null; // the card picture the modal opened from
+  const media = () => body.querySelector<HTMLElement>("figure");
+
+  // Runs `update` as a view transition, with the shared picture name moved from `from` to `to`.
+  function morph(from: HTMLElement | null, to: () => HTMLElement | null, update: () => void) {
+    if (!morphs || !from) return update();
+    from.style.viewTransitionName = "detail-media";
+    const transition = document.startViewTransition(() => {
+      from.style.viewTransitionName = "";
+      update();
+      const target = to();
+      if (target) target.style.viewTransitionName = "detail-media";
+    });
+    transition.finished.finally(() => {
+      const target = to();
+      if (target) target.style.viewTransitionName = "";
+    });
+  }
+
+  function open(trigger: HTMLElement) {
+    const card = trigger.closest<HTMLElement>(".card");
+    const template = card?.querySelector<HTMLTemplateElement>("template[data-detail]");
+    if (!card || !template) return;
+    source = card.querySelector<HTMLElement>(".media") ?? card;
+    morph(source, media, () => {
       body.replaceChildren(template.content.cloneNode(true));
       body.querySelector("[data-detail-title]")!.id = "detail-title";
       dialog.showModal();
       dialog.scrollTop = 0;
       // Focus the close button without the ring a mouse click shouldn't show.
       dialog.querySelector<HTMLElement>("[data-detail-close]")!.focus({ focusVisible: false } as FocusOptions);
-    }),
+    });
+  }
+
+  function close() {
+    // Only morph back when the card is on screen; otherwise it would fly in from off the page.
+    const r = source?.getBoundingClientRect();
+    const visible = r && r.bottom > 0 && r.top < innerHeight;
+    morph(visible ? media() : null, () => source, () => dialog.close());
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-detail-open]").forEach((trigger) =>
+    trigger.addEventListener("click", () => open(trigger)),
   );
-  dialog.querySelector("[data-detail-close]")!.addEventListener("click", () => dialog.close());
+  dialog.querySelector("[data-detail-close]")!.addEventListener("click", close);
+  // Escape closes through the same path, so it morphs back too.
+  dialog.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    close();
+  });
   // A click on the dimmed area outside the panel closes it.
   dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
+    if (e.target === dialog) close();
   });
 </script>
