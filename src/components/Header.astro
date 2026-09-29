@@ -35,15 +35,26 @@ import Icon from "./Icon.astro";
     display: block;
     mask: url("/images/logo.png") center / contain no-repeat;
   }
-  /* The theme button looks the same on hover and click, on every screen (the theme change is the feedback).
-     Keyboard users still get the site's focus outline. */
+  /* The theme button gets a soft hover (a faint box, text turns ink), so "let's talk" stays the one obvious button.
+     Hover only with a mouse, so a tap on a phone doesn't leave it stuck; a press shows the same box briefly. */
+  .theme-btn {
+    -webkit-tap-highlight-color: transparent;
+  }
   .theme-btn:hover,
   .theme-btn:focus-visible {
     background: transparent;
     color: var(--color-muted);
   }
-  .theme-btn {
-    -webkit-tap-highlight-color: transparent;
+  @media (hover: hover) {
+    .theme-btn:hover {
+      background: color-mix(in srgb, var(--color-ink) 7%, transparent);
+      color: var(--color-ink);
+    }
+  }
+  .theme-btn:active,
+  .theme-btn:focus-visible {
+    background: color-mix(in srgb, var(--color-ink) 7%, transparent);
+    color: var(--color-ink);
   }
   .tui-btn--primary {
     display: inline-flex;
