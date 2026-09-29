@@ -1,17 +1,20 @@
 ---
 // A TUI status line pinned to the bottom (vim / btop): mode badge, the pane you're in, key hints and a clock.
 // Laptops and desktops only; the keys it names work there: ↑↓ jump between panes, / focuses the AI prompt.
+// The clock is my time in the Philippines, and "updated" counts from when the site was last built.
+const builtAt = new Date().toISOString();
 ---
 
 <!-- Decorative parts are hidden from screen readers; the two buttons stay reachable and named. -->
 <div class="status">
   <span class="mode" aria-hidden="true">tui</span>
   <span class="text-ink" aria-hidden="true"><span class="text-accent">~/</span><span data-status-pane>jerome-tegrado</span></span>
+  <span class="text-muted" aria-hidden="true">updated <time data-status-updated datetime={builtAt}></time></span>
   <span class="ml-auto flex items-center gap-4 text-muted">
     <span aria-hidden="true"><kbd>↑↓</kbd> panes</span>
     <button type="button" data-status-ask aria-label="Ask my AI"><kbd aria-hidden="true">/</kbd> ask</button>
     <button type="button" data-palette-open aria-label="Open command menu"><kbd aria-hidden="true">⌘K</kbd> menu</button>
-    <time data-status-clock class="text-ink tabular-nums" aria-hidden="true"></time>
+    <span aria-hidden="true" title="My local time">ph <time data-status-clock class="text-ink tabular-nums"></time></span>
   </span>
 </div>
 
@@ -92,8 +95,16 @@
   );
   syncPane();
 
+  const updated = document.querySelector<HTMLTimeElement>("[data-status-updated]");
+  function ago(date: Date) {
+    const minutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60_000));
+    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60 * 24) return `${Math.round(minutes / 60)}h ago`;
+    return `${Math.round(minutes / (60 * 24))}d ago`;
+  }
   function tickClock() {
-    if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+    if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Manila" });
+    if (updated) updated.textContent = ago(new Date(updated.dateTime));
   }
   tickClock();
   setInterval(tickClock, 15_000);
