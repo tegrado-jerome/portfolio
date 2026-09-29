@@ -28,7 +28,7 @@ import Icon from "./Icon.astro";
   >
 </button>
 
-<aside id="chat" class="sheet" role="dialog" aria-labelledby="chat-title">
+<aside id="chat" class="sheet" role="dialog" aria-labelledby="chat-title" tabindex="-1">
   <p id="chat-keys" class="sr-only">Enter to send, Shift and Enter for a new line, Escape to close.</p>
   <!-- Laid out like Messenger's chat header: photo with an online dot, name, status underneath. -->
   <header class="flex items-center justify-between border-b border-line pb-4">
@@ -55,7 +55,7 @@ import Icon from "./Icon.astro";
     </button>
   </header>
 
-  <ol data-chat-log aria-live="polite" class="flex flex-1 flex-col gap-4 overflow-y-auto py-6">
+  <ol data-chat-log aria-live="polite" class="mb-3 flex flex-1 flex-col gap-4 overflow-y-auto py-6">
     <!-- Like Messenger, the thread opens with my profile, and it stays at the top of the conversation. -->
     <li class="flex flex-col items-center gap-1.5 pt-6 pb-4 text-center">
       {
@@ -70,6 +70,24 @@ import Icon from "./Icon.astro";
       <p class="text-heading">{site.name.toLowerCase().replace(" ", "-")}</p>
       <p class="text-small text-muted">Online</p>
     </li>
+    <!-- Quick replies (Messenger's icebreakers): outlined bubbles on the visitor's side. They sit at the bottom of the
+         thread and scroll with it. -->
+    <li data-chat-suggestions class="mt-auto">
+      <ul class="flex flex-col items-end gap-2">
+        {
+          assistant.suggestions.map((s) => (
+            <li>
+              <button
+                type="button"
+                class="rounded-[2px] border border-ink px-3 py-1.5 text-small text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
+              >
+                {s}
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </li>
   </ol>
   <!-- My avatar, copied next to each of my replies. -->
   <template data-avatar>
@@ -83,22 +101,6 @@ import Icon from "./Icon.astro";
       )
     }
   </template>
-
-  <!-- Quick replies (Messenger's icebreakers): outlined bubbles on the visitor's side. -->
-  <ul data-chat-suggestions class="mb-3 flex flex-col items-end gap-2">
-    {
-      assistant.suggestions.map((s) => (
-        <li>
-          <button
-            type="button"
-            class="rounded-[2px] border border-ink px-3 py-1.5 text-small text-ink transition-colors duration-200 hover:bg-ink hover:text-paper"
-          >
-            {s}
-          </button>
-        </li>
-      ))
-    }
-  </ul>
 
   <form data-chat-form class="composer flex items-end gap-2 rounded-[4px] border border-line py-2 pr-2 pl-4">
     <label for="chat-input" class="sr-only">Your message</label>
@@ -149,6 +151,14 @@ import Icon from "./Icon.astro";
       translate 0.5s var(--ease-out-soft),
       visibility 0s linear 0.5s;
   }
+  /* Hidden while the chat is open (the sheet's close button takes over), fading out as the sheet slides in. */
+  .chat-fab.is-covered {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.2s var(--ease-out-soft),
+      visibility 0s linear 0.2s;
+  }
   .online-badge {
     position: absolute;
     right: -1px;
@@ -173,18 +183,29 @@ import Icon from "./Icon.astro";
     background: var(--color-paper);
     border-left: 1px solid var(--color-line);
     visibility: hidden;
-    opacity: 0;
-    transform: translateX(24px);
+    /* Slides in from the edge on the iOS sheet curve (as in Vaul): quick to start, long soft landing.
+       Closing runs a little faster than opening. */
+    transform: translateX(100%);
+    box-shadow: 0 0 0 transparent;
     transition:
-      opacity 0.24s var(--ease-out-soft),
-      transform 0.24s var(--ease-out-soft),
-      visibility 0s linear 0.24s;
+      transform 0.38s var(--ease-sheet),
+      box-shadow 0.38s var(--ease-sheet),
+      visibility 0s linear 0.38s;
+    will-change: transform;
+    --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
   }
   .sheet[data-open] {
     visibility: visible;
-    opacity: 1;
     transform: none;
-    transition-delay: 0s;
+    box-shadow: -24px 0 60px -30px rgb(0 0 0 / 0.25);
+    transition:
+      transform 0.5s var(--ease-sheet),
+      box-shadow 0.5s var(--ease-sheet),
+      visibility 0s;
+  }
+  /* The sheet itself takes focus on open (so phones don't raise the keyboard); it needs no ring. */
+  .sheet:focus {
+    outline: none;
   }
   [data-chat-log] {
     overscroll-behavior: contain;
@@ -218,6 +239,78 @@ import Icon from "./Icon.astro";
   [data-chat-log] :global(.msg-ai .bubble) {
     background: var(--color-ph);
     border-bottom-left-radius: 4px;
+    white-space: normal;
+  }
+  /* Rendered replies (src/scripts/markdown.ts): bold, italics, lists, tables, code. */
+  [data-chat-log] :global(.msg-ai .bubble > * + *) {
+    margin-top: 0.6em;
+  }
+  [data-chat-log] :global(.bubble strong),
+  [data-chat-log] :global(.bubble .md-heading) {
+    font-weight: 600;
+  }
+  [data-chat-log] :global(.bubble ul),
+  [data-chat-log] :global(.bubble ol) {
+    padding-left: 1.25em;
+  }
+  [data-chat-log] :global(.bubble ul) {
+    list-style: disc;
+  }
+  [data-chat-log] :global(.bubble ol) {
+    list-style: decimal;
+  }
+  [data-chat-log] :global(.bubble li + li) {
+    margin-top: 0.25em;
+  }
+  [data-chat-log] :global(.bubble code),
+  [data-chat-log] :global(.bubble pre) {
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--color-ink) 7%, transparent);
+    font-size: 0.9em;
+  }
+  [data-chat-log] :global(.bubble code) {
+    padding: 0.1em 0.35em;
+  }
+  [data-chat-log] :global(.bubble pre) {
+    padding: 8px 10px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  [data-chat-log] :global(.md-table) {
+    overflow-x: auto;
+  }
+  [data-chat-log] :global(.bubble table) {
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  [data-chat-log] :global(.bubble th),
+  [data-chat-log] :global(.bubble td) {
+    padding: 5px 8px;
+    border: 1px solid var(--color-line);
+    text-align: left;
+    vertical-align: top;
+    /* Words stay whole in cells; a wide table scrolls sideways instead. */
+    overflow-wrap: normal;
+  }
+  [data-chat-log] :global(.bubble th) {
+    font-weight: 600;
+  }
+  [data-chat-log] :global(.md-link) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  /* My email: in the accent colour, bolder, and always on one line. It shrinks with the screen so it fits the bubble. */
+  [data-chat-log] :global(.md-email) {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-size: min(1em, 3.6vw);
+    white-space: nowrap;
+    overflow-wrap: normal;
+    transition: opacity 0.2s ease;
+  }
+  [data-chat-log] :global(.md-email:hover) {
+    opacity: 0.75;
   }
   [data-chat-log] :global(.msg-user .bubble) {
     background: var(--color-ink);
@@ -261,8 +354,7 @@ import Icon from "./Icon.astro";
     background: var(--color-muted);
   }
   /* A caret that follows the reply as it types out. */
-  [data-chat-log] :global(.is-typing::after) {
-    content: "";
+  [data-chat-log] :global(.caret) {
     display: inline-block;
     width: 2px;
     height: 1em;
@@ -280,7 +372,7 @@ import Icon from "./Icon.astro";
     [data-chat-log] :global(.typing-dots span:nth-child(3)) {
       animation-delay: 0.3s;
     }
-    [data-chat-log] :global(.is-typing::after) {
+    [data-chat-log] :global(.caret) {
       animation: caret 0.9s steps(1) infinite;
     }
   }
@@ -305,7 +397,11 @@ import Icon from "./Icon.astro";
     .sheet {
       padding: 20px;
       border-left: 0;
-      transform: translateY(24px);
+      transform: translateY(100%);
+    }
+    /* More room for my replies, so an email address fits on one line. */
+    [data-chat-log] :global(.msg-ai) {
+      padding-right: 12px;
     }
     /* The sheet is full-screen here, so the page behind it must not scroll. */
     :global(html.chat-open),
@@ -316,10 +412,16 @@ import Icon from "./Icon.astro";
 </style>
 
 <script>
+  import { markdown } from "../scripts/markdown";
+
   type Message = { role: "user" | "assistant"; content: string };
 
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const MIN_TYPING_DOTS = 2000; // ms
+  // A reply never shows sooner than 4s after sending, and the typing dots wait half a second before they appear,
+  // like a person reading then answering. Sending is locked until the reply is done, so this also paces visitors
+  // to one message every few seconds at most.
+  const MIN_REPLY_DELAY = 4000; // ms
+  const TYPING_DOTS_DELAY = 500; // ms
 
   // Resolves after `ms`, or straight away once the visitor presses stop.
   function wait(ms: number, signal: AbortSignal) {
@@ -347,11 +449,12 @@ import Icon from "./Icon.astro";
     document.documentElement.classList.toggle("chat-open", open);
     openers.forEach((b) => {
       b.setAttribute("aria-expanded", String(open));
-      b.hidden = open; // the sheet covers the corner; its own close button takes over
+      b.classList.toggle("is-covered", open); // the sheet covers the corner; its own close button takes over
     });
     if (open) {
+      // Focus the sheet, not the text field: on phones the keyboard only comes up once the visitor taps the field.
       returnFocus = document.activeElement as HTMLElement | null;
-      input.focus();
+      sheet.focus({ preventScroll: true });
     } else {
       returnFocus?.focus();
     }
@@ -415,11 +518,21 @@ import Icon from "./Icon.astro";
   }
 
   function typingDots() {
-    const bubble = document.createElement("p");
+    const bubble = document.createElement("div");
     bubble.className = "bubble typing-dots";
     bubble.setAttribute("aria-label", "Jerome is typing");
     bubble.append(...Array.from({ length: 3 }, () => document.createElement("span")));
     return bubble;
+  }
+
+  // Renders a reply as Markdown with a caret at the end of its last line.
+  function render(bubble: HTMLElement, text: string, caret: boolean) {
+    const content = markdown(text);
+    if (caret) {
+      const last = Array.from(content.querySelectorAll("p, li, td, th, pre")).at(-1) ?? content;
+      last.append(Object.assign(document.createElement("span"), { className: "caret" }));
+    }
+    bubble.replaceChildren(content);
   }
 
   // Types the reply out at 60 characters a second, speeding up so even long replies finish in about 1.5s.
@@ -428,23 +541,19 @@ import Icon from "./Icon.astro";
   function typeOut(bubble: HTMLElement, text: string, signal: AbortSignal) {
     const chars = Array.from(text); // whole characters, so emoji never split
     if (reduceMotion) {
-      bubble.textContent = text;
+      render(bubble, text, false);
       return Promise.resolve();
     }
     const perSecond = Math.max(60, chars.length / 1.5);
     const start = performance.now();
-    bubble.classList.add("is-typing");
     return new Promise<void>((resolve) => {
       const frame = (now: number) => {
         const shown = signal.aborted ? chars.length : Math.min(chars.length, Math.floor(((now - start) / 1000) * perSecond));
-        bubble.textContent = chars.slice(0, shown).join("");
+        const done = shown >= chars.length;
+        render(bubble, chars.slice(0, shown).join(""), !done);
         if (stickToBottom) toBottom();
-        if (shown < chars.length) {
-          requestAnimationFrame(frame);
-          return;
-        }
-        bubble.classList.remove("is-typing");
-        resolve();
+        if (done) resolve();
+        else requestAnimationFrame(frame);
       };
       requestAnimationFrame(frame);
     });
@@ -461,21 +570,29 @@ import Icon from "./Icon.astro";
   async function ask(question: string) {
     const text = question.trim();
     if (!text || request) return;
+    // Only a visitor already typing gets the field back afterwards; tapping a quick reply never raises the keyboard.
+    const refocus = document.activeElement === input || document.activeElement === send;
     suggestions.hidden = true;
     input.value = "";
     growInput();
 
     history.push({ role: "user", content: text });
-    const writing = typingDots();
-    log.append(message("user", paragraph("bubble", text)), message("assistant", writing));
+    const reply = message("assistant", typingDots());
+    log.append(message("user", paragraph("bubble", text)));
     // Sending always jumps to your own message, like chat apps do.
     stickToBottom = true;
     toBottom(true);
 
     request = new AbortController();
+    const { signal } = request;
     const askedAt = performance.now();
     log.setAttribute("aria-busy", "true");
     syncButton();
+    const showDots = setTimeout(() => {
+      log.append(reply);
+      if (stickToBottom) toBottom(true);
+    }, TYPING_DOTS_DELAY);
+    const bubble = () => reply.lastElementChild as HTMLElement;
     try {
       // The server accepts at most 12 messages. History alternates and ends with the visitor,
       // so the last 11 always start with a user turn.
@@ -483,27 +600,31 @@ import Icon from "./Icon.astro";
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history.slice(-11) }),
-        signal: request.signal,
+        signal,
       });
       const data: { reply?: string; error?: string } = await res.json().catch(() => ({}));
       if (!res.ok || !data.reply) throw new Error(data.error ?? "Chat's down right now. Try again later.");
       history.push({ role: "assistant", content: data.reply });
-      // Keep the typing dots up for at least 2s, so a fast reply still reads as being written.
-      await wait(MIN_TYPING_DOTS - (performance.now() - askedAt), request.signal);
-      const reply = paragraph("bubble", "");
-      writing.replaceWith(reply);
-      await typeOut(reply, data.reply, request.signal);
+      await wait(MIN_REPLY_DELAY - (performance.now() - askedAt), signal);
+      clearTimeout(showDots);
+      if (!reply.isConnected) log.append(reply);
+      const text = document.createElement("div");
+      text.className = "bubble";
+      bubble().replaceWith(text);
+      await typeOut(text, data.reply, signal);
     } catch (error) {
       history.pop(); // keep history alternating so the next question is still valid
+      clearTimeout(showDots);
+      if (!reply.isConnected) log.append(reply);
       const stopped = error instanceof DOMException && error.name === "AbortError";
-      writing.replaceWith(
+      bubble().replaceWith(
         paragraph("bubble text-muted", stopped ? "Stopped." : error instanceof Error ? error.message : "Something broke. Try again."),
       );
     } finally {
       request = null;
       log.removeAttribute("aria-busy");
       syncButton();
-      input.focus();
+      if (refocus) input.focus();
     }
   }
 
