@@ -336,8 +336,13 @@ import Icon from "./Icon.astro";
     margin-left: -8px;
     color: var(--color-accent);
   }
-  /* The chip's accent text would otherwise win over tui-btn's inverted hover and turn unreadable. */
-  [data-chat-log] :global(.show-chip:hover),
+  /* The chip's accent text would otherwise win over tui-btn's inverted hover and turn unreadable. Only with a real
+     mouse, like tui-btn itself: on phones a tap leaves :hover stuck, which turned the text white on a light bubble. */
+  @media (hover: hover) {
+    [data-chat-log] :global(.show-chip:hover) {
+      color: var(--color-paper);
+    }
+  }
   [data-chat-log] :global(.show-chip:focus-visible) {
     color: var(--color-paper);
   }
