@@ -352,6 +352,35 @@ import Icon from "./Icon.astro";
   [data-chat-log] :global(.show-chip:focus-visible) {
     color: var(--color-paper);
   }
+  /* Phones, chat down to the status bar: a reply too long to fit ends in a fade and "see more", which opens the full
+     chat. The full chat itself never cuts a reply short. */
+  [data-chat-log] :global(.bubble.is-clamped) {
+    position: relative;
+    overflow: hidden;
+  }
+  [data-chat-log] :global(.bubble.is-clamped::after) {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 76px;
+    background: linear-gradient(transparent, var(--color-ph) 60%);
+  }
+  [data-chat-log] :global(.see-more) {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    z-index: 1;
+    height: 28px;
+    color: var(--color-accent);
+  }
+  @media (hover: hover) {
+    [data-chat-log] :global(.see-more:hover) {
+      color: var(--color-paper);
+    }
+  }
+  [data-chat-log] :global(.see-more:focus-visible) {
+    color: var(--color-paper);
+  }
   [data-chat-log] :global(.md-link) {
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -623,6 +652,7 @@ import Icon from "./Icon.astro";
   const header = sheet.querySelector<HTMLElement>(":scope > header")!;
   const peekPath = sheet.querySelector<HTMLElement>("[data-peek-path]")!;
   let peekHeight = 0;
+  let clampTo = 0; // how tall my last reply may be while the sheet is down; 0 = it fits whole
   const lastQuestion = () => [...log.querySelectorAll<HTMLElement>(".msg-user")].at(-1);
   const offsetInLog = (el: HTMLElement) => el.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop;
   function measurePeek() {
@@ -631,7 +661,29 @@ import Icon from "./Icon.astro";
     const exchange = question ? log.scrollHeight - offsetInLog(question) + 12 : 0;
     // Everything around the log (padding, composer, note), with the bar in the header's place.
     const around = sheet.clientHeight - log.clientHeight - header.offsetHeight - 20 + BAR;
-    peekHeight = Math.round(Math.min(screen * PEEK_MAX, Math.max(screen * PEEK_MIN, around + exchange)));
+    const need = around + exchange;
+    peekHeight = Math.round(Math.min(screen * PEEK_MAX, Math.max(screen * PEEK_MIN, need)));
+    const reply = lastReply();
+    clampTo = reply && need > peekHeight ? Math.max(96, reply.offsetHeight - (need - peekHeight)) : 0;
+  }
+  const lastReply = () => [...log.querySelectorAll<HTMLElement>(".msg-ai .bubble")].at(-1);
+  // Cuts my last reply to fit (with "see more"), or shows it whole again.
+  function clampReply(on: boolean) {
+    log.querySelectorAll(".see-more").forEach((b) => b.remove());
+    log.querySelectorAll<HTMLElement>(".is-clamped").forEach((b) => {
+      b.classList.remove("is-clamped");
+      b.style.removeProperty("max-height");
+    });
+    const reply = lastReply();
+    if (!on || !clampTo || !reply) return;
+    reply.classList.add("is-clamped");
+    reply.style.maxHeight = `${clampTo}px`;
+    const more = document.createElement("button");
+    more.type = "button";
+    more.className = "see-more tui-btn inline-flex";
+    more.textContent = "[ see more ]";
+    more.addEventListener("click", () => setPeek(false));
+    reply.append(more);
   }
   function showExchange() {
     const question = lastQuestion();
@@ -640,17 +692,21 @@ import Icon from "./Icon.astro";
   function setPeek(peek: boolean, target?: string) {
     if (target) peekPath.textContent = target === "top" ? "~/" : `~/${target}`;
     if (sheet.hasAttribute("data-peek") === peek) return;
+    const wasClamped = clampTo > 0;
     if (peek) measurePeek();
+    clampReply(peek);
     sheet.classList.add("is-resizing");
     setTimeout(() => sheet.classList.remove("is-resizing"), 500);
     sheet.toggleAttribute("data-peek", peek);
     document.documentElement.classList.toggle("chat-peek", peek);
     document.documentElement.style.scrollPaddingBottom = peek ? `${peekHeight}px` : "";
     fitToViewport();
-    if (peek) {
+    if (peek || wasClamped) {
+      // Opening a cut reply starts at the question, so it reads on from the top.
       showExchange();
       setTimeout(showExchange, 460);
     } else if (stickToBottom) setTimeout(() => toBottom(), 460);
+    if (!peek) clampTo = 0;
   }
 
   // "Stick to bottom", like ChatGPT and Messenger: the log follows new text only while the visitor is at the
