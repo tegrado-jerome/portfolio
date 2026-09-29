@@ -30,6 +30,9 @@ import Icon from "./Icon.astro";
 
 <aside id="chat" class="sheet" role="dialog" aria-labelledby="chat-title" tabindex="-1">
   <p id="chat-keys" class="sr-only">Enter to send, Shift and Enter for a new line, Escape to close.</p>
+  <!-- Phones: when a reply shows part of the page, the sheet drops to half height (like Apple and Google Maps);
+       this handle brings it back up. -->
+  <button type="button" data-chat-expand class="grab" aria-label="Show the whole chat"><span></span></button>
   <!-- Laid out like Messenger's chat header: photo with an online dot, name, status underneath. -->
   <header class="flex items-center justify-between border-b border-line pb-4">
     <div class="flex items-center gap-3">
@@ -462,10 +465,54 @@ import Icon from "./Icon.astro";
     [data-chat-log] :global(.msg-ai) {
       padding-right: 12px;
     }
-    /* The sheet is full-screen here, so the page behind it must not scroll. */
-    :global(html.chat-open),
-    :global(html.chat-open body) {
+    /* The sheet is full-screen here, so the page behind it must not scroll, except while it's down at half height. */
+    :global(html.chat-open:not(.chat-peek)),
+    :global(html.chat-open:not(.chat-peek) body) {
       overflow: hidden;
+    }
+    .sheet[data-peek] {
+      top: 50%;
+      padding-top: 0;
+      border-top: 1px solid var(--color-line);
+      box-shadow: 0 -16px 40px -24px rgb(0 0 0 / 0.35);
+    }
+    /* Growing and shrinking between full and half height eases like the slide in. */
+    .sheet.is-resizing {
+      transition:
+        transform 0.5s var(--ease-sheet),
+        top 0.45s var(--ease-sheet),
+        height 0.45s var(--ease-sheet),
+        visibility 0s;
+    }
+    .sheet[data-peek] .grab {
+      display: block;
+    }
+  }
+  .grab {
+    display: none;
+    width: 100%;
+    padding: 10px 0 12px;
+    cursor: pointer;
+  }
+  .grab span {
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 0 auto;
+    border-radius: 2px;
+    background: var(--color-line);
+    transition: background 0.2s ease;
+  }
+  .grab:hover span,
+  .grab:focus-visible span {
+    background: var(--color-muted);
+  }
+  .grab:focus-visible {
+    outline: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet.is-resizing {
+      transition: none;
     }
   }
 </style>
@@ -503,8 +550,6 @@ import Icon from "./Icon.astro";
   const history: Message[] = [];
   let request: AbortController | null = null;
   let returnFocus: HTMLElement | null = null;
-  // Phones: the part of the page my last reply was about, shown as soon as the chat closes.
-  let showOnClose: string | null = null;
 
   function setOpen(open: boolean) {
     sheet.toggleAttribute("data-open", open);
@@ -518,12 +563,27 @@ import Icon from "./Icon.astro";
       returnFocus = document.activeElement as HTMLElement | null;
       sheet.focus({ preventScroll: true });
     } else {
-      // Focusing would scroll the page back to the opener, so skip that scroll when a reply's target is waiting.
-      returnFocus?.focus({ preventScroll: showOnClose !== null });
-      if (showOnClose) pointTo(showOnClose);
-      showOnClose = null;
+      // After a half-height peek the visitor is looking at that part of the page; don't jump back to the opener.
+      returnFocus?.focus({ preventScroll: sheet.hasAttribute("data-peek") });
+      // Slide away at the current height; go back to full once it's out of sight.
+      setTimeout(() => sheet.hasAttribute("data-open") || setPeek(false), 400);
     }
     fitToViewport();
+  }
+
+  // Phones: half height with the page showing above (Apple and Google Maps do this for results on the map), or
+  // back to full screen. While it's down the page scrolls freely, and scrolling to a part of it keeps clear of the
+  // sheet.
+  const PEEK = 0.5; // share of the screen the sheet keeps
+  function setPeek(peek: boolean) {
+    if (sheet.hasAttribute("data-peek") === peek) return;
+    sheet.classList.add("is-resizing");
+    setTimeout(() => sheet.classList.remove("is-resizing"), 500);
+    sheet.toggleAttribute("data-peek", peek);
+    document.documentElement.classList.toggle("chat-peek", peek);
+    document.documentElement.style.scrollPaddingBottom = peek ? `${Math.round(PEEK * 100)}vh` : "";
+    fitToViewport();
+    if (stickToBottom) setTimeout(() => toBottom(), 460);
   }
 
   // "Stick to bottom", like ChatGPT and Messenger: the log follows new text only while the visitor is at the
@@ -549,13 +609,15 @@ import Icon from "./Icon.astro";
       sheet.style.removeProperty("top");
       return;
     }
-    sheet.style.top = `${viewport.offsetTop}px`;
-    sheet.style.height = `${viewport.height}px`;
+    const height = sheet.hasAttribute("data-peek") ? Math.round(viewport.height * PEEK) : viewport.height;
+    sheet.style.top = `${viewport.offsetTop + viewport.height - height}px`;
+    sheet.style.height = `${height}px`;
     if (stickToBottom) toBottom();
   }
   viewport?.addEventListener("resize", fitToViewport);
   viewport?.addEventListener("scroll", fitToViewport);
   input.addEventListener("focus", () => {
+    setPeek(false);
     // Once the keyboard has slid up, bring the latest message back into view.
     setTimeout(() => {
       fitToViewport();
@@ -664,9 +726,8 @@ import Icon from "./Icon.astro";
     }
   }
 
-  // A reply that's about part of the page scrolls there (laptops and up, where the page shows beside the chat) and
-  // gets a chip to go back to it. On phones the chat covers the page, so the page goes there once the chat closes,
-  // and the chip closes it straight away.
+  // A reply that's about part of the page scrolls there and gets a chip to go back to it. Laptops and up show the
+  // page beside the chat; phones drop the chat to half height so it shows above.
   function showChip(bubble: HTMLElement, target: string, auto: boolean) {
     if (!findTarget(target)) return;
     const chip = document.createElement("button");
@@ -674,16 +735,13 @@ import Icon from "./Icon.astro";
     chip.className = "show-chip tui-btn inline-flex";
     chip.textContent = `[ cd ~/${target === "top" ? "" : target} ]`;
     chip.addEventListener("click", () => {
-      if (phone.matches) {
-        showOnClose = null;
-        setOpen(false);
-      }
+      if (phone.matches) setPeek(true);
       pointTo(target);
     });
     bubble.append(chip);
     if (!auto) return;
-    if (phone.matches) showOnClose = target;
-    else pointTo(target);
+    if (phone.matches) setPeek(true);
+    pointTo(target);
   }
 
   function message(role: Message["role"], bubble: HTMLElement) {
@@ -700,6 +758,7 @@ import Icon from "./Icon.astro";
     // Only a visitor already typing gets the field back afterwards; tapping a quick reply never raises the keyboard.
     const refocus = document.activeElement === input || document.activeElement === send;
     suggestions.hidden = true;
+    setPeek(false);
     input.value = "";
     growInput();
 
@@ -804,6 +863,7 @@ import Icon from "./Icon.astro";
 
   openers.forEach((b) => b.addEventListener("click", () => setOpen(!sheet.hasAttribute("data-open"))));
   sheet.querySelector("[data-chat-close]")!.addEventListener("click", () => setOpen(false));
+  sheet.querySelector("[data-chat-expand]")!.addEventListener("click", () => setPeek(false));
   sheet.addEventListener("keydown", (e) => {
     if (e.key === "Escape") setOpen(false);
   });
