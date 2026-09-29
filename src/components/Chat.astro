@@ -242,7 +242,7 @@ import Icon from "./Icon.astro";
     white-space: normal;
   }
   /* Rendered replies (src/scripts/markdown.ts): bold, italics, lists, tables, code. */
-  [data-chat-log] :global(.msg-ai .bubble > * + *) {
+  [data-chat-log] :global(.msg-ai .bubble:not(.typing-dots) > * + *) {
     margin-top: 0.6em;
   }
   [data-chat-log] :global(.bubble strong),
