@@ -386,14 +386,9 @@ import Icon from "./Icon.astro";
     border-radius: 50%;
     background: var(--color-muted);
   }
-  /* A caret that follows the reply as it types out. */
-  [data-chat-log] :global(.caret) {
-    display: inline-block;
-    width: 2px;
-    height: 1em;
-    margin-left: 2px;
-    vertical-align: -0.15em;
-    background: currentColor;
+  /* The reply fades in word by word. A word (and the blocks around it) stays out of the layout until its turn. */
+  [data-chat-log] :global(.pending) {
+    display: none;
   }
   @media (prefers-reduced-motion: no-preference) {
     [data-chat-log] :global(.typing-dots span) {
@@ -405,8 +400,8 @@ import Icon from "./Icon.astro";
     [data-chat-log] :global(.typing-dots span:nth-child(3)) {
       animation-delay: 0.3s;
     }
-    [data-chat-log] :global(.caret) {
-      animation: caret 0.9s steps(1) infinite;
+    [data-chat-log] :global(.word) {
+      animation: word-in 0.6s ease-out both;
     }
   }
   @keyframes typing-dot {
@@ -421,9 +416,10 @@ import Icon from "./Icon.astro";
       opacity: 1;
     }
   }
-  @keyframes caret {
-    50% {
+  @keyframes word-in {
+    from {
       opacity: 0;
+      filter: blur(3px);
     }
   }
   @media (max-width: 639px) {
@@ -558,34 +554,48 @@ import Icon from "./Icon.astro";
     return bubble;
   }
 
-  // Renders a reply as Markdown with a caret at the end of its last line.
-  function render(bubble: HTMLElement, text: string, caret: boolean) {
-    const content = markdown(text);
-    if (caret) {
-      const last = Array.from(content.querySelectorAll("p, li, td, th, pre")).at(-1) ?? content;
-      last.append(Object.assign(document.createElement("span"), { className: "caret" }));
+  // Wraps every word of the rendered reply in a hidden span, and hides the blocks around it too, so nothing
+  // (not even an empty bullet) shows before its first word. Returns the words in reading order.
+  function wrapWords(root: Node) {
+    const texts: Text[] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) texts.push(walker.currentNode as Text);
+    const words: HTMLElement[] = [];
+    for (const node of texts) {
+      if (!node.data.trim()) continue;
+      const parts = node.data.split(/(\s+)/).map((part) => {
+        if (!part || /^\s+$/.test(part)) return part;
+        const word = Object.assign(document.createElement("span"), { className: "word pending", textContent: part });
+        words.push(word);
+        return word;
+      });
+      for (let el = node.parentElement; el && el !== root; el = el.parentElement) el.classList.add("pending");
+      node.replaceWith(...parts.filter(Boolean));
     }
-    bubble.replaceChildren(content);
+    return words;
   }
 
-  // Types the reply out at 60 characters a second, speeding up so even long replies finish in about 1.5s.
-  // Timed by the clock, not by frames, so it runs the same on 60 Hz and 120 Hz screens.
+  // Shows a word, and the blocks it sits in.
+  function reveal(word: HTMLElement, root: HTMLElement) {
+    for (let el: HTMLElement | null = word; el && el !== root; el = el.parentElement) el.classList.remove("pending");
+  }
+
+  // Fades the reply in word by word, about 25 words a second, speeding up so even long replies finish in about 3s.
+  // Each word eases in from a soft blur. Timed by the clock, not by frames, so it runs the same on 60 Hz and 120 Hz.
   // Stopping mid-way shows the rest at once: the reply is already complete, only its display is animated.
   function typeOut(bubble: HTMLElement, text: string, signal: AbortSignal) {
-    const chars = Array.from(text); // whole characters, so emoji never split
-    if (reduceMotion) {
-      render(bubble, text, false);
-      return Promise.resolve();
-    }
-    const perSecond = Math.max(60, chars.length / 1.5);
+    bubble.replaceChildren(markdown(text));
+    if (reduceMotion) return Promise.resolve();
+    const words = wrapWords(bubble);
+    const step = Math.min(40, 3000 / words.length); // ms per word
     const start = performance.now();
+    let shown = 0;
     return new Promise<void>((resolve) => {
       const frame = (now: number) => {
-        const shown = signal.aborted ? chars.length : Math.min(chars.length, Math.floor(((now - start) / 1000) * perSecond));
-        const done = shown >= chars.length;
-        render(bubble, chars.slice(0, shown).join(""), !done);
+        const target = signal.aborted ? words.length : Math.min(words.length, Math.floor((now - start) / step) + 1);
+        for (; shown < target; shown++) reveal(words[shown], bubble);
         if (stickToBottom) toBottom();
-        if (done) resolve();
+        if (shown >= words.length) resolve();
         else requestAnimationFrame(frame);
       };
       requestAnimationFrame(frame);
