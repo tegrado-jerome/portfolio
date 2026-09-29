@@ -8,22 +8,43 @@ import Icon from "./Icon.astro";
 
 interface Props {
   project: Project;
+  index: number;
   class?: string;
 }
 
-const { project, class: className } = Astro.props;
+const { project, index, class: className } = Astro.props;
 const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
+const number = String(index + 1).padStart(2, "0");
 ---
 
-<!-- Reference-style card: cover, title and one line. The whole card opens the full project in a modal. -->
-<article data-reveal class:list={["card relative flex flex-col", className]}>
-  <div class="media relative block aspect-[5/4] w-full overflow-hidden rounded-[2px] bg-ph">
+<!-- A bento tile: number, title, badge and visit on top, one line, then the cover running to the edge. An optional
+     ticket stub closes it, tinted from the cover. The whole card opens the full project in a modal. -->
+<article data-reveal class:list={["card tile relative", className]}>
+  <div class="tile-top">
+    <span class="tile-icon" aria-hidden="true">{number}</span>
+    <h3 class="tile-title truncate">
+      <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
+        {project.title}
+      </button>
+    </h3>
+    {project.locked && <span class="tile-badge">nda</span>}
+    {
+      href && (
+        <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex h-7">
+          [ visit ]
+        </a>
+      )
+    }
+  </div>
+  <p class="tile-desc">{project.description}</p>
+
+  <div class="tile-media">
     {
       project.image ? (
-        <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img size-full object-cover" />
+        <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
       ) : (
-        <span class="eyebrow absolute inset-0 grid place-items-center text-muted">[PROJECT IMAGE]</span>
+        <span class="eyebrow text-muted">[PROJECT IMAGE]</span>
       )
     }
     {
@@ -39,16 +60,18 @@ const href = !project.locked && isSet(project.href) ? project.href : undefined;
     }
   </div>
 
-  <!-- The same order as every card on the site: title, the muted meta line, then the text. -->
-  <div class="pt-4">
-    <h3 class="text-heading font-normal">
-      <button type="button" data-detail-open class="link-strong cursor-pointer text-left after:absolute after:inset-0 after:content-['']">
-        {project.title}
-      </button>
-    </h3>
-    <p class="text-small text-muted tabular-nums">{project.category} · {project.year}</p>
-    <p class="mt-2 text-body text-ink-soft">{project.description}</p>
-  </div>
+  {
+    project.stub && (
+      <div class="stub" data-stub>
+        <p class="stub-eyebrow">{project.stub.eyebrow}</p>
+        <p class="stub-title">{project.stub.title}</p>
+        <p class="stub-foot">
+          <span>{project.stub.code}</span>
+          <span>{project.year}</span>
+        </p>
+      </div>
+    )
+  }
 
   <Detail
     path={`projects/${slug}`}
@@ -69,4 +92,96 @@ const href = !project.locked && isSet(project.href) ? project.href : undefined;
   .card:hover .lock {
     opacity: 1;
   }
+  /* The ticket stub: a tinted band with a perforated line and punched notches, like a receipt's tear-off.
+     --tint comes from the cover image (see the script below); without one it's the accent. */
+  .stub {
+    --tint: var(--color-accent);
+    position: relative;
+    padding: 18px 18px 14px;
+    background: linear-gradient(135deg, var(--tint), color-mix(in srgb, var(--tint) 70%, black));
+    color: #fff;
+    transition: background 0.4s ease;
+  }
+  .stub-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .stub-title {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+  .stub-foot {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed rgb(255 255 255 / 0.5);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .stub-foot span:last-child {
+    font-weight: 600;
+  }
+  /* Punched notches at both ends of the perforation, in the card's own background so they look cut out. */
+  .stub-foot::before,
+  .stub-foot::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-paper);
+  }
+  .stub-foot::before {
+    left: -24px;
+  }
+  .stub-foot::after {
+    right: -24px;
+  }
 </style>
+
+<script>
+  // Tints each ticket stub with its cover's main colour: the image is shrunk to a few pixels and averaged, then
+  // darkened until white text on it stays readable (4.5:1).
+  function tint(img: HTMLImageElement, stub: HTMLElement) {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 8;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+      ctx.drawImage(img, 0, 0, 8, 8);
+      const data = ctx.getImageData(0, 0, 8, 8).data;
+      let [r, g, b] = [0, 0, 0];
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+      }
+      const n = data.length / 4;
+      [r, g, b] = [r / n, g / n, b / n];
+      const lum = (v: number) => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      };
+      for (let k = 0; k < 20 && 1.05 / (0.2126 * lum(r) + 0.7152 * lum(g) + 0.0722 * lum(b) + 0.05) < 4.5; k++) {
+        [r, g, b] = [r * 0.88, g * 0.88, b * 0.88];
+      }
+      stub.style.setProperty("--tint", `rgb(${Math.round(r)} ${Math.round(g)} ${Math.round(b)})`);
+    } catch {
+      // A cross-origin image can't be read; the stub keeps the accent colour.
+    }
+  }
+  document.querySelectorAll<HTMLElement>("[data-stub]").forEach((stub) => {
+    const img = stub.closest(".card")?.querySelector<HTMLImageElement>(".tile-media img");
+    if (!img) return;
+    if (img.complete && img.naturalWidth) tint(img, stub);
+    else img.addEventListener("load", () => tint(img, stub), { once: true });
+  });
+</script>

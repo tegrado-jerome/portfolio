@@ -148,8 +148,102 @@
 
 /* The one grid for every card section (projects, awards, certifications, testimonials), so they all breathe the same. */
 @utility card-grid {
-  column-gap: clamp(24px, 4vw, 64px);
-  row-gap: clamp(40px, 5vw, 72px);
+  gap: 16px;
+}
+
+/* The one card for every section (after kennethtegrado.com's project bento, drawn in this site's terminal style):
+   a top row (icon tile, title, badge, action), one line of text, then the picture running to the card's edge or a
+   footer line. The whole card opens its full view; the action and badge sit above that. */
+.tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-ink) 2.5%, var(--color-paper));
+  transition: border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .tile:hover {
+    border-color: var(--color-muted);
+  }
+}
+.tile-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 18px 0;
+}
+.tile-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: 11px;
+  font-weight: 600;
+}
+.tile-title {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+.tile-badge {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.tile-action {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  margin-left: auto;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+}
+.tile-desc {
+  padding: 6px 18px 16px;
+  color: var(--color-muted);
+  font-size: var(--text-small);
+}
+.tile-media {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin-inline: 18px;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background: var(--color-ph);
+}
+.tile-media > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.tile-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
 }
 
 /* A TUI section: no box and no divider, just its ~/path title above the content (see SectionHead).

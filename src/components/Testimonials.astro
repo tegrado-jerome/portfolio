@@ -1,5 +1,6 @@
 ---
-// Quotes as straight hairline boxes inside the "testimonials" pane.
+// Quotes in the site's one card (.tile in global.css): photo and name, role and company, the quote, then the year.
+// Three per row when there are three (or six…), otherwise two.
 import { testimonials } from "../data/testimonials";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
@@ -11,39 +12,27 @@ import SectionHead from "./SectionHead.astro";
     <section id="testimonials" class="shell section" aria-labelledby="testimonials-title">
       <div class="pane" data-pane="testimonials">
       <SectionHead id="testimonials-title" title="Testimonials" />
-      <div class="card-grid grid items-start md:grid-cols-2">
+      <div class:list={["card-grid grid", testimonials.length % 3 === 0 ? "md:grid-cols-3" : "md:grid-cols-2"]}>
         {testimonials.map((t, i) => (
-          <figure data-reveal style={`--i:${i}`} class="m-0">
-            <div class="note h-full p-[clamp(24px,3vw,40px)]">
-              {/* Quote first, then who said it, their role, and when. */}
-              <blockquote class="m-0 text-heading">
-                <p>{t.quote}</p>
-              </blockquote>
-              {/* A round photo beside the name, like a LinkedIn recommendation. */}
-              <figcaption class="mt-5 flex items-start gap-3">
-                <span class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ph text-muted">
-                  {t.avatar ? (
-                    <img src={t.avatar} alt="" width="80" height="80" loading="lazy" decoding="async" class="size-full object-cover" />
-                  ) : (
-                    <Icon icon={faUser} class="text-[14px]" />
-                  )}
-                </span>
-                <span>
-                <span class="block text-body">
-                  {t.href ? (
-                    <a href={t.href} target="_blank" rel="noopener noreferrer" class="link-strong">
-                      {t.name}
-                    </a>
-                  ) : (
-                    t.name
-                  )}
-                </span>
-                <span class="block text-small text-muted tabular-nums">
-                  {t.role}, {t.company} · {t.year}
-                </span>
-                </span>
-              </figcaption>
-            </div>
+          <figure data-reveal style={`--i:${i}`} class="tile m-0">
+            <figcaption class="tile-top">
+              <span class="tile-icon rounded-full bg-ph text-muted">
+                {t.avatar ? (
+                  <img src={t.avatar} alt="" width="52" height="52" loading="lazy" decoding="async" class="size-full object-cover" />
+                ) : (
+                  <Icon icon={faUser} class="text-[11px]" />
+                )}
+              </span>
+              <span class="tile-title">{t.name}</span>
+            </figcaption>
+            <p class="tile-desc">{t.role}, {t.company}</p>
+            <blockquote class="quote">
+              <p>{t.quote}</p>
+            </blockquote>
+            <p class="tile-meta mt-auto">
+              <span>{t.company}</span>
+              <span>{t.year}</span>
+            </p>
           </figure>
         ))}
       </div>
@@ -53,9 +42,21 @@ import SectionHead from "./SectionHead.astro";
 }
 
 <style>
-  /* No box: a soft surface, like a selected block in a terminal. */
-  .note {
-    border-radius: 2px;
-    background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  /* The quote sits where a picture would, on the same placeholder surface. */
+  .quote {
+    margin: 0 18px 18px;
+    padding: 18px;
+    border-radius: 3px;
+    background: var(--color-ph);
+    font-size: var(--text-heading);
+    line-height: 1.45;
+  }
+  .quote::before {
+    content: "“";
+    display: block;
+    height: 0.6em;
+    color: var(--color-accent);
+    font-size: 1.8em;
+    line-height: 1;
   }
 </style>
