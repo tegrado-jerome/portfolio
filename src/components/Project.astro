@@ -29,12 +29,18 @@ const number = String(index + 1).padStart(2, "0");
       </button>
     </h3>
     {project.locked && <span class="tile-badge">nda</span>}
+    {/* Every project shows visit. Until its real link is set it's a quiet stand-in, so the cards line up already. */}
     {
-      href && (
-        <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex h-7">
-          [ visit ]
-        </a>
-      )
+      !project.locked &&
+        (href ? (
+          <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex h-7">
+            [ visit ]
+          </a>
+        ) : (
+          <span class="tile-action tui-btn pointer-events-none inline-flex h-7 opacity-60" aria-hidden="true">
+            [ visit ]
+          </span>
+        ))
     }
   </div>
   <p class="tile-desc">{project.description}</p>
