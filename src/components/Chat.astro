@@ -912,11 +912,8 @@ import Icon from "./Icon.astro";
   // shell's history. Typing anything else leaves the history.
   let recall = -1;
   const asked = () => history.filter((m) => m.role === "user").map((m) => m.content);
-  // On-screen keyboards (phones, tablets), after ChatGPT's mobile site, WhatsApp and Messenger: Return makes a new
-  // line and the send button sends (there's no Shift to hold), tapping send keeps the keyboard up, and swiping the
-  // messages down puts it away.
-  const touch = matchMedia("(pointer: coarse)").matches;
-  if (touch) input.enterKeyHint = "enter";
+  // On-screen keyboards (phones, tablets), after WhatsApp and Messenger: tapping send keeps the keyboard up, and
+  // swiping the messages down puts it away. Enter sends everywhere (the keyboard's key shows "send").
   send.addEventListener("pointerdown", (e) => {
     if (document.activeElement === input) e.preventDefault(); // keeps focus, so the keyboard doesn't drop and pop back
   });
@@ -931,10 +928,10 @@ import Icon from "./Icon.astro";
   );
 
   input.addEventListener("keydown", (e) => {
-    // Enter sends, Shift+Enter is a new line (on-screen keyboards: Return is a new line). Not while an IME (Chinese,
-    // Japanese, Korean) is composing a word.
+    // Enter sends, Shift+Enter is a new line, on every device. Not while an IME (Chinese, Japanese, Korean) is
+    // composing a word.
     if (e.key.length === 1 || e.key === "Backspace") play("key");
-    if (e.key === "Enter" && !e.shiftKey && !e.isComposing && !touch) {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       recall = -1;
       ask(input.value);
