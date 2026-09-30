@@ -1,5 +1,4 @@
 ---
-import { faAward } from "@fortawesome/free-solid-svg-icons";
 import { awards } from "../data/awards";
 import CredentialGrid from "./CredentialGrid.astro";
 
@@ -15,4 +14,4 @@ const entries = awards.map((a) => ({
 }));
 ---
 
-<CredentialGrid id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" icon={faAward} linkLabel="view proof" />
+<CredentialGrid id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" linkLabel="view proof" />

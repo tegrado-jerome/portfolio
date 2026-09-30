@@ -8,24 +8,23 @@ import Icon from "./Icon.astro";
 
 interface Props {
   project: Project;
-  index: number;
   class?: string;
 }
 
-const { project, index, class: className } = Astro.props;
+const { project, class: className } = Astro.props;
 const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
-const number = String(index + 1).padStart(2, "0");
 ---
 
-<!-- A bento tile: number, title, badge and visit on top, one line, then the cover running to the edge. An optional
-     ticket stub closes it, tinted from the cover. The whole card opens the full project in a modal. -->
+<!-- A terminal window: the ~/path and visit in the title bar, one line, the cover running to the status line (live,
+     tech, year). An optional ticket stub closes it, tinted from the cover. The whole card opens the full project in a
+     modal. -->
 <article data-reveal class:list={["card tile relative", className]}>
   <div class="tile-top">
-    <span class="tile-icon" aria-hidden="true">{number}</span>
+    <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
     <h3 class="tile-title">
       <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
-        {project.title}
+        <span aria-hidden="true">~/projects/</span><wbr /><strong>{project.title}</strong>
       </button>
     </h3>
     {project.locked && <span class="tile-badge">nda</span>}
@@ -33,11 +32,11 @@ const number = String(index + 1).padStart(2, "0");
     {
       !project.locked &&
         (href ? (
-          <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex h-7">
+          <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex">
             [ visit ]
           </a>
         ) : (
-          <span class="tile-action tui-btn pointer-events-none inline-flex h-7 opacity-60" aria-hidden="true">
+          <span class="tile-action tui-btn pointer-events-none inline-flex opacity-60" aria-hidden="true">
             [ visit ]
           </span>
         ))
@@ -65,6 +64,14 @@ const number = String(index + 1).padStart(2, "0");
       )
     }
   </div>
+
+  <p class="tile-meta">
+    <span>
+      {href && <span class="tile-live" aria-hidden="true">●</span>}
+      {[href ? "live" : project.locked ? "private" : "", ...project.technologies].filter(Boolean).join(" · ")}
+    </span>
+    <span>{project.year}</span>
+  </p>
 
   {
     project.stub && (
@@ -99,9 +106,10 @@ const number = String(index + 1).padStart(2, "0");
     opacity: 1;
   }
   /* The ticket stub: a tinted band with a perforated line and punched notches, like a receipt's tear-off.
-     --tint comes from the cover image (see the script below); without one it's the accent. */
+     --tint comes from the cover image (see the script below); without one it's the light theme's deep blue in both
+     themes, so the white text always reads. */
   .stub {
-    --tint: var(--color-accent);
+    --tint: #2b4c7e;
     position: relative;
     padding: 18px 18px 14px;
     background: linear-gradient(135deg, var(--tint), color-mix(in srgb, var(--tint) 70%, black));

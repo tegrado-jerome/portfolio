@@ -16,14 +16,17 @@ import SectionHead from "./SectionHead.astro";
         {testimonials.map((t, i) => (
           <figure data-reveal style={`--i:${i}`} class="tile m-0">
             <figcaption class="tile-top">
-              <span class="tile-icon rounded-full bg-ph text-muted">
+              <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="grid size-6 shrink-0 place-items-center overflow-hidden rounded-full bg-ph text-muted">
                 {t.avatar ? (
                   <img src={t.avatar} alt="" width="52" height="52" loading="lazy" decoding="async" class="size-full object-cover" />
                 ) : (
                   <Icon icon={faUser} class="text-[11px]" />
                 )}
               </span>
-              <span class="tile-title">{t.name}</span>
+              <span class="tile-title">
+                <span aria-hidden="true">~/testimonials/</span><wbr /><strong>{t.name}</strong>
+              </span>
             </figcaption>
             <p class="tile-desc">{t.role}, {t.company}</p>
             <blockquote class="quote">

@@ -1,5 +1,4 @@
 ---
-import { faCertificate } from "@fortawesome/free-solid-svg-icons";
 import { certifications } from "../data/certifications";
 import { isSet } from "../data/placeholders";
 import CredentialGrid from "./CredentialGrid.astro";
@@ -16,4 +15,4 @@ const entries = certifications.map((c) => ({
 }));
 ---
 
-<CredentialGrid id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" icon={faCertificate} linkLabel="verify" />
+<CredentialGrid id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" linkLabel="verify" />

@@ -151,15 +151,15 @@
   gap: 16px;
 }
 
-/* The one card for every section (after kennethtegrado.com's project bento, drawn in this site's terminal style):
-   a top row (icon tile, title, badge, action), one line of text, then the picture running to the card's edge or a
-   footer line. The whole card opens its full view; the action and badge sit above that. */
+/* The one card for every section, drawn as a terminal window: a title bar (three dots, the ~/path, an action or
+   badge), what's inside (a line of text, then the picture or quote), and a dark status line at the bottom. The whole
+   card opens its full view; the action and badge sit above that. */
 .tile {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 4px;
+  border-radius: 6px;
   background: color-mix(in srgb, var(--color-ink) 2.5%, var(--color-paper));
   transition: border-color 0.2s ease;
 }
@@ -172,28 +172,38 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 18px 0;
+  min-height: 40px;
+  padding: 6px 8px 6px 12px;
+  border-bottom: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-ink) 6%, var(--color-paper));
+  font-size: var(--text-small);
 }
-.tile-icon {
-  display: grid;
+/* The window's three buttons, quiet grey like an unfocused terminal. */
+.tile-dots {
+  display: flex;
   flex: none;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  overflow: hidden;
-  border-radius: 3px;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  font-size: 11px;
-  font-weight: 600;
+  gap: 5px;
+}
+.tile-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-ink) 18%, var(--color-paper));
 }
 .tile-title {
   min-width: 0;
-  font-size: 16px;
-  line-height: 1.3;
+  color: var(--color-muted);
+  line-height: 1.35;
+  /* Breaks after the ~/section/ part first, so a name stays whole; only a single overlong word splits. */
+  overflow-wrap: break-word;
+}
+.tile-title strong {
+  color: var(--color-ink);
+  font-weight: 500;
 }
 .tile-badge {
   flex: none;
+  margin-left: auto;
   padding: 0 6px;
   border: 1px solid currentColor;
   border-radius: 2px;
@@ -205,13 +215,12 @@
   position: relative;
   z-index: 2;
   flex: none;
+  height: 26px;
   margin-left: auto;
-  border: 1px solid var(--color-line);
-  background: var(--color-paper);
 }
 .tile-desc {
-  padding: 6px 18px 16px;
-  color: var(--color-muted);
+  padding: 12px 14px;
+  color: var(--color-ink-soft);
   font-size: var(--text-small);
 }
 .tile-media {
@@ -220,7 +229,7 @@
   display: grid;
   place-items: center;
   min-height: 200px;
-  margin-inline: 18px;
+  margin-inline: 14px;
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-bottom: 0;
@@ -235,15 +244,27 @@
   object-fit: cover;
   object-position: top;
 }
+/* The status line: dark in both themes, like a terminal's (in dark mode a shade deeper than the card). */
 .tile-meta {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 18px 14px;
-  border-top: 1px solid var(--color-line);
-  color: var(--color-muted);
-  font-size: var(--text-small);
+  padding: 7px 14px;
+  background: var(--color-night);
+  color: #e6e9ee;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+.tile-meta > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tile-live {
+  margin-right: 6px;
+  color: #5cc493;
 }
 
 /* A TUI section: no box and no divider, just its ~/path title above the content (see SectionHead).

@@ -14,7 +14,7 @@ function layout(i: number) {
   <div class="pane" data-pane="projects">
   <SectionHead id="projects-title" title="Projects" />
   <div class="card-grid grid md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
-    {projects.map((project, i) => <Project project={project} index={i} class={layout(i)} />)}
+    {projects.map((project, i) => <Project project={project} class={layout(i)} />)}
   </div>
   </div>
 </section>
