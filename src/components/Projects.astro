@@ -186,12 +186,33 @@ import Project from "./Project.astro";
       rise = items.map((li) => Math.max(0, innerHeight - top - li.offsetTop));
     };
 
-    function update() {
+    // The cards don't jump with each scroll step (a wheel notch is ~100px at once): they glide toward where the
+    // scroll says they should be, closing about 63% of the gap every GLIDE ms, frame-rate independent. A small scroll
+    // eases a little; a big one catches up fast, then slows as it lands. Only the cards glide; the page scrolls as
+    // usual.
+    const GLIDE = 150; // ms
+    let shown = 0; // the progress on screen, in cards
+    let lastTime = 0; // 0 while at rest
+    let snap = true; // jump straight there (first paint, resize)
+
+    function update(now: number) {
       frame = 0;
-      const progress = (top - stack!.getBoundingClientRect().top) / per;
-      const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, progress - (i - 1)))));
+      const target = (top - stack!.getBoundingClientRect().top) / per;
+      if (snap || !lastTime) {
+        if (snap) shown = target;
+        snap = false;
+      } else {
+        shown += (target - shown) * (1 - Math.exp(-Math.min(64, now - lastTime) / GLIDE));
+      }
+      if (Math.abs(target - shown) < 0.0005) shown = target;
+      lastTime = shown === target ? 0 : now;
+      if (lastTime) frame = requestAnimationFrame(update);
+
+      const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
       items.forEach((li, i) => {
-        set(li, "slide", i, i && arrived[i] < 1 ? `translateY(${((1 - arrived[i]) * rise[i]).toFixed(1)}px)` : "");
+        // The slide eases out, so each card settles softly onto the stack.
+        const slide = 1 - (1 - arrived[i]) ** 2;
+        set(li, "slide", i, i && slide < 1 ? `translateY(${((1 - slide) * rise[i]).toFixed(1)}px)` : "");
         let depth = 0;
         for (let j = i + 1; j < items.length; j++) depth += arrived[j];
         depth = Math.min(depth, 3);
@@ -205,13 +226,14 @@ import Project from "./Project.astro";
         );
         set(dims[i], "dim", i, (Math.min(depth, 2) * 0.1).toFixed(3));
       });
-      const shown = arrived.filter((a) => a >= 0.5).length;
-      count!.textContent = `${String(Math.max(1, shown)).padStart(2, "0")}/${total}`;
+      const landed = arrived.filter((a) => a >= 0.5).length;
+      count!.textContent = `${String(Math.max(1, landed)).padStart(2, "0")}/${total}`;
       hint!.classList.toggle("is-done", arrived[arrived.length - 1] >= 0.98);
     }
     const queue = () => (frame ||= requestAnimationFrame(update));
     const resized = () => {
       measure();
+      snap = true;
       queue();
     };
     resized();
