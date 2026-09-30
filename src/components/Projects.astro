@@ -78,6 +78,12 @@ import Project from "./Project.astro";
     top: calc(var(--i) * var(--step));
     right: 0;
     left: 0;
+    /* A card still waiting below the screen leaves its box in place; the box lets clicks through, and only the card
+       itself (wherever it has moved) takes them. */
+    pointer-events: none;
+  }
+  .is-live .stack-item > :global(.stack-card) {
+    pointer-events: auto;
   }
   /* One GPU layer per card; the script moves it with a single transform. */
   .is-live .stack-item > :global(.stack-card) {
