@@ -369,7 +369,7 @@ import Icon from "./Icon.astro";
     const lines = [
       ["type here!", "type here!"],
       ["ask me anything", "ask me!"],
-      ["or type help", "try help"],
+      ["or type help", "try help!"],
     ];
     const chWidth = () => parseFloat(getComputedStyle(field).fontSize) * 0.6; // Geist Mono's advance width
     const pick = ([long, short]: string[]) => ((long.length + 1) * chWidth() <= field.clientWidth ? long : short);
