@@ -2,19 +2,226 @@
 import { projects } from "../data/projects";
 import SectionHead from "./SectionHead.astro";
 import Project from "./Project.astro";
-
-// Bento grid (after kennethtegrado.com): three columns on laptops, the first project a tall featured card beside
-// two stacked pairs. Tablets show two columns with the featured card across the top; phones, one.
-function layout(i: number) {
-  return i === 0 ? "md:col-span-2 lg:col-span-1 lg:row-span-2 min-h-[560px] md:min-h-[480px] lg:min-h-[640px]" : "min-h-[340px]";
-}
 ---
 
+<!-- Sticky stack (after the stacking-cards demos on scroll-driven-animations.style and CodyHouse): each project pins
+     near the top as you scroll and the next one slides up over it, while the ones behind sink back, tilt a touch and
+     dim, a light fake 3D. A "keep scrolling" hint (a mouse, or a swipe on touch screens) counts the cards and leaves
+     once the last one lands. -->
 <section id="projects" class="shell section" aria-labelledby="projects-title">
   <div class="pane" data-pane="projects">
-  <SectionHead id="projects-title" title="Projects" />
-  <div class="card-grid grid md:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
-    {projects.map((project, i) => <Project project={project} class={layout(i)} />)}
-  </div>
+    <SectionHead id="projects-title" title="Projects" />
+    <ol class="stack" data-stack style={`--n:${projects.length}`}>
+      {
+        projects.map((project, i) => (
+          <li class="stack-item" style={`--i:${i}`}>
+            <Project project={project} index={i} />
+          </li>
+        ))
+      }
+    </ol>
+    <p class="stack-hint" data-stack-hint aria-hidden="true">
+      <span class="mouse"><span class="wheel"></span></span>
+      <span class="swipe">↑</span>
+      <span><span data-stack-count class="tabular-nums">01/{String(projects.length).padStart(2, "0")}</span> · keep scrolling</span>
+    </p>
   </div>
 </section>
+
+<style>
+  .stack {
+    --card-h: min(520px, calc(100svh - 170px));
+    --top: 24px;
+    --step: 14px;
+  }
+  .stack-item {
+    position: sticky;
+    top: calc(var(--top) + var(--i) * var(--step));
+    height: var(--card-h);
+    margin-bottom: 12vh;
+    perspective: 1400px;
+  }
+  .stack-item:last-child {
+    margin-bottom: 0;
+  }
+  /* The card sinks back as later ones cover it (transform and --dim, set by the script; the dimming layer is in
+     Project.astro). Only transform and opacity change, so it stays on the GPU. */
+  .stack-item > :global(.stack-card) {
+    transform-origin: 50% 0;
+    will-change: transform;
+  }
+  @media (max-width: 767px) {
+    .stack {
+      --card-h: min(560px, calc(100svh - 150px));
+      --top: 16px;
+      --step: 10px;
+    }
+  }
+
+  /* The hint rides at the bottom of the screen while the stack is on it. */
+  .stack-hint {
+    position: sticky;
+    bottom: 24px;
+    z-index: 5;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: max-content;
+    margin: 24px auto 0;
+    padding: 6px 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-paper);
+    color: var(--color-muted);
+    font-size: var(--text-small);
+    transition: opacity 0.4s ease;
+  }
+  @media (min-width: 1024px) {
+    .stack-hint {
+      bottom: 56px; /* above the status bar */
+    }
+  }
+  /* Phones: smaller and lower, so it covers as little of the card sliding in as it can. */
+  @media (max-width: 767px) {
+    .stack-hint {
+      bottom: 10px;
+      gap: 8px;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+  }
+  .stack-hint.is-done {
+    opacity: 0;
+  }
+  .mouse {
+    display: none;
+    position: relative;
+    width: 14px;
+    height: 21px;
+    border: 1.5px solid currentColor;
+    border-radius: 7px;
+  }
+  .wheel {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 2px;
+    height: 5px;
+    margin-left: -1px;
+    border-radius: 1px;
+    background: currentColor;
+  }
+  .swipe {
+    display: none;
+    font-size: 14px;
+    line-height: 1;
+  }
+  /* A mouse where there's a mouse or trackpad, a swipe arrow on touch screens. */
+  @media (pointer: fine) {
+    .mouse {
+      display: block;
+    }
+  }
+  @media (pointer: coarse) {
+    .swipe {
+      display: block;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .wheel {
+      animation: wheel 1.6s ease-in-out infinite;
+    }
+    .swipe {
+      animation: swipe 1.6s ease-in-out infinite;
+    }
+  }
+  @keyframes wheel {
+    0% {
+      translate: 0 0;
+      opacity: 1;
+    }
+    70% {
+      translate: 0 7px;
+      opacity: 0;
+    }
+    100% {
+      translate: 0 0;
+      opacity: 0;
+    }
+  }
+  @keyframes swipe {
+    0%,
+    100% {
+      translate: 0 3px;
+      opacity: 0.4;
+    }
+    50% {
+      translate: 0 -3px;
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  // The fake 3D: each card's depth is how much of the cards after it have slid over it (0 to a few). Deeper cards
+  // shrink, tilt back and dim. Positions are read, then transforms written, once a frame and only while the stack
+  // is on screen. Reduced motion keeps the plain sticky stack.
+  const stack = document.querySelector<HTMLElement>("[data-stack]");
+  const hint = document.querySelector<HTMLElement>("[data-stack-hint]");
+  const count = document.querySelector<HTMLElement>("[data-stack-count]");
+  if (stack && hint && count) {
+    const items = [...stack.querySelectorAll<HTMLElement>(".stack-item")];
+    const cards = items.map((li) => li.firstElementChild as HTMLElement);
+    const total = String(items.length).padStart(2, "0");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    // Where each card pins and how tall it is; measured again only when the screen size changes.
+    let pins: number[] = [];
+    let heights: number[] = [];
+    const measure = () => {
+      pins = items.map((li) => parseFloat(getComputedStyle(li).top));
+      heights = items.map((li) => li.offsetHeight);
+    };
+
+    function update() {
+      frame = 0;
+      // How far each card has come up over the one before it: 0 below, 1 once it's pinned.
+      const arrived = items.map((li, i) =>
+        Math.min(1, Math.max(0, 1 - (li.getBoundingClientRect().top - pins[i]) / heights[i])),
+      );
+      cards.forEach((card, i) => {
+        let depth = 0;
+        for (let j = i + 1; j < items.length; j++) depth += arrived[j];
+        depth = Math.min(depth, 3);
+        if (!still) {
+          card.style.transform = depth
+            ? `translateY(${(-depth * 6).toFixed(1)}px) scale(${(1 - depth * 0.05).toFixed(4)}) rotateX(${(depth * 2.5).toFixed(2)}deg)`
+            : "";
+        }
+        card.style.setProperty("--dim", (Math.min(depth, 2) * 0.1).toFixed(3));
+      });
+      const shown = arrived.filter((a) => a > 0.5).length;
+      count!.textContent = `${String(Math.max(1, shown)).padStart(2, "0")}/${total}`;
+      hint!.classList.toggle("is-done", arrived[arrived.length - 1] >= 0.98);
+    }
+    const queue = () => (frame ||= requestAnimationFrame(update));
+    const resized = () => {
+      measure();
+      queue();
+    };
+
+    let watching = false;
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting === watching) return;
+      watching = entry.isIntersecting;
+      if (watching) {
+        addEventListener("scroll", queue, { passive: true });
+        addEventListener("resize", resized, { passive: true });
+        resized();
+      } else {
+        removeEventListener("scroll", queue);
+        removeEventListener("resize", resized);
+      }
+    }).observe(stack);
+  }
+</script>

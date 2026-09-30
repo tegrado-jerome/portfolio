@@ -8,83 +8,68 @@ import Icon from "./Icon.astro";
 
 interface Props {
   project: Project;
-  class?: string;
+  index: number;
 }
 
-const { project, class: className } = Astro.props;
+const { project, index } = Astro.props;
 const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
+const number = String(index + 1).padStart(2, "0");
 ---
 
-<!-- A terminal window: the ~/path and visit in the title bar, one line, the cover running to the status line (live,
-     tech, year). An optional ticket stub closes it, tinted from the cover. The whole card opens the full project in a
-     modal. -->
-<article data-reveal class:list={["card tile relative", className]}>
-  <div class="tile-top">
-    <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h3 class="tile-title">
-      <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
-        <span aria-hidden="true">~/projects/</span><wbr /><strong>{project.title}</strong>
-      </button>
-    </h3>
-    {project.locked && <span class="tile-badge">nda</span>}
-    {/* Every project shows visit. Until its real link is set it's a quiet stand-in, so the cards line up already. */}
+<!-- One card of the sticky stack (see Projects.astro): the story on the left (number and year, name, one line, stack,
+     visit), the screenshot in a browser frame on the right; on phones the screenshot sits on top. NDA projects show
+     "nda" and a private cover instead of visit. The whole card opens the full project in a modal. -->
+<article class="card stack-card relative">
+  <div class="info">
+    <p class="text-small text-muted tabular-nums">{number} · {project.year}</p>
+    <div class="flex items-baseline justify-between gap-3">
+      <h3 class="name">
+        <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
+          {project.title}
+        </button>
+      </h3>
+      {project.locked && <span class="nda">nda</span>}
+    </div>
+    <p class="text-small text-muted">{project.description}</p>
+    <ul class="tags">
+      {project.technologies.filter(Boolean).map((t) => <li>{t}</li>)}
+    </ul>
+    {/* Until a project's real link is set, visit is a quiet stand-in so every card reads the same. */}
     {
       !project.locked &&
         (href ? (
-          <a href={href} target="_blank" rel="noopener noreferrer" class="tile-action tui-btn inline-flex">
+          <a href={href} target="_blank" rel="noopener noreferrer" class="visit tui-btn inline-flex">
             [ visit ]
           </a>
         ) : (
-          <span class="tile-action tui-btn pointer-events-none inline-flex opacity-60" aria-hidden="true">
+          <span class="visit tui-btn pointer-events-none inline-flex opacity-60" aria-hidden="true">
             [ visit ]
           </span>
         ))
     }
   </div>
-  <p class="tile-desc">{project.description}</p>
 
-  <div class="tile-media">
-    {
-      project.image ? (
-        <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
-      ) : (
-        <span class="eyebrow text-muted">[PROJECT IMAGE]</span>
-      )
-    }
-    {
-      project.locked && (
-        <span class="lock absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-[rgb(18_18_18/0.5)] opacity-0 backdrop-blur-[2px] transition-opacity duration-[250ms]">
-          <span class="inline-flex items-center gap-1.5 rounded-[2px] bg-white/95 px-3 py-1.5 eyebrow text-night">
+  <div class="shot">
+    <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="shot-view">
+      {
+        project.image ? (
+          <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
+        ) : (
+          <span class="eyebrow text-muted">[PROJECT IMAGE]</span>
+        )
+      }
+      {
+        project.locked && (
+          <span class="private">
             <Icon icon={faLock} class="text-[11px]" />
-            Classified
+            private
           </span>
-          {project.lockedNote && <span class="text-small text-white/90">{project.lockedNote}</span>}
-        </span>
-      )
-    }
+        )
+      }
+    </div>
   </div>
-
-  <p class="tile-meta">
-    <span>
-      {href && <span class="tile-live" aria-hidden="true">●</span>}
-      {[href ? "live" : project.locked ? "private" : "", ...project.technologies].filter(Boolean).join(" · ")}
-    </span>
-    <span>{project.year}</span>
-  </p>
-
-  {
-    project.stub && (
-      <div class="stub" data-stub>
-        <p class="stub-eyebrow">{project.stub.eyebrow}</p>
-        <p class="stub-title">{project.stub.title}</p>
-        <p class="stub-foot">
-          <span>{project.stub.code}</span>
-          <span>{project.year}</span>
-        </p>
-      </div>
-    )
-  }
 
   <Detail
     path={`projects/${slug}`}
@@ -102,100 +87,130 @@ const href = !project.locked && isSet(project.href) ? project.href : undefined;
 </article>
 
 <style>
-  .card:hover .lock {
-    opacity: 1;
+  .stack-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: clamp(20px, 3vw, 36px);
+    height: 100%;
+    padding: clamp(16px, 2vw, 24px);
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-paper) 40%, white);
+    box-shadow: 0 -12px 34px -20px rgb(0 0 0 / 0.35);
   }
-  /* The ticket stub: a tinted band with a perforated line and punched notches, like a receipt's tear-off.
-     --tint comes from the cover image (see the script below); without one it's the light theme's deep blue in both
-     themes, so the white text always reads. */
-  .stub {
-    --tint: #2b4c7e;
-    position: relative;
-    padding: 18px 18px 14px;
-    background: linear-gradient(135deg, var(--tint), color-mix(in srgb, var(--tint) 70%, black));
-    color: #fff;
-    transition: background 0.4s ease;
-  }
-  .stub-eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.75;
-  }
-  .stub-title {
-    margin-top: 4px;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.35;
-    text-wrap: balance;
-  }
-  .stub-foot {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
-    padding-top: 12px;
-    border-top: 1px dashed rgb(255 255 255 / 0.5);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .stub-foot span:last-child {
-    font-weight: 600;
-  }
-  /* Punched notches at both ends of the perforation, in the card's own background so they look cut out. */
-  .stub-foot::before,
-  .stub-foot::after {
+  /* Darkens the card as later ones stack over it (--dim, set in Projects.astro). */
+  .stack-card::after {
     content: "";
     position: absolute;
-    top: -6px;
-    width: 12px;
-    height: 12px;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    background: #000;
+    opacity: var(--dim, 0);
+    pointer-events: none;
+  }
+  :global([data-theme="dark"]) .stack-card {
+    background: color-mix(in srgb, var(--color-paper) 92%, white);
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .name {
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .nda {
+    flex: none;
+    padding: 0 6px;
+    border: 1px solid var(--color-muted);
+    border-radius: 2px;
+    color: var(--color-muted);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tags li {
+    padding: 1px 7px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    color: var(--color-ink-soft);
+    font-size: 11px;
+  }
+  .visit {
+    position: relative;
+    z-index: 2;
+    align-self: flex-start;
+    margin-left: -8px;
+    color: var(--color-ink);
+  }
+  /* The screenshot in a small browser frame. */
+  .shot {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-ph);
+  }
+  .shot-bar {
+    display: flex;
+    flex: none;
+    gap: 5px;
+    align-items: center;
+    height: 22px;
+    padding-inline: 9px;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-ink) 4%, var(--color-paper));
+  }
+  .shot-bar i {
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--color-paper);
+    background: color-mix(in srgb, var(--color-ink) 18%, var(--color-paper));
   }
-  .stub-foot::before {
-    left: -24px;
+  .shot-view {
+    position: relative;
+    display: grid;
+    flex: 1;
+    place-items: center;
+    overflow: hidden;
   }
-  .stub-foot::after {
-    right: -24px;
+  .shot-view img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
   }
-</style>
-
-<script>
-  // Tints each ticket stub with its cover's main colour: the image is shrunk to a few pixels and averaged, then
-  // darkened until white text on it stays readable (4.5:1).
-  function tint(img: HTMLImageElement, stub: HTMLElement) {
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 8;
-      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-      ctx.drawImage(img, 0, 0, 8, 8);
-      const data = ctx.getImageData(0, 0, 8, 8).data;
-      let [r, g, b] = [0, 0, 0];
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-      }
-      const n = data.length / 4;
-      [r, g, b] = [r / n, g / n, b / n];
-      const lum = (v: number) => {
-        const c = v / 255;
-        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-      };
-      for (let k = 0; k < 20 && 1.05 / (0.2126 * lum(r) + 0.7152 * lum(g) + 0.0722 * lum(b) + 0.05) < 4.5; k++) {
-        [r, g, b] = [r * 0.88, g * 0.88, b * 0.88];
-      }
-      stub.style.setProperty("--tint", `rgb(${Math.round(r)} ${Math.round(g)} ${Math.round(b)})`);
-    } catch {
-      // A cross-origin image can't be read; the stub keeps the accent colour.
+  .private {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    background: rgb(27 36 48 / 0.55);
+    color: #fff;
+    font-size: var(--text-small);
+  }
+  /* Phones: screenshot on top, the story under it. */
+  @media (max-width: 767px) {
+    .stack-card {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+    .shot {
+      order: -1;
     }
   }
-  document.querySelectorAll<HTMLElement>("[data-stub]").forEach((stub) => {
-    const img = stub.closest(".card")?.querySelector<HTMLImageElement>(".tile-media img");
-    if (!img) return;
-    if (img.complete && img.naturalWidth) tint(img, stub);
-    else img.addEventListener("load", () => tint(img, stub), { once: true });
-  });
-</script>
+</style>
