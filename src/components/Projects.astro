@@ -186,11 +186,10 @@ import Project from "./Project.astro";
       rise = items.map((li) => Math.max(0, innerHeight - top - li.offsetTop));
     };
 
-    // With a mouse wheel the cards glide toward where the scroll says they should be (a notch jumps ~100px at once),
-    // closing about 63% of the gap every GLIDE ms. Touch scrolling is already smooth and continuous, so there the
-    // cards follow the finger directly; gliding on top of it would only feel like lag.
-    const glide = matchMedia("(pointer: fine)").matches;
-    const GLIDE = 150; // ms
+    // The cards glide toward where the scroll says they should be instead of snapping to it, closing about 63% of
+    // the gap every GLIDE ms: softer with a mouse wheel (a notch jumps ~100px at once), lighter on touch screens,
+    // where the finger already scrolls smoothly, so they trail it a little without feeling slow.
+    const GLIDE = matchMedia("(pointer: fine)").matches ? 150 : 100; // ms
     let shown = 0; // the progress on screen, in cards
     let lastTime = 0; // 0 while at rest
     let snap = true; // jump straight there (first paint, resize)
@@ -222,7 +221,7 @@ import Project from "./Project.astro";
     function update(now: number) {
       frame = 0;
       const target = (top - stack!.getBoundingClientRect().top) / per;
-      if (snap || !glide) {
+      if (snap) {
         shown = target;
         snap = false;
       } else if (lastTime) {
