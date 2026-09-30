@@ -60,6 +60,8 @@
     cursor: grab;
     /* Dragging the thumb on a touch screen moves the bar, not the page. */
     touch-action: none;
+    /* Its own GPU layer: it moves on every scroll, and this way it never repaints. */
+    will-change: transform;
     --color-bar: var(--color-ink);
   }
   /* A wider invisible grab area, since the bar itself is thin. */
@@ -92,6 +94,7 @@
     font: var(--text-label) / 1 var(--font-mono);
     white-space: nowrap;
     pointer-events: none;
+    will-change: transform, opacity;
     opacity: 0;
     translate: 4px -50%;
     transition:

@@ -25,7 +25,7 @@ import Project from "./Project.astro";
         </ol>
       </div>
     </div>
-    <p class="stack-hint" data-stack-hint aria-hidden="true">
+    <p class="stack-hint" data-stack-hint data-pause-offscreen aria-hidden="true">
       <span class="mouse"><span class="wheel"></span></span>
       <span><span data-stack-count class="tabular-nums">01/{String(projects.length).padStart(2, "0")}</span> · keep scrolling</span>
     </p>
@@ -78,12 +78,12 @@ import Project from "./Project.astro";
     top: calc(var(--i) * var(--step));
     right: 0;
     left: 0;
-    perspective: 1400px;
-    will-change: transform;
   }
+  /* One GPU layer per card; the script moves it with a single transform. */
   .is-live .stack-item > :global(.stack-card) {
     transform-origin: 50% 0;
     will-change: transform;
+    backface-visibility: hidden;
   }
 
   /* The hint rides at the bottom of the screen while the stack is on it. Same pill on every screen. */
@@ -154,8 +154,13 @@ import Project from "./Project.astro";
 <script>
   // Scroll through the track moves the cards: `arrived[i]` goes 0 → 1 as card i slides up from below the screen onto
   // the stack. A card's depth is how much of the cards after it have arrived; deeper cards shrink, tilt back and dim.
-  // Only transforms and one small overlay's opacity change, and only when they differ from the last frame, once a
-  // frame and only while the stack is on screen.
+  //
+  // Built to stay smooth on slow phones and in every browser:
+  // - each card is one GPU layer, moved with a single transform (slide and depth combined), so the browser only
+  //   recombines layers and never repaints a card while it moves;
+  // - the dimming changes in small steps, so a card is repainted a handful of times per pass, not every frame;
+  // - nothing is written unless it changed (the counter's text included), and nothing runs while the stack is off
+  //   screen.
   const stack = document.querySelector<HTMLElement>("[data-stack]");
   const hint = document.querySelector<HTMLElement>("[data-stack-hint]");
   const count = document.querySelector<HTMLElement>("[data-stack-count]");
@@ -163,19 +168,14 @@ import Project from "./Project.astro";
     const items = [...stack.querySelectorAll<HTMLElement>(".stack-item")];
     const cards = items.map((li) => li.firstElementChild as HTMLElement);
     const dims = cards.map((card) => card.querySelector<HTMLElement>(".dim")!);
-    // Last values written, so a frame only touches what changed.
-    const last = items.map(() => ({ slide: "", card: "", dim: "" }));
-    const set = (el: HTMLElement, key: "slide" | "card" | "dim", i: number, value: string) => {
-      if (last[i][key] === value) return;
-      last[i][key] = value;
-      if (key === "dim") el.style.opacity = value;
-      else el.style.transform = value;
-    };
     const pin = stack.querySelector<HTMLElement>(".stack-pin")!;
     const total = String(items.length).padStart(2, "0");
+    const lastTransform = items.map(() => "");
+    const lastDim = items.map(() => "");
+    let lastCount = "";
+    let lastDone = false;
     stack.classList.add("is-live");
 
-    let frame = 0;
     // Sizes, measured again only when the screen size changes.
     let top = 0; // where the pin sticks
     let per = 1; // scroll per card
@@ -186,49 +186,52 @@ import Project from "./Project.astro";
       rise = items.map((li) => Math.max(0, innerHeight - top - li.offsetTop));
     };
 
-    // The cards don't jump with each scroll step (a wheel notch is ~100px at once): they glide toward where the
-    // scroll says they should be, closing about 63% of the gap every GLIDE ms, frame-rate independent. A small scroll
-    // eases a little; a big one catches up fast, then slows as it lands. Only the cards glide; the page scrolls as
-    // usual.
+    // With a mouse wheel the cards glide toward where the scroll says they should be (a notch jumps ~100px at once),
+    // closing about 63% of the gap every GLIDE ms. Touch scrolling is already smooth and continuous, so there the
+    // cards follow the finger directly; gliding on top of it would only feel like lag.
+    const glide = matchMedia("(pointer: fine)").matches;
     const GLIDE = 150; // ms
     let shown = 0; // the progress on screen, in cards
     let lastTime = 0; // 0 while at rest
     let snap = true; // jump straight there (first paint, resize)
+    let frame = 0;
+
+    function render() {
+      const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
+      for (let i = 0; i < items.length; i++) {
+        // The slide eases out, so each card settles softly onto the stack.
+        const slide = i ? (1 - (1 - arrived[i]) ** 2) : 1;
+        let depth = 0;
+        for (let j = i + 1; j < items.length; j++) depth += arrived[j];
+        depth = Math.min(depth, 3);
+        const y = (1 - slide) * rise[i] - depth * 6;
+        const transform =
+          y || depth
+            ? `translate3d(0, ${y.toFixed(1)}px, 0) perspective(1400px) rotateX(${(depth * 2.5).toFixed(2)}deg) scale(${(1 - depth * 0.05).toFixed(4)})`
+            : "";
+        if (transform !== lastTransform[i]) cards[i].style.transform = lastTransform[i] = transform;
+        const dim = (Math.round(Math.min(depth, 2) * 4) / 20).toFixed(2); // 0, 0.05 … 0.4
+        if (dim !== lastDim[i]) dims[i].style.opacity = lastDim[i] = dim;
+      }
+      const landed = `${String(Math.max(1, arrived.filter((a) => a >= 0.5).length)).padStart(2, "0")}/${total}`;
+      if (landed !== lastCount) count!.textContent = lastCount = landed;
+      const done = arrived[arrived.length - 1] >= 0.98;
+      if (done !== lastDone) hint!.classList.toggle("is-done", (lastDone = done));
+    }
 
     function update(now: number) {
       frame = 0;
       const target = (top - stack!.getBoundingClientRect().top) / per;
-      if (snap || !lastTime) {
-        if (snap) shown = target;
+      if (snap || !glide) {
+        shown = target;
         snap = false;
-      } else {
+      } else if (lastTime) {
         shown += (target - shown) * (1 - Math.exp(-Math.min(64, now - lastTime) / GLIDE));
+        if (Math.abs(target - shown) < 0.0005) shown = target;
       }
-      if (Math.abs(target - shown) < 0.0005) shown = target;
       lastTime = shown === target ? 0 : now;
       if (lastTime) frame = requestAnimationFrame(update);
-
-      const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
-      items.forEach((li, i) => {
-        // The slide eases out, so each card settles softly onto the stack.
-        const slide = 1 - (1 - arrived[i]) ** 2;
-        set(li, "slide", i, i && slide < 1 ? `translateY(${((1 - slide) * rise[i]).toFixed(1)}px)` : "");
-        let depth = 0;
-        for (let j = i + 1; j < items.length; j++) depth += arrived[j];
-        depth = Math.min(depth, 3);
-        set(
-          cards[i],
-          "card",
-          i,
-          depth
-            ? `translateY(${(-depth * 6).toFixed(1)}px) scale(${(1 - depth * 0.05).toFixed(4)}) rotateX(${(depth * 2.5).toFixed(2)}deg)`
-            : "",
-        );
-        set(dims[i], "dim", i, (Math.min(depth, 2) * 0.1).toFixed(3));
-      });
-      const landed = arrived.filter((a) => a >= 0.5).length;
-      count!.textContent = `${String(Math.max(1, landed)).padStart(2, "0")}/${total}`;
-      hint!.classList.toggle("is-done", arrived[arrived.length - 1] >= 0.98);
+      render();
     }
     const queue = () => (frame ||= requestAnimationFrame(update));
     const resized = () => {

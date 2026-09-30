@@ -58,8 +58,10 @@ const builtAt = new Date().toISOString();
     color: var(--color-ink);
     font: inherit;
   }
-  /* A small "live" dot next to my local time that pulses slowly, like a status LED. */
+  /* A small "live" dot next to my local time that pulses slowly, like a status LED. The pulse is a ring that only
+     scales and fades, so it runs on the GPU instead of repainting every frame. */
   .live {
+    position: relative;
     display: inline-block;
     width: 6px;
     height: 6px;
@@ -68,18 +70,28 @@ const builtAt = new Date().toISOString();
     background: var(--color-online);
     vertical-align: 1px;
   }
+  .live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--color-online);
+    opacity: 0;
+  }
   @media (prefers-reduced-motion: no-preference) {
-    .live {
-      animation: live 2.4s ease-in-out infinite;
+    .live::after {
+      animation: live 2.4s ease-out infinite;
     }
   }
   @keyframes live {
-    0%,
-    100% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-online) 50%, transparent);
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
     }
-    60% {
-      box-shadow: 0 0 0 5px transparent;
+    60%,
+    100% {
+      transform: scale(2.7);
+      opacity: 0;
     }
   }
   button:hover {

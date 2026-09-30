@@ -135,8 +135,7 @@ import Icon from "./Icon.astro";
 </aside>
 
 <style>
-  /* The round chat button tucks away while the hero's prompt bar is on screen (it does the same job there),
-     and gently fades back in once you scroll past it. */
+  /* The round chat button stays tucked away through the hero and the projects, and gently fades in after them. */
   .chat-fab {
     transition:
       opacity 0.5s var(--ease-out-soft),
@@ -880,17 +879,24 @@ import Icon from "./Icon.astro";
     }
   });
   document.addEventListener("chat:open", () => setOpen(true));
-  // Questions asked from elsewhere on the page (the hero prompt bar) open the chat and send.
-  // Tuck the round button away while the hero prompt bar is visible. It starts tucked so it doesn't flash on load;
-  // pages without the prompt bar show it right away.
-  const heroAsk = document.querySelector("[data-hero-ask]");
-  if (heroAsk) {
-    new IntersectionObserver(([entry]) => {
-      openers.forEach((b) => b.classList.toggle("is-tucked", entry.isIntersecting));
-    }).observe(heroAsk);
+  // The round button stays tucked away through the hero and the projects (the hero's prompt bar already opens the
+  // chat there) and fades in once the projects have scrolled past. Pages without a projects section show it at once.
+  // "Past" once the projects' bottom edge is above the middle of the screen. Watching both the hero and the projects
+  // catches long jumps too (links, the chat pointing somewhere), where a single watcher wouldn't fire.
+  const tuckUntilPast = document.getElementById("projects");
+  if (tuckUntilPast) {
+    const sync = () => {
+      const past = tuckUntilPast.getBoundingClientRect().bottom < innerHeight / 2;
+      openers.forEach((b) => b.classList.toggle("is-tucked", !past));
+    };
+    const watcher = new IntersectionObserver(sync, { rootMargin: "-1px 0px -50% 0px" }); // -1px: an edge exactly at the top still counts as gone
+    watcher.observe(tuckUntilPast);
+    const hero = document.getElementById("top");
+    if (hero) watcher.observe(hero);
   } else {
     openers.forEach((b) => b.classList.remove("is-tucked"));
   }
+  // Questions asked from elsewhere on the page (the hero prompt bar) open the chat and send.
   document.addEventListener("chat:ask", (e) => {
     setOpen(true);
     // Let the sheet start sliding before the message goes in, so the first frames stay smooth.

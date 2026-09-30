@@ -151,6 +151,12 @@
   gap: 16px;
 }
 
+/* Set by Layout.astro on [data-pause-offscreen] elements that are off screen. */
+.is-offscreen,
+.is-offscreen * {
+  animation-play-state: paused !important;
+}
+
 /* The one card for awards, certifications and testimonials, drawn as a terminal window: a title bar (three dots and
    the name; the section title above already gives the ~/path), what's inside (a line of text, then the picture or quote), and a dark status line at the bottom. The whole
    card opens its full view; the action and badge sit above that. */

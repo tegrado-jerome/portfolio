@@ -91,6 +91,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </script>
 
     <script>
+      // Looping decorations (the hero's cursor and crop marks, the skill wheel's gesture, the scroll hint) pause while
+      // they're off screen, so they cost nothing while you're elsewhere on the page; that keeps scrolling smooth on
+      // slow phones.
+      const pausable = document.querySelectorAll<HTMLElement>("[data-pause-offscreen]");
+      if ("IntersectionObserver" in window) {
+        const watcher = new IntersectionObserver(
+          (entries) => entries.forEach((e) => e.target.classList.toggle("is-offscreen", !e.isIntersecting)),
+          { rootMargin: "100px" },
+        );
+        pausable.forEach((el) => watcher.observe(el));
+      }
+    </script>
+
+    <script>
       // Reveal elements as they scroll into view — held back until the preloader lifts.
       const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
       const start = () => {
