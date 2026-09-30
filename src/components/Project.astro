@@ -71,6 +71,8 @@ const number = String(index + 1).padStart(2, "0");
     </div>
   </div>
 
+  <span class="dim" aria-hidden="true"></span>
+
   <Detail
     path={`projects/${slug}`}
     title={project.title}
@@ -98,15 +100,15 @@ const number = String(index + 1).padStart(2, "0");
     background: color-mix(in srgb, var(--color-paper) 40%, white);
     box-shadow: 0 -12px 34px -20px rgb(0 0 0 / 0.35);
   }
-  /* Darkens the card as later ones stack over it (--dim, set in Projects.astro). */
-  .stack-card::after {
-    content: "";
+  /* Darkens the card as later ones stack over it (its opacity is set in Projects.astro). A real element, so a change
+     restyles only it, not the whole card. */
+  .dim {
     position: absolute;
     inset: 0;
     z-index: 3;
     border-radius: inherit;
     background: #000;
-    opacity: var(--dim, 0);
+    opacity: 0;
     pointer-events: none;
   }
   :global([data-theme="dark"]) .stack-card {
