@@ -151,8 +151,8 @@
   gap: 16px;
 }
 
-/* The one card for every section, drawn as a terminal window: a title bar (three dots, the ~/path, an action or
-   badge), what's inside (a line of text, then the picture or quote), and a dark status line at the bottom. The whole
+/* The one card for awards, certifications and testimonials, drawn as a terminal window: a title bar (three dots and
+   the name; the section title above already gives the ~/path), what's inside (a line of text, then the picture or quote), and a dark status line at the bottom. The whole
    card opens its full view; the action and badge sit above that. */
 .tile {
   display: flex;
