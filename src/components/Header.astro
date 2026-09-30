@@ -36,13 +36,14 @@ import Icon from "./Icon.astro";
     mask: url("/images/logo.png") center / contain no-repeat;
   }
   /* The theme button stays plain: no hover or press box, on a mouse or a phone, so "let's talk" is the one obvious
-     button. Keyboard focus still shows, as a thin outline. */
+     button. Hovering only turns the cursor into a hand; keyboard focus still shows, as a thin outline. */
   .theme-btn,
   .theme-btn:hover,
   .theme-btn:active,
   .theme-btn:focus-visible {
     background: transparent;
     color: var(--color-muted);
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
   .theme-btn:focus-visible {

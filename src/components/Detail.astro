@@ -23,7 +23,11 @@ const { path, title, meta, image, imageAlt, placeholder, text = [], tags = [], l
 ---
 
 <template data-detail data-path={path}>
-  <p class="detail-path text-small"><span class="text-accent">~/</span>{path}</p>
+  <!-- One line, like a shell prompt: a long name is cut with "…" but the section before it always shows. -->
+  <p class="detail-path flex min-w-0 text-small whitespace-nowrap" title={`~/${path}`}>
+    <span class="shrink-0"><span class="text-accent">~/</span>{path.slice(0, path.lastIndexOf("/") + 1)}</span>
+    <span class="truncate">{path.slice(path.lastIndexOf("/") + 1)}</span>
+  </p>
   <figure class="relative m-0 mt-4 grid aspect-[16/10] place-items-center overflow-hidden rounded-[2px] bg-ph">
     {
       image ? (

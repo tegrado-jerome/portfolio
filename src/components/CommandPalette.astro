@@ -205,7 +205,7 @@ const commands: Command[] = [
       e.preventDefault();
       if (dialog.open) dialog.close();
       else open();
-    } else if (e.key === "/" && !typing) {
+    } else if (e.key === "/" && !typing && !document.documentElement.classList.contains("chat-open")) {
       e.preventDefault();
       open();
     }
