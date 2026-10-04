@@ -25,7 +25,7 @@ import Project from "./Project.astro";
         </ol>
       </div>
     </div>
-    <p class="stack-hint" data-stack-hint data-pause-offscreen aria-hidden="true">
+    <p class="stack-hint is-waiting" data-stack-hint data-pause-offscreen aria-hidden="true">
       <span class="mouse"><span class="wheel"></span></span>
       <span><span data-stack-count class="tabular-nums">01/{String(projects.length).padStart(2, "0")}</span> · keep scrolling</span>
     </p>
@@ -115,7 +115,10 @@ import Project from "./Project.astro";
       bottom: 56px; /* above the status bar */
     }
   }
-  .stack-hint.is-done {
+  /* Out of sight until the stack has pinned (the section fully on screen, not just entering), and again once the
+     last card has landed. */
+  .stack-hint.is-done,
+  .stack-hint.is-waiting {
     opacity: 0;
   }
   .mouse {
@@ -180,6 +183,7 @@ import Project from "./Project.astro";
     const lastDim = items.map(() => "");
     let lastCount = "";
     let lastDone = false;
+    let lastWaiting = false;
     stack.classList.add("is-live");
 
     // Sizes, measured again only when the screen size changes.
@@ -227,6 +231,10 @@ import Project from "./Project.astro";
     function update(now: number) {
       frame = 0;
       const target = (top - stack!.getBoundingClientRect().top) / per;
+      // The hint waits until the stack has actually pinned; while the section is only part-way up the screen it stays
+      // out of sight.
+      const waiting = target < 0;
+      if (waiting !== lastWaiting) hint!.classList.toggle("is-waiting", (lastWaiting = waiting));
       if (snap) {
         shown = target;
         snap = false;
