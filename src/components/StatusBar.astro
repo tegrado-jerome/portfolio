@@ -119,13 +119,15 @@ const builtAt = new Date().toISOString();
   const paneLabel = document.querySelector<HTMLElement>("[data-status-pane]");
   const clock = document.querySelector<HTMLTimeElement>("[data-status-clock]");
 
-  // The pane whose top is nearest above the middle of the screen is the current one.
+  // The pane whose top is nearest above the middle of the screen is the current one; at the very bottom of the page
+  // it's the last pane (a short last section never reaches the middle). Same rule as the scrollbar's label.
   function currentPane() {
     const mid = innerHeight / 2;
     let index = 0;
     panes.forEach((p, i) => {
       if (p.getBoundingClientRect().top <= mid) index = i;
     });
+    if (scrollY >= document.documentElement.scrollHeight - innerHeight - 2) index = panes.length - 1;
     return index;
   }
   // At most once per frame, and only where the bar is shown (it's hidden below 1024px).
