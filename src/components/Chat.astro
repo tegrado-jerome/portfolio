@@ -199,6 +199,11 @@ import Icon from "./Icon.astro";
     contain: layout style;
     --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
   }
+  /* With JS the sheet is `inert` while closed instead of hidden, so it stays painted off screen and the slide
+     starts on its first frame with nothing left to draw. */
+  :global(.js) .sheet {
+    visibility: visible;
+  }
   .sheet[data-open] {
     visibility: visible;
     transform: none;
@@ -473,16 +478,17 @@ import Icon from "./Icon.astro";
       opacity: 1;
     }
   }
+  /* Opacity only: a blur filter per word made long replies stutter on phones. */
   @keyframes word-in {
     from {
       opacity: 0;
-      filter: blur(3px);
     }
   }
   @media (max-width: 639px) {
     .sheet {
       padding: 20px;
       border-left: 0;
+      box-shadow: none;
       transform: translateY(100%);
     }
     /* More room for my replies, so an email address fits on one line. */
@@ -531,9 +537,24 @@ import Icon from "./Icon.astro";
   let request: AbortController | null = null;
   let returnFocus: HTMLElement | null = null;
 
+  // Resolves once the sheet has finished sliding (or after a short fallback, if the transition never fires).
+  function settled() {
+    return new Promise<void>((resolve) => {
+      const done = () => (clearTimeout(timer), sheet.removeEventListener("transitionend", onEnd), resolve());
+      const onEnd = (e: TransitionEvent) => e.target === sheet && e.propertyName === "transform" && done();
+      const timer = setTimeout(done, 600);
+      sheet.addEventListener("transitionend", onEnd);
+    });
+  }
+
+  sheet.inert = true;
   function setOpen(open: boolean) {
     sheet.toggleAttribute("data-open", open);
-    document.documentElement.classList.toggle("chat-open", open);
+    sheet.inert = !open;
+    // Locking the page's scroll re-lays out the whole page, so on open it waits for the slide to land; on close it
+    // lifts at once.
+    if (open) settled().then(() => sheet.hasAttribute("data-open") && document.documentElement.classList.add("chat-open"));
+    else document.documentElement.classList.remove("chat-open");
     openers.forEach((b) => {
       b.setAttribute("aria-expanded", String(open));
       b.classList.toggle("is-covered", open); // the sheet covers the corner; its own close button takes over
@@ -577,8 +598,10 @@ import Icon from "./Icon.astro";
     sheet.style.height = `${viewport.height}px`;
     if (stickToBottom) toBottom();
   }
-  viewport?.addEventListener("resize", fitToViewport);
-  viewport?.addEventListener("scroll", fitToViewport);
+  let fitFrame = 0;
+  const queueFit = () => (fitFrame ||= requestAnimationFrame(() => ((fitFrame = 0), fitToViewport())));
+  viewport?.addEventListener("resize", queueFit);
+  viewport?.addEventListener("scroll", queueFit);
   input.addEventListener("focus", () => {
     // Once the keyboard has slid up, bring the latest message back into view.
     setTimeout(() => {
@@ -614,59 +637,74 @@ import Icon from "./Icon.astro";
     return bubble;
   }
 
-  // Wraps every word of the rendered reply in a span so it can fade in. Returns the words in reading order.
-  function wrapWords(root: Node) {
+  // Walks the words of the rendered reply in reading order. `delay(i)` returns the animation delay for word i while
+  // it is still fading in, and null once it has landed; only fading words get a span, so a long reply stays a
+  // handful of nodes instead of one per word.
+  function wrapWords(root: Node, delay: (i: number) => string | null) {
     const texts: Text[] = [];
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) texts.push(walker.currentNode as Text);
-    const words: HTMLElement[] = [];
+    let i = 0;
     for (const node of texts) {
       if (!node.data.trim()) continue;
+      let wrapped = false;
       const parts = node.data.split(/(\s+)/).map((part) => {
         if (!part || /^\s+$/.test(part)) return part;
+        const at = delay(i++);
+        if (at === null) return part;
+        wrapped = true;
         const word = Object.assign(document.createElement("span"), { className: "word", textContent: part });
-        words.push(word);
+        word.style.animationDelay = at;
         return word;
       });
-      node.replaceWith(...parts.filter(Boolean));
+      if (wrapped) node.replaceWith(...parts.filter(Boolean));
     }
-    return words;
   }
 
-  // Shows the reply as it streams in. Each word eases in from a soft blur, at least WORD_GAP after the one before,
-  // so a burst of text still reads like typing. The bubble is re-rendered as text arrives (Markdown can change
-  // shape mid-reply); every word keeps its own start time, so one already fading in carries on, never restarts.
+  // Shows the reply as it streams in. Each word fades in at least WORD_GAP after the one before, so a burst of text
+  // still reads like typing. The bubble is re-rendered as text arrives (Markdown can change shape mid-reply), at most
+  // every RENDER_GAP, since the eye can't follow faster and phones can't paint faster; every word keeps its own start
+  // time, so one already fading in carries on, never restarts.
   const WORD_GAP = 18; // ms
   const WORD_FADE = 600; // ms, the length of the word-in animation
+  const RENDER_GAP = phone.matches ? 90 : 50; // ms between re-renders of the bubble
   function streamInto(bubble: HTMLElement) {
     const born: number[] = [];
     let text = "";
     let frame = 0;
+    let timer = 0;
+    let lastRender = 0;
     const render = () => {
       frame = 0;
+      timer = 0;
+      lastRender = performance.now();
       bubble.replaceChildren(markdown(text));
       if (!reduceMotion) {
         const now = performance.now();
-        wrapWords(bubble).forEach((word, i) => {
+        wrapWords(bubble, (i) => {
           born[i] ??= Math.max(now, (born[i - 1] ?? 0) + WORD_GAP);
           const age = now - born[i];
-          if (age >= WORD_FADE) word.classList.remove("word");
-          else word.style.animationDelay = `${-age}ms`;
+          return age >= WORD_FADE ? null : `${-age}ms`;
         });
       }
       if (stickToBottom) toBottom();
     };
+    const schedule = () => (frame ||= requestAnimationFrame(render));
     return {
       get text() {
         return text;
       },
       set(next: string) {
         text = next;
-        frame ||= requestAnimationFrame(render);
+        if (frame || timer) return;
+        const wait = lastRender + RENDER_GAP - performance.now();
+        if (wait <= 0) schedule();
+        else timer = window.setTimeout(() => ((timer = 0), schedule()), wait);
       },
       flush() {
-        if (!frame) return;
+        if (!frame && !timer) return;
         cancelAnimationFrame(frame);
+        clearTimeout(timer);
         render();
       },
     };
@@ -901,9 +939,10 @@ import Icon from "./Icon.astro";
   // Questions asked from elsewhere on the page (the hero prompt bar) open the chat and send.
   document.addEventListener("chat:ask", (e) => {
     setOpen(true);
-    // Let the sheet start sliding before the message goes in, so the first frames stay smooth.
+    // The message goes in once the sheet has landed (at once with reduced motion), so the slide itself stays smooth.
     const question = (e as CustomEvent<string>).detail;
-    requestAnimationFrame(() => requestAnimationFrame(() => ask(question)));
+    if (reduceMotion) ask(question);
+    else settled().then(() => ask(question));
   });
 
   suggestions.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent ?? "")));
