@@ -94,13 +94,14 @@
     const maxScroll = () => Math.max(1, doc.scrollHeight - innerHeight);
 
     // The bar starts just under the header, and takes its space while it's hidden on scroll.
-    // The thumb is sized in whole rows to how much of the page is visible. Rows are counted on the bar's full height
+    // The thumb is sized in whole rows to how much of the page is visible, but kept short (3 to 5 rows) so it reads
+    // as a marker rather than a long block. Rows are counted on the bar's full height
     // (header hidden), so while the bar grows or shrinks with the header the thumb keeps its size and only glides.
     const header = document.getElementById("site-header");
     function layout() {
       if (header) root!.style.top = `${header.classList.contains("is-hidden") ? 6 : header.offsetHeight + 6}px`;
       trackRows = Math.floor((root!.getBoundingClientRect().bottom - 6) / LINE);
-      thumbRows = Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight)));
+      thumbRows = Math.min(5, Math.max(3, Math.round(trackRows * (innerHeight / doc.scrollHeight))));
       thumb.style.height = `${thumbRows * LINE}px`;
       root!.style.visibility = doc.scrollHeight > innerHeight + 1 ? "visible" : "hidden";
       position();
