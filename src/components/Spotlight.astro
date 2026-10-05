@@ -100,7 +100,9 @@ const name = (e: Credential) => toSlug(e.title) || slug;
             <div class="tile-meta">
               <span class="hidden gap-1.5 in-[.js]:flex">
                 {entries.map((e, i) => (
-                  <button type="button" class="thumb" data-spot-thumb={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Show ${e.title}`} />
+                  <button type="button" class="thumb" data-spot-thumb={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Show ${e.title}`}>
+                    {e.image && <img src={e.image} alt="" loading="lazy" decoding="async" />}
+                  </button>
                 ))}
               </span>
               <span class="tabular-nums" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
@@ -159,22 +161,35 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     min-width: 0;
     padding: 24px;
   }
-  /* The thumbnails ride in the dark status line: light on dark, the picked one solid. */
+  /* The thumbnails ride in the dark status line: each entry's own picture, small; the picked one bright and outlined,
+     the rest dimmed. An entry without a picture yet shows a plain light block. */
   .thumb {
     position: relative;
     z-index: 2;
-    width: 26px;
-    height: 18px;
+    width: 32px;
+    height: 22px;
+    overflow: hidden;
     border-radius: 2px;
     background: rgb(255 255 255 / 0.18);
-    transition: background-color 0.2s ease;
+    opacity: 0.55;
+    transition:
+      opacity 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .thumb[aria-current="true"] {
     background: #e6e9ee;
+    opacity: 1;
+    outline: 1px solid #e6e9ee;
+    outline-offset: 1px;
   }
   @media (hover: hover) {
     .thumb:not([aria-current="true"]):hover {
-      background: rgb(255 255 255 / 0.4);
+      opacity: 0.85;
     }
   }
   [data-spot-prev]:disabled,
