@@ -1,6 +1,6 @@
 ---
 import { awards } from "../data/awards";
-import CredentialGrid from "./CredentialGrid.astro";
+import Spotlight from "./Spotlight.astro";
 
 const entries = awards.map((a) => ({
   title: a.title,
@@ -14,4 +14,4 @@ const entries = awards.map((a) => ({
 }));
 ---
 
-<CredentialGrid id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" linkLabel="view proof" />
+<Spotlight id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" linkLabel="view proof" />

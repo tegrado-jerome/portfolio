@@ -13,6 +13,8 @@ export function pointTo(target: string) {
   const el = findTarget(target);
   if (!el) return false;
   const card = target.includes("/");
+  // A card that isn't on show (one entry of a spotlight) listens for this and brings itself forward first.
+  if (card) el.dispatchEvent(new CustomEvent("point", { bubbles: true }));
   const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
   el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: card ? "center" : "start" });
   if (card) frame(el);
