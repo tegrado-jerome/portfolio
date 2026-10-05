@@ -290,6 +290,92 @@
   color: #5cc493;
 }
 
+/* The guide pill under the skills dial and the awards and certifications windows, after the projects' "keep
+   scrolling" one: the same outline and size, with a line drawing of the gesture (a dot going round a ring to spin, a
+   dot sliding across a pad to swipe). It shows only with JS and leaves once the visitor has done it. */
+.hint-pill {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: max-content;
+  margin-inline: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  transition: opacity 0.4s ease;
+}
+html:not(.js) .hint-pill {
+  display: none;
+}
+.hint-pill.is-done {
+  opacity: 0;
+}
+.hint-icon {
+  position: relative;
+  display: block;
+  flex: none;
+  border: 1.5px solid currentColor;
+}
+.hint-icon i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hint-icon.spin {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+.hint-icon.spin i {
+  top: 50%;
+  left: 50%;
+  margin: -2px;
+  transform: translateY(-5px);
+}
+.hint-icon.pad {
+  width: 22px;
+  height: 15px;
+  border-radius: 4px;
+}
+.hint-icon.pad i {
+  top: 4px;
+  left: 12px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hint-icon.spin i {
+    animation: hint-spin 1.6s linear infinite;
+  }
+  .hint-icon.pad i {
+    animation: hint-swipe 1.6s ease-in-out infinite;
+  }
+}
+@keyframes hint-spin {
+  from {
+    transform: rotate(0deg) translateY(-5px);
+  }
+  to {
+    transform: rotate(360deg) translateY(-5px);
+  }
+}
+@keyframes hint-swipe {
+  0% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  70% {
+    translate: -9px 0;
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* A TUI section: no box and no divider, just its ~/path title above the content (see SectionHead).
    Space separates sections, so the page isn't crowded with lines. */
 @utility pane {

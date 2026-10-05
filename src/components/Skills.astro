@@ -52,9 +52,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             </div>
           ))}
 
-          <p class="hint-pill mt-8 text-muted" aria-hidden="true">
-            <span class="hint-mouse">Drag the dial to spin</span>
-            <span class="hint-touch">Swipe the dial to spin</span>
+          <p class="hint-pill mt-6" data-skills-hint data-pause-offscreen aria-hidden="true">
+            <span class="hint-icon spin"><i></i></span>
+            <span>drag to spin</span>
           </p>
         </div>
       </div>
@@ -89,37 +89,17 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
   }
-  /* The same pill as the projects' "keep scrolling" hint. */
-  .hint-pill {
-    width: max-content;
-    margin-inline: auto;
-    padding: 6px 12px;
-    border: 1px solid var(--color-line);
-    border-radius: 999px;
-    background: var(--color-paper);
-    font-size: var(--text-small);
-  }
-  /* The guide's words match the device. */
-  .hint-mouse,
-  .hint-touch {
-    display: none;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .hint-mouse {
-      display: inline;
-    }
-  }
-  @media not ((hover: hover) and (pointer: fine)) {
-    .hint-touch {
-      display: inline;
-    }
-  }
 </style>
 
 <script>
   const tabs = [...document.querySelectorAll<HTMLButtonElement>("#skills [role=tab]")];
 
   const thumb = document.querySelector<HTMLElement>("#skills .thumb");
+
+  // The guide pill leaves once the visitor has spun a dial themselves.
+  document.getElementById("skills")?.addEventListener("spin", () =>
+    document.querySelector("[data-skills-hint]")?.classList.add("is-done"),
+  );
 
   // Sit the raised tile exactly on the picked tab.
   function moveThumb() {

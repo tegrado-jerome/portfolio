@@ -19,7 +19,6 @@ const C = S / 2;
 const TICKS = N * 8;
 const TICK_OUTER = 163;
 const LOGO_RADIUS = 200;
-const TRACK_RADIUS = 182;
 const step = 360 / N;
 
 const point = (r: number, deg: number) => {
@@ -53,13 +52,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
       })
     }
   </div>
-
-  <!-- The guide: a faint dotted track round the dial, between the ticks and the logos, with a short ink run going
-       round it, so it shows where to drag. It stays put while the dial turns. -->
-  <svg viewBox={`0 0 ${S} ${S}`} class="track" data-pause-offscreen>
-    <circle cx={C} cy={C} r={TRACK_RADIUS} />
-    <circle cx={C} cy={C} r={TRACK_RADIUS} pathLength="100" class="run" />
-  </svg>
 
   <svg viewBox={`0 0 ${S} ${S}`} class="needle">
     <line x1={C} y1={C - 88} x2={needleX} y2={needleY} />
@@ -174,6 +166,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
       dragging = false;
       wheel.classList.remove("is-dragging");
       lastUse = performance.now();
+      // Spun by hand: the page's guide (the pill under the dial) has done its job.
+      if (moved >= TAP_SLOP) wheel.dispatchEvent(new CustomEvent("spin", { bubbles: true }));
       if (moved < TAP_SLOP) {
         // A tap: turn the tapped logo to the needle the short way round.
         const tapped = mod(Math.round((polar(e).deg - angle) / step), total);
@@ -257,46 +251,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
   .dial-logo :global(img) {
     -webkit-user-drag: none;
-  }
-  .track {
-    position: absolute;
-    inset: 0;
-    overflow: visible;
-    pointer-events: none;
-  }
-  .track circle {
-    fill: none;
-    stroke: var(--color-muted);
-    stroke-width: 1.5;
-    stroke-dasharray: 2 6;
-    opacity: 0.45;
-  }
-  .track .run {
-    stroke: var(--color-ink);
-    stroke-width: 2.5;
-    stroke-dasharray: 14 86;
-    stroke-linecap: round;
-    opacity: 0.85;
-    transform-origin: center;
-    transform-box: view-box;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .track .run {
-      animation: run 3.2s ease-in-out infinite;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .track .run {
-      display: none;
-    }
-  }
-  @keyframes run {
-    from {
-      stroke-dashoffset: 25;
-    }
-    to {
-      stroke-dashoffset: -75;
-    }
   }
   .needle {
     position: absolute;
