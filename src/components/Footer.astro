@@ -1,7 +1,8 @@
 ---
-// The last TUI pane, ~/contact: bracketed profile links.
-import { faArrowUp, faFileLines } from "@fortawesome/free-solid-svg-icons";
-import { site, socials } from "../data/site";
+// The last TUI pane, ~/contact: a status line, one big line, my email with a copy button, then bracketed profile links
+// (after raviklaassens.com's "available from" and rauno.me's copy-on-click email).
+import { faArrowUp, faCopy, faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { contactHref, site, socials } from "../data/site";
 import { isSet } from "../data/placeholders";
 import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
@@ -20,6 +21,23 @@ const profileLinks = [
     <SectionHead id="contact-title" title="Contact" />
 
     <div class="relative z-[1] flex flex-col gap-7">
+      {
+        site.availability && (
+          <p class="text-small text-ink">
+            <span class="dot" aria-hidden="true" />
+            {site.availability}
+            {site.lookingFor && <span class="text-muted"> · {site.lookingFor}</span>}
+          </p>
+        )
+      }
+      <p class="text-title font-medium">Let's build something.</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href={contactHref} target="_blank" rel="noopener noreferrer" class="link-strong text-heading break-all">{site.email}</a>
+        <button type="button" data-copy-email={site.email} class="tui-btn inline-flex">
+          [ <Icon icon={faCopy} class="text-[12px]" /><span data-copy-label> copy</span> ]
+        </button>
+        <span class="sr-only" role="status" data-copy-status></span>
+      </div>
       <ul class="flex flex-wrap gap-2">
         {
           profileLinks.map((l) => (
@@ -41,3 +59,32 @@ const profileLinks = [
   </div>
 </footer>
 
+<style>
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--color-online);
+    vertical-align: 1px;
+  }
+</style>
+
+<script>
+  // Copy my email, and say "copied" on the button for a moment.
+  const button = document.querySelector<HTMLButtonElement>("[data-copy-email]");
+  const label = button?.querySelector("[data-copy-label]");
+  const status = document.querySelector("[data-copy-status]");
+  let timer: number | undefined;
+  button?.addEventListener("click", async () => {
+    await navigator.clipboard?.writeText(button.dataset.copyEmail!).catch(() => {});
+    label!.textContent = " copied ✓";
+    status!.textContent = "Email address copied";
+    clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      label!.textContent = " copy";
+      status!.textContent = "";
+    }, 2000);
+  });
+</script>

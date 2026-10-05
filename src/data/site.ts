@@ -13,6 +13,9 @@ export const site = {
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.webp",
   email: "tegradojeromebrent@gmail.com",
+  // The status line at the top of the contact pane, with a green dot. Empty availability hides it.
+  availability: "open to work",
+  lookingFor: "web dev, seo, ai automation",
   // Resume link shown in the footer (a PDF in public/ or a Google Drive link).
   resume: "[RESUME URL]",
 
