@@ -5,7 +5,9 @@
 // opens it in full in the modal (with the link to proof). Without JS every entry shows, one under the other.
 import { isSet } from "../data/placeholders";
 import { slug as toSlug } from "../data/slug";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Detail from "./Detail.astro";
+import Icon from "./Icon.astro";
 
 export interface Credential {
   title: string;
@@ -52,8 +54,8 @@ const name = (e: Credential) => toSlug(e.title) || slug;
           {n > 1 && (
             <div class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap in-[.js]:flex">
               <span class="mr-1.5 text-muted tabular-nums max-sm:hidden" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
-              <button type="button" data-spot-prev class="key" aria-label="Previous">←</button>
-              <button type="button" data-spot-next class="key" aria-label="Next">→</button>
+              <button type="button" data-spot-prev class="key" aria-label="Previous"><Icon icon={faArrowLeft} class="block text-[12px]" /></button>
+              <button type="button" data-spot-next class="key" aria-label="Next"><Icon icon={faArrowRight} class="block text-[12px]" /></button>
             </div>
           )}
         </div>
@@ -207,13 +209,14 @@ const name = (e: Credential) => toSlug(e.title) || slug;
       opacity: 0.85;
     }
   }
-  /* Keycaps, like the ↵ key in the hero's prompt bar: an outline and a 1px bottom edge, never a fill. The outline
-     goes ink on hover; at either end the key fades out. */
+  /* Keycaps, like the ↵ key in the hero's prompt bar: an outline and a 1px bottom edge, never a fill, with an icon
+     arrow (the font's own arrows sat low and small, Android most of all). The outline goes ink on hover; at either
+     end the key fades out. */
   .key {
     display: inline-grid;
     place-items: center;
-    min-width: 30px;
-    height: 26px;
+    min-width: 34px;
+    height: 30px;
     padding-inline: 6px;
     border: 1px solid var(--color-line);
     border-radius: 5px;
