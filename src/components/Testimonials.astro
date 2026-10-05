@@ -1,8 +1,8 @@
 ---
 // Quotes one at a time, centred, with no box (after Stripe's customer quotes): the person's photo above, the quote, who
-// said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every few
-// seconds, to the right. A swipe or a click on a company jumps there; hovering or focusing the quote holds it. With
-// reduced motion it never moves on its own. Without JS every quote shows, one under the other.
+// said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every 3 seconds,
+// to the right, without stopping. A swipe or a click on a company jumps there. With reduced motion it never moves on its
+// own. Without JS every quote shows, one under the other.
 import { testimonials } from "../data/testimonials";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
@@ -160,7 +160,7 @@ const n = testimonials.length;
   const root = document.querySelector<HTMLElement>("[data-quotes]");
   const fill = root?.querySelector<HTMLElement>("[data-quotes-fill]");
   if (root && fill) {
-    const DURATION = 6000; // ms per quote
+    const DURATION = 3000; // ms per quote
     const track = root.querySelector<HTMLElement>("[data-quotes-track]")!;
     const viewport = root.querySelector<HTMLElement>("[data-quotes-viewport]")!;
     const slides = [...track.children] as HTMLElement[];
@@ -170,7 +170,6 @@ const n = testimonials.length;
     let current = 0;
     let elapsed = 0; // ms spent on the current quote
     let last = 0;
-    let held = false; // hovered or focused
     let onScreen = false;
     let frame = 0;
 
@@ -183,7 +182,7 @@ const n = testimonials.length;
       buttons.forEach((b, k) => (k === current ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
       draw();
     }
-    // Runs only while the section is on screen and not held, so it costs nothing elsewhere on the page.
+    // Runs only while the section is on screen and the tab is visible, so it costs nothing elsewhere on the page.
     function tick(now: number) {
       frame = 0;
       if (last) elapsed += Math.min(100, now - last);
@@ -193,7 +192,7 @@ const n = testimonials.length;
       run();
     }
     function run() {
-      const moving = !still && onScreen && !held && !document.hidden;
+      const moving = !still && onScreen && !document.hidden;
       if (moving && !frame) frame = requestAnimationFrame(tick);
       if (!moving) {
         cancelAnimationFrame(frame);
@@ -203,10 +202,6 @@ const n = testimonials.length;
     }
 
     buttons.forEach((b, k) => b.addEventListener("click", () => (go(k), run())));
-    viewport.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && ((held = true), run()));
-    viewport.addEventListener("pointerleave", () => ((held = false), run()));
-    root.addEventListener("focusin", () => ((held = true), run()));
-    root.addEventListener("focusout", () => ((held = false), run()));
     document.addEventListener("visibilitychange", run);
     new IntersectionObserver(([entry]) => ((onScreen = entry.isIntersecting), run())).observe(root);
 
