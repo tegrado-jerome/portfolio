@@ -205,6 +205,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
     touch-action: none;
     cursor: grab;
   }
+  /* On phones it fills the column, so a touch smaller there leaves it some air. */
+  @media (max-width: 767px) {
+    .dial-wrap {
+      width: min(88%, 420px);
+    }
+  }
   .dial-wrap.is-dragging {
     cursor: grabbing;
   }
