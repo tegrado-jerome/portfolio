@@ -77,6 +77,12 @@
   --color-online: #5cc493;
   color-scheme: dark;
 }
+/* Set for the one frame a theme changes (src/scripts/theme.ts): everything takes its new colours at once, instead of
+   borders and text easing over at different speeds. */
+.theme-switching,
+.theme-switching * {
+  transition: none !important;
+}
 
 @layer base {
   /* One scrollbar on the whole site: the page's own TUI bar (TuiScrollbar). Everything inside the page (chat log,
@@ -92,7 +98,12 @@
   }
   /* The page only ever scrolls vertically: nothing can pan it sideways on any screen,
      and touch gestures (like spinning the skill wheel) can't drag it left or right. */
+  /* The page's own paper on the root, light or dark said outright: Chrome on Android colours the phone's bottom
+     navigation bar from the page's background, so it never sees the browser's default white or black in between
+     when the theme changes. */
   html {
+    background-color: var(--color-paper);
+    color-scheme: light;
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
     overflow-x: clip;

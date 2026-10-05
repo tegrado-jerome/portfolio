@@ -15,8 +15,11 @@ export function nextTheme(): Theme {
 }
 
 export function setTheme(theme: Theme) {
+  // One clean swap: no transitions while the colours change, back on two frames later.
+  root.classList.add("theme-switching");
   if (theme === "light") delete root.dataset.theme;
   else root.dataset.theme = theme;
+  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
 
   try {
     localStorage.setItem("theme", theme);
