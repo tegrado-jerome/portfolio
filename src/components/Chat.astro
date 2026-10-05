@@ -839,6 +839,11 @@ import Icon from "./Icon.astro";
       syncButton();
       if (refocus) input.focus();
     }
+    if (queued) {
+      const next = queued;
+      queued = "";
+      ask(next);
+    }
   }
 
   // Scrolling over the open sheet moves only the chat, never the page behind it.
@@ -946,10 +951,17 @@ import Icon from "./Icon.astro";
   });
 
   suggestions.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent ?? "")));
+  // While a reply is streaming, Enter with a typed message queues it for right after the reply (it never cuts the
+  // reply short); Enter or the button with an empty field stops the reply.
+  let queued = "";
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (request) request.abort();
-    else ask(input.value);
+    if (!request) ask(input.value);
+    else if (input.value.trim()) {
+      queued = input.value;
+      input.value = "";
+      growInput();
+    } else request.abort();
   });
   input.addEventListener("input", () => {
     growInput();
