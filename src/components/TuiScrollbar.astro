@@ -2,14 +2,11 @@
 // The page scrollbar drawn as a terminal block bar (btop / lazygit): a ░-style dithered track with a █-style thumb,
 // matching the boot screen's progress bar. The same on every device and browser.
 // It's a visual mirror of the page scroll: drag the thumb or click the track, and keyboard scrolling still works.
-// While you scroll, the section you're in rides beside the thumb as its ~/path, like a fast-scroll label on Android or
-// Google Photos, and fades a moment after you stop. It's decorative: the section headings already say where you are.
 ---
 
 <div class="tui-scroll" data-tui-scroll aria-hidden="true">
   <div class="track" data-track></div>
   <div class="bar" data-thumb></div>
-  <span class="here" data-here></span>
 </div>
 
 <style>
@@ -82,40 +79,6 @@
   .bar.is-dragging {
     cursor: grabbing;
   }
-  /* The current section's ~/path, in the same inverted look as the site's active tab, centred on the thumb.
-     It fades in quickly and out slowly, and never catches the pointer while hidden. */
-  .here {
-    position: absolute;
-    top: 0;
-    right: 12px;
-    padding: 3px 6px;
-    background: var(--color-ink);
-    color: var(--color-paper);
-    font: var(--text-label) / 1 var(--font-mono);
-    white-space: nowrap;
-    pointer-events: none;
-    will-change: transform, opacity;
-    opacity: 0;
-    translate: 4px -50%;
-    transition:
-      opacity 0.5s ease,
-      translate 0.5s ease;
-  }
-  .here.is-on {
-    opacity: 1;
-    translate: 0 -50%;
-    transition-duration: 0.15s;
-  }
-  .bar.is-dragging ~ .here {
-    background: var(--color-accent);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .here,
-    .here.is-on {
-      translate: 0 -50%;
-      transition: none;
-    }
-  }
 </style>
 
 <script>
@@ -123,9 +86,6 @@
   if (root) {
     const track = root.querySelector<HTMLElement>("[data-track]")!;
     const thumb = root.querySelector<HTMLElement>("[data-thumb]")!;
-    const here = root.querySelector<HTMLElement>("[data-here]")!;
-    const sections = [...document.querySelectorAll<HTMLElement>("#top, main section[id], #contact")];
-    let current = -1;
     const LINE = 10; // px per block row
     let thumbRows = 0;
     let trackRows = 0;
@@ -153,35 +113,6 @@
       const space = Math.max(0, root!.clientHeight - thumbRows * LINE);
       const y = Math.round((step / steps) * space);
       thumb.style.transform = `translateY(${y}px)`;
-      mark();
-      here.style.transform = `translateY(${y + (thumbRows * LINE) / 2}px)`;
-    }
-
-    // The section you're in is the last one whose top has passed a third of the way down the screen, or the last
-    // one at the very bottom.
-    function mark() {
-      if (!sections.length) return;
-      let i = 0;
-      sections.forEach((s, j) => {
-        if (s.getBoundingClientRect().top <= innerHeight / 3) i = j;
-      });
-      if (scrollY >= maxScroll() - 2) i = sections.length - 1;
-      if (i === current) return;
-      current = i;
-      here.textContent = sections[i].id === "top" ? "~/" : `~/${sections[i].id}`;
-    }
-
-    // Shows the label, and hides it again once scrolling, dragging and hovering have all stopped for a second.
-    let hideTimer = 0;
-    let holding = false;
-    function wake() {
-      here.classList.add("is-on");
-      clearTimeout(hideTimer);
-      if (!holding) hideTimer = window.setTimeout(() => here.classList.remove("is-on"), 1000);
-    }
-    function hold(on: boolean) {
-      holding = on;
-      wake();
     }
 
     let queued = false;
@@ -193,7 +124,6 @@
         requestAnimationFrame(() => {
           queued = false;
           position();
-          wake();
         });
       },
       { passive: true },
@@ -221,7 +151,6 @@
       startScroll = scrollY;
       thumb.setPointerCapture(e.pointerId);
       thumb.classList.add("is-dragging");
-      hold(true);
       doc.style.scrollBehavior = "auto"; // follow the pointer exactly while dragging
     });
     thumb.addEventListener("pointermove", (e) => {
@@ -232,13 +161,8 @@
     const stop = (e: PointerEvent) => {
       if (thumb.hasPointerCapture(e.pointerId)) thumb.releasePointerCapture(e.pointerId);
       thumb.classList.remove("is-dragging");
-      hold(false);
       doc.style.removeProperty("scroll-behavior");
     };
-    if (matchMedia("(hover: hover)").matches) {
-      root.addEventListener("pointerenter", () => hold(true));
-      root.addEventListener("pointerleave", () => hold(false));
-    }
     thumb.addEventListener("pointerup", stop);
     thumb.addEventListener("pointercancel", stop);
   }
