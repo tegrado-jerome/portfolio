@@ -1,13 +1,12 @@
 ---
-// A credentials section (Awards, Certifications) as a spotlight: one entry at a time in the site's window, the photo
-// on the left and the text on the right, with small thumbnails in the dark status line to jump between entries.
-// [ ← ] [ → ] beside the count, a swipe on the photo, or the arrow keys turn to the next one. A click on the entry
-// opens it in full in the modal (with the link to proof). Without JS every entry shows, one under the other.
+// A credentials section (Awards, Certifications) as a row of the site's windows, one per entry (the photo on the left,
+// the text on the right), that scrolls sideways a window at a time. The next window's edge peeks in on the right, so
+// it reads as "swipe" without arrows (like Apple's product rows). A swipe, a mouse drag, the arrow keys, a click on
+// the peeking window or a thumbnail in the dark status line moves along. A click on an entry opens it in full in the
+// modal (with the link to proof). Without JS the row still scrolls.
 import { isSet } from "../data/placeholders";
 import { slug as toSlug } from "../data/slug";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Detail from "./Detail.astro";
-import Icon from "./Icon.astro";
 
 export interface Credential {
   title: string;
@@ -16,7 +15,7 @@ export interface Credential {
   caption: string;
   /** Full name of who gave it, shown in the modal. */
   issuer: string;
-  /** Extra lines for the modal (e.g. "GWA 1.36", "Credential ID: …"); the first one also shows in the spotlight. */
+  /** Extra lines for the modal (e.g. "GWA 1.36", "Credential ID: …"); the first one also shows in the window. */
   details?: string[];
   href?: string;
   image?: string;
@@ -46,29 +45,20 @@ const name = (e: Credential) => toSlug(e.title) || slug;
   n > 0 && (
     <section id={id} class="shell screen" aria-labelledby={`${id}-title`}>
       <div class="pane" data-pane={slug}>
-        <div class="absolute inset-x-0 top-0 flex items-center justify-between gap-3 text-small">
-          <h2 id={`${id}-title`} class="min-w-0 truncate font-normal text-ink">
-            <span class="sr-only">{title}</span>
-            <span aria-hidden="true"><span class="text-accent">~/</span>{slug}</span>
-          </h2>
-          {n > 1 && (
-            <div class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap in-[.js]:flex">
-              <span class="mr-1.5 text-muted tabular-nums max-sm:hidden" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
-              <button type="button" data-spot-prev class="key" aria-label="Previous"><Icon icon={faArrowLeft} class="block text-[12px]" /></button>
-              <button type="button" data-spot-next class="key" aria-label="Next"><Icon icon={faArrowRight} class="block text-[12px]" /></button>
-            </div>
-          )}
-        </div>
+        <h2 id={`${id}-title`} class="absolute inset-x-0 top-0 truncate text-small font-normal text-ink">
+          <span class="sr-only">{title}</span>
+          <span aria-hidden="true"><span class="text-accent">~/</span>{slug}</span>
+        </h2>
 
-        <div class="tile" data-spotlight data-reveal>
-          <div class="tile-top">
-            <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="tile-title"><strong data-spot-name>{name(entries[0])}</strong></span>
-            <span class="tile-badge" data-spot-year>{entries[0].year}</span>
-          </div>
-          <ol class="slides" aria-live="polite">
-            {entries.map((e, i) => (
-              <li class="card slide relative" data-active={i === 0 ? "" : undefined} data-name={name(e)} data-year={e.year}>
+        <ol class="row" data-spotlight data-reveal>
+          {entries.map((e, i) => (
+            <li class="card tile">
+              <div class="tile-top">
+                <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="tile-title"><strong>{name(e)}</strong></span>
+                <span class="tile-badge">{e.year}</span>
+              </div>
+              <div class="slide relative">
                 <div class="media photo">
                   {e.image ? (
                     <img src={e.image} alt={e.imageAlt ?? ""} loading="lazy" decoding="async" />
@@ -85,69 +75,68 @@ const name = (e: Credential) => toSlug(e.title) || slug;
                   </h3>
                   {line(e) && <p class="mt-2 text-small text-ink-soft">{line(e)}</p>}
                 </div>
-                <Detail
-                  path={`${slug}/${name(e)}`}
-                  title={e.title}
-                  meta={[e.year, e.issuer]}
-                  image={e.image}
-                  imageAlt={e.imageAlt}
-                  placeholder={placeholder}
-                  text={(e.details ?? []).filter(isSet)}
-                  link={isSet(e.href) ? { href: e.href, label: linkLabel } : undefined}
-                />
-              </li>
-            ))}
-          </ol>
-          {n > 1 && (
-            <div class="tile-meta">
-              <span class="hidden gap-1.5 in-[.js]:flex">
-                {entries.map((e, i) => (
-                  <button type="button" class="thumb" data-spot-thumb={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Show ${e.title}`}>
-                    {e.image && <img src={e.image} alt="" loading="lazy" decoding="async" />}
-                  </button>
-                ))}
-              </span>
-              <span class="tabular-nums" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
-            </div>
-          )}
-        </div>
+              </div>
+              {n > 1 && (
+                <div class="tile-meta">
+                  <span class="hidden gap-1.5 in-[.js]:flex">
+                    {entries.map((t, k) => (
+                      <button type="button" class="thumb" data-spot-thumb={k} aria-current={k === i ? "true" : undefined} aria-label={`Show ${t.title}`}>
+                        {t.image && <img src={t.image} alt="" loading="lazy" decoding="async" />}
+                      </button>
+                    ))}
+                  </span>
+                  <span class="tabular-nums" aria-hidden="true">{pad(i + 1)} / {pad(n)}</span>
+                </div>
+              )}
+              <Detail
+                path={`${slug}/${name(e)}`}
+                title={e.title}
+                meta={[e.year, e.issuer]}
+                image={e.image}
+                imageAlt={e.imageAlt}
+                placeholder={placeholder}
+                text={(e.details ?? []).filter(isSet)}
+                link={isSet(e.href) ? { href: e.href, label: linkLabel } : undefined}
+              />
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   )
 }
 
 <style>
+  /* The row runs out through the shell's side padding to the page's edge, so the next window is cut there like a card
+     sliding in. The end padding (that bleed plus the peek) makes each window the content width less the peek, and
+     lets the last one line up on the left like the rest. */
+  .row {
+    --bleed: clamp(20px, 11vw, 200px);
+    --peek: 56px;
+    display: flex;
+    gap: 12px;
+    margin-right: calc(-1 * var(--bleed));
+    padding-right: calc(var(--bleed) + var(--peek));
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+  }
+  .row > .card {
+    flex: none;
+    width: 100%;
+    scroll-snap-align: start;
+  }
+  /* While a mouse drags the row it follows the pointer exactly; the snap comes back on release. */
+  .row.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
+  }
   /* One entry: the photo pane on the left, the text on the right. */
   .slide {
+    flex: 1;
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  }
-  .slide + .slide {
-    border-top: 1px solid var(--color-line);
-  }
-  /* With JS every entry sits in the same spot and only the picked one shows, easing in, so the window keeps the
-     height of the tallest entry and never jumps between them. Hidden entries can't be clicked or focused. */
-  :global(.js) .slides {
-    display: grid;
-  }
-  :global(.js) .slide {
-    grid-area: 1 / 1;
-  }
-  :global(.js) .slide:not([data-active]) {
-    visibility: hidden;
-  }
-  :global(.js) .slide + .slide {
-    border-top: 0;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .slide[data-active] {
-      animation: slide-in 0.45s var(--ease-out-soft);
-    }
-  }
-  @keyframes slide-in {
-    from {
-      opacity: 0;
-    }
   }
   .photo {
     position: relative;
@@ -157,7 +146,6 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     overflow: hidden;
     border-right: 1px solid var(--color-line);
     background: var(--color-ph);
-    touch-action: pan-y;
   }
   .photo img {
     position: absolute;
@@ -170,8 +158,8 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     min-width: 0;
     padding: 24px;
   }
-  /* The thumbnails ride in the dark status line: each entry's own picture, small; the picked one bright with a light
-     edge, the rest dimmed. An entry without a picture yet shows a plain light block. */
+  /* The thumbnails ride in the dark status line: each entry's own picture, small; the window's own one bright with a
+     light edge, the rest dimmed. An entry without a picture yet shows a plain light block. */
   .thumb {
     position: relative;
     z-index: 2;
@@ -186,6 +174,7 @@ const name = (e: Credential) => toSlug(e.title) || slug;
       background-color 0.2s ease;
   }
   .thumb img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -196,11 +185,7 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     opacity: 1;
     box-shadow: inset 0 0 0 1px #e6e9ee;
   }
-  .thumb img {
-    display: block;
-  }
   .thumb[aria-current="true"] img {
-    box-shadow: inset 0 0 0 1px #e6e9ee;
     outline: 1px solid #e6e9ee;
     outline-offset: -1px;
   }
@@ -209,42 +194,13 @@ const name = (e: Credential) => toSlug(e.title) || slug;
       opacity: 0.85;
     }
   }
-  /* Keycaps, like the ↵ key in the hero's prompt bar: an outline and a 1px bottom edge, never a fill, with an icon
-     arrow (the font's own arrows sat low and small, Android most of all). The outline goes ink on hover; at either
-     end the key fades out. */
-  .key {
-    display: inline-grid;
-    place-items: center;
-    min-width: 34px;
-    height: 30px;
-    padding-inline: 6px;
-    border: 1px solid var(--color-line);
-    border-radius: 5px;
-    background: var(--color-paper);
-    box-shadow: 0 1px 0 var(--color-line);
-    color: var(--color-ink);
-    font: 500 var(--text-label) / 1 var(--font-mono);
-    transition:
-      border-color 0.2s ease,
-      opacity 0.2s ease,
-      translate 0.1s ease;
-  }
-  @media (hover: hover) {
-    .key:hover {
-      border-color: var(--color-ink);
-    }
-  }
-  .key:active {
-    translate: 0 1px;
-    box-shadow: none;
-  }
-  .key:disabled {
-    opacity: 0.4;
-    pointer-events: none;
-  }
   @media (max-width: 767px) {
+    .row {
+      --peek: 36px;
+    }
     .slide {
       grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
     }
     .photo {
       min-height: 220px;
@@ -258,65 +214,86 @@ const name = (e: Credential) => toSlug(e.title) || slug;
 </style>
 
 <script>
-  document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach((win) => {
-    const pane = win.closest<HTMLElement>(".pane")!;
-    const slides = [...win.querySelectorAll<HTMLElement>(".slide")];
-    const thumbs = [...win.querySelectorAll<HTMLButtonElement>("[data-spot-thumb]")];
-    const counts = pane.querySelectorAll<HTMLElement>("[data-spot-count]");
-    const prev = pane.querySelector<HTMLButtonElement>("[data-spot-prev]");
-    const next = pane.querySelector<HTMLButtonElement>("[data-spot-next]");
-    const nameEl = win.querySelector<HTMLElement>("[data-spot-name]")!;
-    const yearEl = win.querySelector<HTMLElement>("[data-spot-year]")!;
-    const n = slides.length;
-    let current = 0;
+  document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach((row) => {
+    const pane = row.closest<HTMLElement>(".pane")!;
+    const cards = [...row.querySelectorAll<HTMLElement>(":scope > .card")];
+    const at = (k: number) => cards[k].offsetLeft - cards[0].offsetLeft;
+    // The window lined up on the left: the last one whose start the row has scrolled to.
+    const indexAt = (left: number) => Math.max(0, cards.findLastIndex((_, k) => at(k) <= left + 1));
+    // While a smooth scroll is on its way, the window it's heading to counts, so quick key presses add up.
+    let goal = -1;
+    const current = () => (goal >= 0 ? goal : indexAt(row.scrollLeft));
+    for (const type of ["scrollend", "touchstart", "wheel"]) row.addEventListener(type, () => (goal = -1), { passive: true });
 
     function show(i: number) {
-      const to = Math.min(n - 1, Math.max(0, i));
-      if (to === current) return;
-      current = to;
-      slides.forEach((s, k) => s.toggleAttribute("data-active", k === to));
-      thumbs.forEach((t, k) => (k === to ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current")));
-      counts.forEach((c) => (c.textContent = String(to + 1).padStart(2, "0")));
-      nameEl.textContent = slides[to].dataset.name ?? "";
-      yearEl.textContent = slides[to].dataset.year ?? "";
-      sync();
-    }
-    function sync() {
-      if (prev) prev.disabled = current === 0;
-      if (next) next.disabled = current === n - 1;
+      const to = Math.min(cards.length - 1, Math.max(0, i));
+      const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      goal = smooth && row.scrollLeft !== at(to) ? to : -1;
+      row.scrollTo({ left: at(to), behavior: smooth ? "smooth" : "auto" });
     }
 
-    prev?.addEventListener("click", () => show(current - 1));
-    next?.addEventListener("click", () => show(current + 1));
-    thumbs.forEach((t, k) => t.addEventListener("click", () => show(k)));
+    row.querySelectorAll<HTMLButtonElement>("[data-spot-thumb]").forEach((t) =>
+      t.addEventListener("click", () => show(Number(t.dataset.spotThumb))),
+    );
     pane.addEventListener("keydown", (e) => {
       if ((e.target as HTMLElement).closest("input, textarea")) return;
-      if (e.key === "ArrowRight") (e.preventDefault(), show(current + 1));
-      if (e.key === "ArrowLeft") (e.preventDefault(), show(current - 1));
+      if (e.key === "ArrowRight") (e.preventDefault(), show(current() + 1));
+      if (e.key === "ArrowLeft") (e.preventDefault(), show(current() - 1));
     });
 
-    // A sideways swipe on the photo turns to the next or previous entry; a tap still opens it.
+    // Touch and trackpads scroll the row natively; a mouse drags it, then it settles on the next or previous window.
     let x0 = 0;
-    let y0 = 0;
-    win.addEventListener("pointerdown", (e) => ((x0 = e.clientX), (y0 = e.clientY)));
-    win.addEventListener("pointerup", (e) => {
-      const dx = e.clientX - x0;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - y0) * 1.5) show(current + (dx < 0 ? 1 : -1));
+    let left0 = 0;
+    let down = false;
+    let moved = false;
+    row.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      x0 = e.clientX;
+      left0 = row.scrollLeft;
+      down = true;
+      moved = false;
     });
-    win.addEventListener(
+    // The pointer is only captured once it really moves, so a plain click still reaches the entry under it.
+    row.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      const dx = e.clientX - x0;
+      if (!moved && Math.abs(dx) < 6) return;
+      if (!moved) row.setPointerCapture(e.pointerId);
+      moved = true;
+      row.classList.add("is-dragging");
+      row.scrollLeft = left0 - dx;
+    });
+    const release = (e: PointerEvent) => {
+      if (!down) return;
+      down = false;
+      if (!moved) return;
+      const dx = e.clientX - x0;
+      const from = indexAt(left0);
+      row.classList.remove("is-dragging");
+      show(Math.abs(dx) > 40 ? from + (dx < 0 ? 1 : -1) : from);
+    };
+    row.addEventListener("pointerup", release);
+    row.addEventListener("pointercancel", release);
+    // A drag never opens an entry, and a click on the peeking window brings it in instead of opening it.
+    row.addEventListener(
       "click",
       (e) => {
-        if (Math.abs(e.clientX - x0) > 10) (e.stopPropagation(), e.preventDefault());
+        const card = (e.target as HTMLElement).closest<HTMLElement>(".card");
+        const k = card ? cards.indexOf(card) : -1;
+        const peeking = k >= 0 && k !== current() && !(e.target as HTMLElement).closest("[data-spot-thumb]");
+        if (!moved && !peeking) return;
+        e.stopPropagation();
+        e.preventDefault();
+        if (!moved) show(k);
+        moved = false;
       },
       { capture: true },
     );
 
     // The chat or the hero's `cd` pointing at one entry (src/scripts/point.ts) brings it forward first.
-    win.addEventListener("point", (e) => {
-      const slide = (e.target as HTMLElement).closest<HTMLElement>(".slide");
-      if (slide) show(slides.indexOf(slide));
+    row.addEventListener("point", (e) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>(".card");
+      if (card) show(cards.indexOf(card));
     });
-
-    sync();
   });
 </script>
