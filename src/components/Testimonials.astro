@@ -1,65 +1,224 @@
 ---
-// Quotes in the site's one card (.tile in global.css): photo and name, role and company, the quote, then the year.
-// Three per row when there are three (or six…), otherwise two.
+// Quotes one at a time, centred, with no box (after Stripe's customer quotes): the person's photo above, the quote, who
+// said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every few
+// seconds, to the right. A swipe or a click on a company jumps there; hovering or focusing the quote holds it. With
+// reduced motion it never moves on its own. Without JS every quote shows, one under the other.
 import { testimonials } from "../data/testimonials";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
+
+const n = testimonials.length;
 ---
 
 {
-  testimonials.length > 0 && (
+  n > 0 && (
     <section id="testimonials" class="shell section" aria-labelledby="testimonials-title">
       <div class="pane" data-pane="testimonials">
-      <SectionHead id="testimonials-title" title="Testimonials" />
-      <div class:list={["card-grid grid", testimonials.length % 3 === 0 ? "md:grid-cols-3" : "md:grid-cols-2"]}>
-        {testimonials.map((t, i) => (
-          <figure data-reveal style={`--i:${i}`} class="tile m-0">
-            <figcaption class="tile-top">
-              <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="grid size-6 shrink-0 place-items-center overflow-hidden rounded-full bg-ph text-muted">
-                {t.avatar ? (
-                  <img src={t.avatar} alt="" width="52" height="52" loading="lazy" decoding="async" class="size-full object-cover" />
-                ) : (
-                  <Icon icon={faUser} class="text-[11px]" />
-                )}
-              </span>
-              <span class="tile-title">
-                <strong>{t.name}</strong>
-              </span>
-            </figcaption>
-            <p class="tile-desc">{t.role}, {t.company}</p>
-            <blockquote class="quote">
-              <p>{t.quote}</p>
-            </blockquote>
-            <p class="tile-meta mt-auto">
-              <span>{t.company}</span>
-              <span>{t.year}</span>
-            </p>
-          </figure>
-        ))}
-      </div>
+        <SectionHead id="testimonials-title" title="Testimonials" />
+        <div class="quotes" data-quotes data-reveal>
+          <div class="viewport" data-quotes-viewport>
+            <ul class="track" data-quotes-track>
+              {testimonials.map((t, i) => (
+                <li class="slide" aria-hidden={i === 0 ? undefined : "true"}>
+                  <figure class="m-0 flex flex-col items-center gap-5 text-center">
+                    <span class="avatar">
+                      {t.avatar ? (
+                        <img src={t.avatar} alt="" width="96" height="96" loading="lazy" decoding="async" class="size-full object-cover" />
+                      ) : (
+                        <Icon icon={faUser} class="text-[14px]" />
+                      )}
+                    </span>
+                    <blockquote class="quote">
+                      <p>“{t.quote}”</p>
+                    </blockquote>
+                    <figcaption class="text-small">
+                      <span class="text-ink">{t.name}</span>
+                      <span class="text-muted"> · {t.role}, {t.company}</span>
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {n > 1 && (
+            <div class="nav hidden in-[.js]:block" style={`--n:${n}`}>
+              <ul class="companies">
+                {testimonials.map((t, i) => (
+                  <li>
+                    <button type="button" data-quotes-to={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Quote from ${t.name}`}>
+                      {t.company}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <span class="rail" aria-hidden="true"><i data-quotes-fill></i></span>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )
 }
 
 <style>
-  /* The quote sits where a picture would, on the same placeholder surface. */
-  .quote {
-    margin: 0 18px 18px;
-    padding: 18px;
-    border-radius: 3px;
-    background: var(--color-ph);
-    font-size: var(--text-heading);
-    line-height: 1.45;
+  .slide {
+    padding: 0 16px;
   }
-  .quote::before {
-    content: "“";
+  .slide + .slide {
+    margin-top: 56px;
+  }
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    background: var(--color-ph);
+    color: var(--color-muted);
+  }
+  .quote {
+    max-width: 50ch;
+    margin: 0;
+    color: var(--color-ink);
+    font-size: clamp(18px, 2.2vw, 26px);
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+  /* With JS: one quote in view, the rest waiting to its right. */
+  :global(.js) .viewport {
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  :global(.js) .track {
+    display: flex;
+    transition: transform 0.7s var(--ease-out-soft);
+  }
+  :global(.js) .slide {
+    flex: 0 0 100%;
+    margin: 0;
+    padding-block: 8px 32px;
+  }
+  /* The companies over one short bar; the fill runs the length of the bar over all the quotes. */
+  .nav {
+    width: min(100%, 420px);
+    margin: 8px auto 0;
+  }
+  .companies {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  }
+  .companies li {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+  .companies button {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 4px 2px;
+    color: var(--color-muted);
+    font-size: var(--text-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+  .companies button[aria-current="true"] {
+    color: var(--color-ink);
+  }
+  @media (hover: hover) {
+    .companies button:hover {
+      color: var(--color-ink);
+    }
+  }
+  .rail {
+    position: relative;
     display: block;
-    height: 0.6em;
-    color: var(--color-accent);
-    font-size: 1.8em;
-    line-height: 1;
+    height: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+    background: var(--color-line);
+  }
+  .rail i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: var(--color-ink);
+    transform: scaleX(var(--p, 0));
+    transform-origin: 0 50%;
+  }
+  @media (max-width: 767px) {
+    .companies button {
+      font-size: 12px;
+    }
   }
 </style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-quotes]");
+  const fill = root?.querySelector<HTMLElement>("[data-quotes-fill]");
+  if (root && fill) {
+    const DURATION = 6000; // ms per quote
+    const track = root.querySelector<HTMLElement>("[data-quotes-track]")!;
+    const viewport = root.querySelector<HTMLElement>("[data-quotes-viewport]")!;
+    const slides = [...track.children] as HTMLElement[];
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-quotes-to]")];
+    const n = slides.length;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let current = 0;
+    let elapsed = 0; // ms spent on the current quote
+    let last = 0;
+    let held = false; // hovered or focused
+    let onScreen = false;
+    let frame = 0;
+
+    const draw = () => fill.style.setProperty("--p", String((current + Math.min(1, elapsed / DURATION)) / n));
+    function go(i: number) {
+      current = (i + n) % n;
+      elapsed = 0;
+      track.style.transform = `translateX(${-current * 100}%)`;
+      slides.forEach((s, k) => (k === current ? s.removeAttribute("aria-hidden") : s.setAttribute("aria-hidden", "true")));
+      buttons.forEach((b, k) => (k === current ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
+      draw();
+    }
+    // Runs only while the section is on screen and not held, so it costs nothing elsewhere on the page.
+    function tick(now: number) {
+      frame = 0;
+      if (last) elapsed += Math.min(100, now - last);
+      last = now;
+      if (elapsed >= DURATION) go(current + 1);
+      else draw();
+      run();
+    }
+    function run() {
+      const moving = !still && onScreen && !held && !document.hidden;
+      if (moving && !frame) frame = requestAnimationFrame(tick);
+      if (!moving) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        last = 0;
+      }
+    }
+
+    buttons.forEach((b, k) => b.addEventListener("click", () => (go(k), run())));
+    viewport.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && ((held = true), run()));
+    viewport.addEventListener("pointerleave", () => ((held = false), run()));
+    root.addEventListener("focusin", () => ((held = true), run()));
+    root.addEventListener("focusout", () => ((held = false), run()));
+    document.addEventListener("visibilitychange", run);
+    new IntersectionObserver(([entry]) => ((onScreen = entry.isIntersecting), run())).observe(root);
+
+    // A sideways swipe moves to the next or previous quote.
+    let x0 = 0;
+    let y0 = 0;
+    viewport.addEventListener("pointerdown", (e) => ((x0 = e.clientX), (y0 = e.clientY)));
+    viewport.addEventListener("pointerup", (e) => {
+      const dx = e.clientX - x0;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - y0) * 1.5) go(current + (dx < 0 ? 1 : -1));
+    });
+
+    go(0);
+  }
+</script>
