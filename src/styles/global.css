@@ -95,6 +95,9 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    /* A gentle snap: stopping near the start of a pane settles onto it, so you land on one whole pane; anywhere else
+       the page scrolls freely. */
+    scroll-snap-type: y proximity;
     overflow-x: clip;
     touch-action: pan-y pinch-zoom;
   }
@@ -144,6 +147,30 @@
    (padding on top only: stacked top and bottom padding doubled some gaps and not others). */
 @utility section {
   padding-top: clamp(80px, 10vw, 160px);
+}
+
+/* A pane that fills one screen on its own (skills, awards, certifications, testimonials): its content centred, and
+   nothing from the next pane showing. The header hides while scrolling down, so the screen is the full height, minus
+   the status line on laptops and up. Taller content (a phone in landscape) just grows. It's a snap point, and it
+   lands flush with the top of the screen (the -5rem cancels the page's scroll-padding meant for the header). */
+.screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  padding-block: clamp(24px, 4vh, 48px);
+  scroll-snap-align: start;
+  scroll-margin-top: -5rem;
+}
+@media (min-width: 1024px) {
+  .screen {
+    min-height: calc(100svh - 32px);
+  }
+}
+/* The hero and the projects are snap points too; the projects' stack keeps its own long scroll. */
+#top,
+#projects {
+  scroll-snap-align: start;
 }
 
 /* The one grid for every card section (projects, awards, certifications, testimonials), so they all breathe the same. */
