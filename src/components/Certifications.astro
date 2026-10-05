@@ -1,7 +1,7 @@
 ---
 import { certifications } from "../data/certifications";
 import { isSet } from "../data/placeholders";
-import TicketReel from "./TicketReel.astro";
+import CredentialGrid from "./CredentialGrid.astro";
 
 const entries = certifications.map((c) => ({
   title: c.name,
@@ -15,4 +15,4 @@ const entries = certifications.map((c) => ({
 }));
 ---
 
-<TicketReel id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" linkLabel="verify" />
+<CredentialGrid id="certifications" title="Certifications" entries={entries} placeholder="CERTIFICATE" linkLabel="verify" />

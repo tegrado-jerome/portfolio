@@ -1,6 +1,6 @@
 ---
 import { awards } from "../data/awards";
-import TicketReel from "./TicketReel.astro";
+import CredentialGrid from "./CredentialGrid.astro";
 
 const entries = awards.map((a) => ({
   title: a.title,
@@ -14,4 +14,4 @@ const entries = awards.map((a) => ({
 }));
 ---
 
-<TicketReel id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" linkLabel="view proof" />
+<CredentialGrid id="awards" title="Awards" entries={entries} placeholder="AWARD PHOTO" linkLabel="view proof" />

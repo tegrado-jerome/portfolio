@@ -1,6 +1,6 @@
 ---
 // TUI title bar (lazygit / btop): the logo and app name on the left, bracketed commands on the right.
-import { faMoon, faSun, faAt } from "@fortawesome/free-solid-svg-icons";
+import { faCircleHalfStroke, faAt } from "@fortawesome/free-solid-svg-icons";
 import { contactHref, site } from "../data/site";
 import Icon from "./Icon.astro";
 ---
@@ -19,9 +19,9 @@ import Icon from "./Icon.astro";
     <!-- Bracketed commands, the main action last. The theme button needs JS, so it stays hidden without it.
          The command menu opens from the status bar and with ⌘K / Ctrl K. -->
     <nav aria-label="Primary" class="ml-auto flex items-center gap-2">
-      <!-- Icon only, no word: the moon means "go dark", the sun means "go light". The name is read out instead. -->
+      <!-- The half-moon icon alone, no word; the accessible name says what it does. -->
       <button type="button" data-theme-toggle class="theme-btn tui-btn hidden in-[.js]:inline-flex">
-        [ <Icon icon={faMoon} class="to-dark text-[12px]" /><Icon icon={faSun} class="to-light text-[12px]" /> ]
+        [ <Icon icon={faCircleHalfStroke} class="text-[12px]" /> ]
       </button>
       <a href={contactHref} target="_blank" rel="noopener noreferrer" aria-label="Let's talk (email me in Gmail)" class="group tui-btn tui-btn--primary">
         [ <Icon icon={faAt} class="text-[11px]" /> let's talk ]
@@ -50,14 +50,6 @@ import Icon from "./Icon.astro";
   .theme-btn:focus-visible {
     outline: 1px solid var(--color-muted);
     outline-offset: 2px;
-  }
-  /* One icon at a time: the mode a press would switch to. Global, since the icon is a child component. */
-  :global(.to-light),
-  :global([data-theme="dark"] .to-dark) {
-    display: none;
-  }
-  :global([data-theme="dark"] .to-light) {
-    display: inline-block;
   }
   .tui-btn--primary {
     display: inline-flex;

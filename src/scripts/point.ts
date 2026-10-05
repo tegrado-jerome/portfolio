@@ -13,8 +13,6 @@ export function pointTo(target: string) {
   const el = findTarget(target);
   if (!el) return false;
   const card = target.includes("/");
-  // A card in a pile (the ticket books) listens for this and brings itself to the front first.
-  if (card) el.dispatchEvent(new CustomEvent("point", { bubbles: true }));
   const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
   el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: card ? "center" : "start" });
   if (card) frame(el);
