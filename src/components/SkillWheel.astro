@@ -235,9 +235,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
       scale 0.25s ease;
     pointer-events: none;
   }
-  /* The dial stays ink; only the big logo in the hub shows its brand colour. */
+  /* The logo under the needle shows its brand colour, like the big one in the hub; the rest of the dial stays grey. */
   .dial-logo[data-active] {
-    filter: grayscale(1);
+    filter: none;
     opacity: 1;
     scale: 1.2;
   }
