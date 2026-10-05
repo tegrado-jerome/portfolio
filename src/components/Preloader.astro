@@ -1,58 +1,21 @@
 ---
-// Full-screen boot screen: neofetch on one side (a block "JT" and who I am), btop-style panels on the other that fill
-// as each part of the page really loads. Phones stack the two and shrink the panels to one line each. The path and
-// overall % sit on the bottom line, then the screen slides up. Only shown when JS runs.
-import { site } from "../data/site";
-
-const JT = [" ████ ██████", "   ██   ██  ", "   ██   ██  ", "█  ██   ██  ", " ███    ██  "];
-const info = [
-  ["role", "web dev · seo · ai"],
-  ["school", "TUP Manila '26"],
-  ["honor", site.honor.title],
-  ["rank", "14 / 2,800+"],
-];
-const panels = ["projects", "skills", "awards", "ai chat"];
-const CELLS = 14;
+// Full-screen boot screen in the page's own colours: the header as it will look, an empty page with "booting", and
+// the status line at the bottom filling up as each part of the page really loads. The header and the status line sit
+// exactly where the real ones are, so when it fades out the page appears around them without a jump. Follows the
+// light and dark theme. Only shown when JS runs.
 ---
 
 <div id="preloader" class="preloader" role="status" aria-label="Loading">
-  <p class="cmd" aria-hidden="true"><span class="ok">jerome</span><span class="dim">@</span><span class="path">portfolio</span> <span class="dim">~ $</span> neofetch</p>
-  <div class="main" aria-hidden="true">
-    <div class="fetch">
-      <div class="logo">
-        {JT.map((row) => [...row].map((ch) => <i class={ch === " " ? "" : "on"} />))}
-      </div>
-      <div class="info">
-        <p><span class="ok">jerome</span>@<span class="ok">tegrado</span></p>
-        <p class="rule"></p>
-        {
-          info.map(([k, v]) => (
-            <p>
-              <span class="key">{k}</span>
-              {v}
-            </p>
-          ))
-        }
-      </div>
-    </div>
-    <ol class="panels">
-      {
-        panels.map((name, i) => (
-          <li class="panel">
-            <span class="name">
-              <sup>{i + 1}</sup>
-              {name}
-            </span>
-            <span class="meter">{Array.from({ length: CELLS }, () => <i />)}</span>
-            <span class="state">waiting</span>
-          </li>
-        ))
-      }
-    </ol>
+  <div class="boot-head" aria-hidden="true">
+    <span class="logo size-8 bg-current text-ink"></span>
+    <span class="hidden text-ink sm:inline"><span class="text-accent">~/</span>jerome-tegrado</span>
   </div>
-  <p class="boot-foot">
-    <span><span class="path">~/</span>jerome-tegrado<span class="caret" aria-hidden="true"></span></span>
-    <span class="pct"><span id="preCount">0</span>%</span>
+  <p class="boot-mid text-muted" aria-hidden="true">booting<span class="caret"></span></p>
+  <p class="boot-bar" aria-hidden="true">
+    <span class="mode">tui</span>
+    <span class="text-ink"><span class="text-accent">~/</span>booting</span>
+    <span class="rail"><i id="preFill"></i></span>
+    <span class="pct text-ink"><span id="preCount">0</span>%</span>
   </p>
 </div>
 
@@ -61,8 +24,8 @@ const CELLS = 14;
     var root = document.documentElement;
     var pre = document.getElementById("preloader");
     var countEl = document.getElementById("preCount");
+    var fillEl = document.getElementById("preFill");
     if (!pre) return;
-    var panels = pre.querySelectorAll(".panel");
 
     function done() {
       root.classList.remove("is-preloading");
@@ -90,9 +53,9 @@ const CELLS = 14;
     var MAX = 10000; // on a very slow connection, open the site anyway after this
     var start = null;
 
-    // The boot does real work: each panel waits for its part of the page to load, including the images further
+    // The boot does real work: each part waits for its piece of the page to load, including the images further
     // down that would otherwise load lazily on scroll, so the site is ready once the screen lifts.
-    // Panel order: projects (with the hero and fonts), skills, awards (and the rest), ai chat (then the full page).
+    // Order: the hero and projects (with the fonts), skills, awards (and the rest), the chat (then the full page).
     var groups = [
       { sel: "#top img, #projects img", waits: [document.fonts ? document.fonts.ready : null] },
       { sel: "#skills img" },
@@ -134,31 +97,26 @@ const CELLS = 14;
       done();
       var remove = function () { pre.remove(); };
       pre.addEventListener("transitionend", remove, { once: true });
-      setTimeout(remove, 1400);
+      setTimeout(remove, 1200);
     }
 
-    // The panels fill one after another on an easing clock, and none runs ahead of what has really loaded.
+    // The parts fill one after another on an easing clock, and none runs ahead of what has really loaded. The bar
+    // in the status line shows their sum.
     function tick(now) {
       if (start === null) start = now;
       var t = Math.min((now - start) / duration, 1);
       var eased = 1 - Math.pow(1 - t, 2);
       var timeout = now - start >= MAX;
       var sum = 0;
-      for (var p = 0; p < panels.length; p++) {
+      for (var p = 0; p < groups.length; p++) {
         var g = groups[p];
         var real = timeout ? 1 : collected ? (g.total ? g.done / g.total : 1) : 0;
-        var fill = Math.min(Math.max(0, Math.min(1, eased * panels.length - p)), real);
-        sum += fill;
-        var panel = panels[p];
-        var cells = panel.querySelectorAll(".meter i");
-        var on = Math.round(fill * cells.length);
-        for (var c = 0; c < cells.length; c++) cells[c].className = c < on ? "on" : "";
-        panel.classList.toggle("is-busy", fill > 0 && fill < 1);
-        panel.querySelector(".state").textContent =
-          fill === 1 ? "ready" : fill > 0 ? Math.round(fill * 100) + "%" : "waiting";
+        sum += Math.min(Math.max(0, Math.min(1, eased * groups.length - p)), real);
       }
-      var pct = Math.round((sum / panels.length) * 100);
+      var share = sum / groups.length;
+      var pct = Math.round(share * 100);
       countEl.textContent = pct;
+      fillEl.style.transform = "scaleX(" + share + ")";
       if (pct < 100) requestAnimationFrame(tick);
       else setTimeout(finish, reduce ? 60 : 320);
     }
@@ -173,179 +131,95 @@ const CELLS = 14;
     inset: 0;
     z-index: 100;
     flex-direction: column;
-    gap: 24px;
-    padding: clamp(22px, 4vw, 48px);
-    background: var(--color-night);
-    color: #e6e9ee;
+    background: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: var(--text-small);
     line-height: 1.6;
-    transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
-    will-change: transform;
-    --dim: rgb(230 233 238 / 0.62); /* dim but readable: 4.5:1 on the night background */
-    --faint: rgb(230 233 238 / 0.14);
-    --ok: #5cc493;
-    --path: #8fb0e0;
+    transition: opacity 0.6s var(--ease-out-soft);
   }
   :global(.js) .preloader {
     display: flex;
   }
+  /* It fades out, and the page underneath appears around the same header and status line. */
   .preloader.is-done {
-    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
   }
   :global(.is-preloading) :global(body) {
     overflow: hidden;
   }
-  .ok {
-    color: var(--ok);
-  }
-  .dim {
-    color: var(--dim);
-  }
-  .path {
-    color: var(--path);
-  }
 
-  /* Neofetch and the panels, centred on the screen: stacked on phones, side by side from tablets up. */
-  .main {
-    flex: 1;
-    display: grid;
-    align-content: center;
-    justify-content: center;
-    gap: 32px;
-  }
-  @media (min-width: 720px) {
-    .main {
-      grid-template-columns: auto minmax(280px, 420px);
-      align-items: center;
-      gap: clamp(40px, 6vw, 96px);
-    }
-  }
-  .fetch {
-    display: grid;
-    gap: 16px;
-  }
-  @media (min-width: 480px) and (max-width: 719px) {
-    .fetch {
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 28px;
-    }
-  }
-  /* The block "JT", drawn in CSS since the web font has no block glyphs. Each block has a thin gap under it, like
-     rows of █ in a terminal. */
-  .logo {
-    display: grid;
-    grid-template-columns: repeat(12, var(--px));
-    gap: 1px 0;
-    width: max-content;
-    --px: clamp(7px, 2.2vw, 11px);
-  }
-  .logo i {
-    height: calc(var(--px) * 1.6);
-  }
-  .logo i.on {
-    background: var(--path);
-  }
-  .info {
-    display: grid;
-    gap: 2px;
-    white-space: nowrap;
-  }
-  .rule {
-    width: 16ch;
-    height: 1px;
-    margin-block: 4px;
-    background: var(--faint);
-  }
-  .key {
-    display: inline-block;
-    width: 7ch;
-    color: var(--path);
-  }
-
-  /* btop-style boxes, each with its name set into the top border. */
-  .panels {
-    display: grid;
-    gap: 16px;
-  }
-  .panel {
-    position: relative;
+  /* The header as it will look (same size and spacing as Header.astro), without its buttons. */
+  .boot-head {
     display: flex;
+    flex: none;
     align-items: center;
     gap: 12px;
-    padding: 14px 12px 10px;
-    border: 1px solid var(--faint);
-    transition: border-color 0.2s ease;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-line);
   }
-  .panel.is-busy {
-    border-color: rgb(143 176 224 / 0.5);
+  @media (min-width: 640px) {
+    .boot-head {
+      padding: 20px clamp(20px, 10vw, 200px);
+    }
   }
-  .name {
-    position: absolute;
-    top: -0.8em;
-    left: 10px;
-    padding-inline: 6px;
-    background: var(--color-night);
-    color: var(--path);
+  .logo {
+    display: block;
+    mask: url("/images/logo.png") center / contain no-repeat;
   }
-  .name sup {
-    margin-right: 1px;
-    font-size: 0.7em;
-  }
-  .meter {
+
+  .boot-mid {
     display: flex;
     flex: 1;
-    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
   }
-  .meter i {
-    flex: 1;
-    max-width: 10px;
-    height: 10px;
-    background: var(--faint);
+
+  /* The status line, sized like StatusBar.astro, with a thin bar that fills as the page loads. */
+  .boot-bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 14px;
+    height: 32px;
+    margin: 0;
+    padding: 0 20px env(safe-area-inset-bottom);
+    border-top: 1px solid var(--color-line);
+    white-space: nowrap;
   }
-  .meter i.on {
-    background: var(--ok);
+  @media (min-width: 640px) {
+    .boot-bar {
+      padding-inline: clamp(20px, 10vw, 200px);
+    }
   }
-  .state {
-    min-width: 7ch;
+  .mode {
+    padding-inline: 8px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .rail {
+    position: relative;
+    width: clamp(80px, 14vw, 180px);
+    height: 2px;
+    overflow: hidden;
+    background: var(--color-line);
+  }
+  .rail i {
+    position: absolute;
+    inset: 0;
+    background: var(--color-ink);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+  .pct {
+    min-width: 4ch;
+    margin-left: auto;
     text-align: right;
-    color: var(--dim);
     font-variant-numeric: tabular-nums;
   }
-  .is-busy .state {
-    color: var(--ok);
-  }
-  /* Phones and small tablets: one column, as wide as the panels need to read well. */
-  @media (max-width: 719px) {
-    .main {
-      grid-template-columns: minmax(0, 380px);
-    }
-  }
-  /* Small phones: one line per panel, so everything fits. */
-  @media (max-width: 479px) {
-    .panels {
-      gap: 8px;
-    }
-    .panel {
-      padding: 0;
-      border: 0;
-    }
-    .name {
-      position: static;
-      flex: none;
-      width: 10ch;
-      padding: 0;
-    }
-  }
 
-  .boot-foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    white-space: nowrap;
-  }
   .caret {
     display: inline-block;
     width: 0.6em;
@@ -353,12 +227,6 @@ const CELLS = 14;
     margin-left: 4px;
     vertical-align: -0.18em;
     background: currentColor;
-  }
-  .pct {
-    min-width: 4ch;
-    text-align: right;
-    color: var(--dim);
-    font-variant-numeric: tabular-nums;
   }
   @media (prefers-reduced-motion: no-preference) {
     .caret {
@@ -372,7 +240,7 @@ const CELLS = 14;
   }
   @media (prefers-reduced-motion: reduce) {
     .preloader {
-      transition-duration: 0.3s !important;
+      transition-duration: 0.2s;
     }
   }
 </style>
