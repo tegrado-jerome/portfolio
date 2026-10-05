@@ -96,10 +96,21 @@ const n = testimonials.length;
     display: flex;
     transition: transform 0.7s var(--ease-out-soft);
   }
+  /* Every quote is as tall as the longest one: the photo stays at the top, the name at the bottom, and a shorter quote
+     sits centred between them, so nothing shifts as they change. */
   :global(.js) .slide {
+    display: flex;
     flex: 0 0 100%;
     margin: 0;
     padding-block: 8px 32px;
+  }
+  :global(.js) .slide figure {
+    flex: 1;
+  }
+  :global(.js) .quote {
+    display: flex;
+    flex: 1;
+    align-items: center;
   }
   /* The companies over one short bar; the fill runs the length of the bar over all the quotes. */
   .nav {
