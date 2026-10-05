@@ -1,8 +1,6 @@
 ---
 // Skills by category: a TUI list of categories, each with its own turning wheel of logos.
-import { faHandPointer } from "@fortawesome/free-solid-svg-icons";
 import { skillGroups } from "../data/skills";
-import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
 import SkillWheel from "./SkillWheel.astro";
 
@@ -54,18 +52,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             </div>
           ))}
 
-          <p data-pause-offscreen class="hint-pill mt-8 flex items-center justify-center gap-2 text-muted" aria-hidden="true">
-            <span class="gesture">
-              <svg class="trail" viewBox="0 0 26 26" aria-hidden="true">
-                <mask id="gesture-reveal"><circle class="reveal" cx="12" cy="10" r="7" pathLength="100" /></mask>
-                <g mask="url(#gesture-reveal)">
-                  <circle class="dots" cx="12" cy="10" r="7" pathLength="100" />
-                </g>
-              </svg>
-              <span class="hand"><Icon icon={faHandPointer} class="block text-[15px]" /></span>
-            </span>
-            <span class="hint-mouse">Drag in a circle to spin</span>
-            <span class="hint-touch">Swipe in a circle to spin</span>
+          <p class="hint-pill mt-8 text-muted" aria-hidden="true">
+            <span class="hint-mouse">Drag the dial to spin</span>
+            <span class="hint-touch">Swipe the dial to spin</span>
           </p>
         </div>
       </div>
@@ -99,99 +88,6 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   /* Without JS there's no sliding bar, so the picked tab paints its own. */
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
-  }
-  /* The guide's gesture, like touch-gesture hints in apps: a pointing finger draws a dotted circle with its tip,
-     the circle fades, and it starts again. That's the motion that spins the wheel. */
-  .gesture {
-    position: relative;
-    display: inline-block;
-    /* Sized to the circle (centred at 12px, 10px), so the circle lines up with the middle of the text beside it;
-       the hand hangs below it. */
-    width: 24px; /* even space on both sides of the circle */
-    height: 20px;
-    color: var(--color-ink);
-  }
-  .trail {
-    position: absolute;
-    inset: 0;
-    overflow: visible;
-  }
-  /* A dotted circle, starting at the top and running clockwise like the finger; a mask reveals it behind the
-     fingertip. */
-  .trail circle {
-    fill: none;
-    transform: rotate(-90deg);
-    transform-origin: 12px 10px;
-  }
-  .dots {
-    stroke: var(--color-muted);
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-dasharray: 0 6;
-  }
-  .reveal {
-    stroke: #fff;
-    stroke-width: 7;
-    stroke-dasharray: 100;
-    stroke-dashoffset: 0;
-  }
-  /* The fingertip rests at the circle's centre (its transform-origin); it's moved out to the edge and around,
-     while the hand stays upright. */
-  .hand {
-    position: absolute;
-    top: 9px;
-    left: 8.25px;
-    transform-origin: 3.75px 1px;
-    transform: translateY(-7px);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .hand {
-      animation: trace 2.8s linear infinite;
-    }
-    .reveal {
-      animation: draw 2.8s linear infinite;
-    }
-    .trail {
-      animation: fade 2.8s linear infinite;
-    }
-  }
-  /* The finger draws one full lap in the first 70%, then lifts away so the finished circle shows, and comes back
-     for the next lap. */
-  @keyframes trace {
-    0% {
-      transform: rotate(0deg) translateY(-7px) rotate(0deg);
-      opacity: 0;
-    }
-    6% {
-      opacity: 1;
-    }
-    70% {
-      transform: rotate(360deg) translateY(-7px) rotate(-360deg);
-      opacity: 1;
-    }
-    78%,
-    100% {
-      transform: rotate(360deg) translateY(-7px) rotate(-360deg);
-      opacity: 0;
-    }
-  }
-  @keyframes draw {
-    0% {
-      stroke-dashoffset: 100;
-    }
-    70%,
-    100% {
-      stroke-dashoffset: 0;
-    }
-  }
-  @keyframes fade {
-    0%,
-    80% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
   }
   /* The same pill as the projects' "keep scrolling" hint. */
   .hint-pill {
