@@ -1,22 +1,19 @@
 ---
-// Full-screen boot screen in the page's own colours: the header as it will look, an empty page with "booting", and
-// the status line at the bottom filling up as each part of the page really loads. The header and the status line sit
-// exactly where the real ones are, so when it fades out the page appears around them without a jump. Follows the
-// light and dark theme. Only shown when JS runs.
+// Full-screen boot screen in the page's own colours (it follows the light and dark theme): the JT mark in the middle,
+// "booting" typing itself out under it like the hero's prompt, and one thin bar with the percentage, filling as each
+// part of the page really loads. At 100% the word backspaces and types "ready", then the screen fades into the page.
+// Only shown when JS runs.
 ---
 
 <div id="preloader" class="preloader" role="status" aria-label="Loading">
-  <div class="boot-head" aria-hidden="true">
-    <span class="logo size-8 bg-current text-ink"></span>
-    <span class="hidden text-ink sm:inline"><span class="text-accent">~/</span>jerome-tegrado</span>
+  <div class="boot" aria-hidden="true">
+    <span class="logo"></span>
+    <p class="word"><span id="preWord"></span><span class="caret"></span></p>
+    <div class="meter">
+      <span class="rail"><i id="preFill"></i></span>
+      <span class="pct"><span id="preCount">0</span>%</span>
+    </div>
   </div>
-  <p class="boot-mid text-muted" aria-hidden="true">booting<span class="caret"></span></p>
-  <p class="boot-bar" aria-hidden="true">
-    <span class="mode">tui</span>
-    <span class="text-ink"><span class="text-accent">~/</span>booting</span>
-    <span class="rail"><i id="preFill"></i></span>
-    <span class="pct text-ink"><span id="preCount">0</span>%</span>
-  </p>
 </div>
 
 <script is:inline>
@@ -25,6 +22,7 @@
     var pre = document.getElementById("preloader");
     var countEl = document.getElementById("preCount");
     var fillEl = document.getElementById("preFill");
+    var wordEl = document.getElementById("preWord");
     if (!pre) return;
 
     function done() {
@@ -100,8 +98,53 @@
       setTimeout(remove, 1200);
     }
 
+    // The word types itself out at the hero prompt's pace (115ms a letter, 55ms to delete). While a letter is going
+    // in, the cursor holds still; between, it blinks.
+    var word = wordEl.parentNode;
+    var typed = Promise.resolve();
+    function later(ms) {
+      return new Promise(function (r) { setTimeout(r, ms); });
+    }
+    function type(text) {
+      if (reduce) {
+        wordEl.textContent = text;
+        return Promise.resolve();
+      }
+      word.classList.add("is-typing");
+      var i = 0;
+      function next() {
+        if (i === text.length) {
+          word.classList.remove("is-typing");
+          return Promise.resolve();
+        }
+        wordEl.textContent = text.slice(0, ++i);
+        return later(115).then(next);
+      }
+      return next();
+    }
+    function erase() {
+      if (reduce) return Promise.resolve();
+      word.classList.add("is-typing");
+      function next() {
+        var t = wordEl.textContent;
+        if (!t) return Promise.resolve();
+        wordEl.textContent = t.slice(0, -1);
+        return later(55).then(next);
+      }
+      return next();
+    }
+    typed = later(reduce ? 0 : 250).then(function () { return type("booting"); });
+    // At 100%: once "booting" has finished typing, it backspaces, types "ready", and the screen fades out.
+    function arrive() {
+      typed
+        .then(erase)
+        .then(function () { return type("ready"); })
+        .then(function () { return later(reduce ? 60 : 350); })
+        .then(finish);
+    }
+
     // The parts fill one after another on an easing clock, and none runs ahead of what has really loaded. The bar
-    // in the status line shows their sum.
+    // shows their sum.
     function tick(now) {
       if (start === null) start = now;
       var t = Math.min((now - start) / duration, 1);
@@ -118,7 +161,7 @@
       countEl.textContent = pct;
       fillEl.style.transform = "scaleX(" + share + ")";
       if (pct < 100) requestAnimationFrame(tick);
-      else setTimeout(finish, reduce ? 60 : 320);
+      else arrive();
     }
     requestAnimationFrame(tick);
   })();
@@ -141,7 +184,7 @@
   :global(.js) .preloader {
     display: flex;
   }
-  /* It fades out, and the page underneath appears around the same header and status line. */
+  /* It fades out into the page underneath. */
   .preloader.is-done {
     opacity: 0;
     pointer-events: none;
@@ -150,58 +193,37 @@
     overflow: hidden;
   }
 
-  /* The header as it will look (same size and spacing as Header.astro), without its buttons. */
-  .boot-head {
+  /* The mark, the word and the bar, centred. */
+  .boot {
     display: flex;
-    flex: none;
+    flex: 1;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--color-line);
-  }
-  @media (min-width: 640px) {
-    .boot-head {
-      padding: 20px clamp(20px, 10vw, 200px);
-    }
+    justify-content: center;
   }
   .logo {
     display: block;
+    width: 40px;
+    height: 40px;
+    background: var(--color-ink);
     mask: url("/images/logo.png") center / contain no-repeat;
   }
-
-  .boot-mid {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-  }
-
-  /* The status line, sized like StatusBar.astro, with a thin bar that fills as the page loads. */
-  .boot-bar {
-    display: flex;
-    flex: none;
-    align-items: center;
-    gap: 14px;
-    height: 32px;
-    margin: 0;
-    padding: 0 20px env(safe-area-inset-bottom);
-    border-top: 1px solid var(--color-line);
+  .word {
+    min-width: 9ch;
+    margin: 16px 0 0;
+    color: var(--color-muted);
+    text-align: center;
     white-space: nowrap;
   }
-  @media (min-width: 640px) {
-    .boot-bar {
-      padding-inline: clamp(20px, 10vw, 200px);
-    }
-  }
-  .mode {
-    padding-inline: 8px;
-    background: var(--color-ink);
-    color: var(--color-paper);
+  .meter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
   }
   .rail {
     position: relative;
-    width: clamp(80px, 14vw, 180px);
+    width: clamp(160px, 24vw, 240px);
     height: 2px;
     overflow: hidden;
     background: var(--color-line);
@@ -215,8 +237,7 @@
   }
   .pct {
     min-width: 4ch;
-    margin-left: auto;
-    text-align: right;
+    color: var(--color-muted);
     font-variant-numeric: tabular-nums;
   }
 
@@ -224,13 +245,16 @@
     display: inline-block;
     width: 0.6em;
     height: 1.1em;
-    margin-left: 4px;
+    margin-left: 2px;
     vertical-align: -0.18em;
     background: currentColor;
   }
   @media (prefers-reduced-motion: no-preference) {
     .caret {
       animation: caret-blink 1.1s steps(1) infinite;
+    }
+    .is-typing .caret {
+      animation: none;
     }
   }
   @keyframes caret-blink {
