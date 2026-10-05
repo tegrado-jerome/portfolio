@@ -2,11 +2,13 @@
 // A credentials section (Awards, Certifications) as a spotlight: one entry at a time in the site's window, the photo
 // on the left and the text on the right, with small thumbnails in the dark status line to jump between entries.
 // Small dots on the photo (like Airbnb's listing photos) say there are more; a swipe or drag on the window, the arrow
-// keys or a thumbnail turns to another one. A click on the entry opens it in full in the modal (with the link to
+// keys or a thumbnail turns to another one; a finger swiping beside the thumbnails shows how. A click on the entry opens it in full in the modal (with the link to
 // proof). Without JS every entry shows, one under the other.
 import { isSet } from "../data/placeholders";
 import { slug as toSlug } from "../data/slug";
+import { faHandPointer } from "@fortawesome/free-solid-svg-icons";
 import Detail from "./Detail.astro";
+import Icon from "./Icon.astro";
 
 export interface Credential {
   title: string;
@@ -95,14 +97,18 @@ const name = (e: Credential) => toSlug(e.title) || slug;
           </ol>
           {n > 1 && (
             <div class="tile-meta">
-              <span class="hidden gap-1.5 in-[.js]:flex">
+              <span class="hidden items-center gap-1.5 in-[.js]:flex">
                 {entries.map((e, i) => (
                   <button type="button" class="thumb" data-spot-thumb={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Show ${e.title}`}>
                     {e.image && <img src={e.image} alt="" loading="lazy" decoding="async" />}
                   </button>
                 ))}
+                <span data-pause-offscreen class="guide" aria-hidden="true">
+                  <span class="gesture"><span class="trail"></span><span class="hand"><Icon icon={faHandPointer} class="block text-[13px]" /></span></span>
+                  swipe
+                </span>
               </span>
-              <span class="tabular-nums" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
+              <span class="shrink-0 whitespace-nowrap tabular-nums" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
             </div>
           )}
         </div>
@@ -227,6 +233,74 @@ const name = (e: Credential) => toSlug(e.title) || slug;
   @media (hover: hover) {
     .thumb:not([aria-current="true"]):hover {
       opacity: 0.85;
+    }
+  }
+  /* The guide after the thumbnails, like the skills dial's: a finger swipes right to left, a dotted line follows
+     its tip, the line fades, and it starts again. */
+  .guide {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 12px;
+    color: rgb(230 233 238 / 0.7);
+  }
+  .gesture {
+    --run: 26px;
+    position: relative;
+    width: var(--run);
+    height: 20px;
+    color: #e6e9ee;
+  }
+  .trail {
+    position: absolute;
+    top: 9px;
+    right: 0;
+    width: var(--run);
+    height: 2px;
+    background: radial-gradient(circle, rgb(230 233 238 / 0.6) 0.8px, transparent 1.2px) 0 50% / 5px 2px repeat-x;
+  }
+  .gesture .hand {
+    position: absolute;
+    top: 9px;
+    right: -4px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .trail {
+      animation: trail 2.2s linear infinite;
+    }
+    .gesture .hand {
+      animation: swipe 2.2s linear infinite;
+    }
+  }
+  @keyframes swipe {
+    0% {
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    65% {
+      translate: calc(-1 * var(--run)) 0;
+      opacity: 1;
+    }
+    75%,
+    100% {
+      translate: calc(-1 * var(--run)) 0;
+      opacity: 0;
+    }
+  }
+  @keyframes trail {
+    0% {
+      width: 0;
+    }
+    65%,
+    80% {
+      width: var(--run);
+      opacity: 1;
+    }
+    100% {
+      width: var(--run);
+      opacity: 0;
     }
   }
   @media (max-width: 767px) {
