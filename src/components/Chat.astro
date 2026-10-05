@@ -954,14 +954,18 @@ import Icon from "./Icon.astro";
   // While a reply is streaming, Enter with a typed message queues it for right after the reply (it never cuts the
   // reply short); Enter or the button with an empty field stops the reply.
   let queued = "";
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  function submit() {
     if (!request) ask(input.value);
     else if (input.value.trim()) {
       queued = input.value;
       input.value = "";
       growInput();
+      syncButton();
     } else request.abort();
+  }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    submit();
   });
   input.addEventListener("input", () => {
     growInput();
@@ -993,7 +997,7 @@ import Icon from "./Icon.astro";
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       recall = -1;
-      ask(input.value);
+      submit();
       return;
     }
     const questions = asked();
