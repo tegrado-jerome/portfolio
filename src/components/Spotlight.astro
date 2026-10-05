@@ -123,9 +123,16 @@ const name = (e: Credential) => toSlug(e.title) || slug;
   .slide + .slide {
     border-top: 1px solid var(--color-line);
   }
-  /* With JS only the picked entry shows, easing in. */
+  /* With JS every entry sits in the same spot and only the picked one shows, easing in, so the window keeps the
+     height of the tallest entry and never jumps between them. Hidden entries can't be clicked or focused. */
+  :global(.js) .slides {
+    display: grid;
+  }
+  :global(.js) .slide {
+    grid-area: 1 / 1;
+  }
   :global(.js) .slide:not([data-active]) {
-    display: none;
+    visibility: hidden;
   }
   :global(.js) .slide + .slide {
     border-top: 0;
@@ -161,8 +168,8 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     min-width: 0;
     padding: 24px;
   }
-  /* The thumbnails ride in the dark status line: each entry's own picture, small; the picked one bright and outlined,
-     the rest dimmed. An entry without a picture yet shows a plain light block. */
+  /* The thumbnails ride in the dark status line: each entry's own picture, small; the picked one bright with a light
+     edge, the rest dimmed. An entry without a picture yet shows a plain light block. */
   .thumb {
     position: relative;
     z-index: 2;
@@ -181,11 +188,19 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     height: 100%;
     object-fit: cover;
   }
+  /* The picked one: full strength, with a light ring drawn inside its own edge (a ring outside it left a dark gap). */
   .thumb[aria-current="true"] {
     background: #e6e9ee;
     opacity: 1;
+    box-shadow: inset 0 0 0 1px #e6e9ee;
+  }
+  .thumb img {
+    display: block;
+  }
+  .thumb[aria-current="true"] img {
+    box-shadow: inset 0 0 0 1px #e6e9ee;
     outline: 1px solid #e6e9ee;
-    outline-offset: 1px;
+    outline-offset: -1px;
   }
   @media (hover: hover) {
     .thumb:not([aria-current="true"]):hover {
