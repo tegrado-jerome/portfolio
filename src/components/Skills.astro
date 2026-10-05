@@ -54,7 +54,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             </div>
           ))}
 
-          <p data-pause-offscreen class="eyebrow mt-8 flex items-center justify-center gap-2 text-muted" aria-hidden="true">
+          <p data-pause-offscreen class="hint-pill mt-8 flex items-center justify-center gap-2 text-muted" aria-hidden="true">
             <span class="gesture">
               <svg class="trail" viewBox="0 0 26 26" aria-hidden="true">
                 <mask id="gesture-reveal"><circle class="reveal" cx="12" cy="10" r="7" pathLength="100" /></mask>
@@ -192,6 +192,16 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     100% {
       opacity: 0;
     }
+  }
+  /* The same pill as the projects' "keep scrolling" hint. */
+  .hint-pill {
+    width: max-content;
+    margin-inline: auto;
+    padding: 6px 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-paper);
+    font-size: var(--text-small);
   }
   /* The guide's words match the device. */
   .hint-mouse,

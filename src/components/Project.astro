@@ -21,6 +21,8 @@ const number = String(index + 1).padStart(2, "0");
      visit), the screenshot in a browser frame on the right; on phones the screenshot sits on top. NDA projects show
      "nda" and a private cover instead of visit. The whole card opens the full project in a modal. -->
 <article class="card stack-card relative">
+  <!-- The same terminal window as every other card: a title bar with three dots across the top. -->
+  <div class="card-bar" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="info">
     <p class="text-small text-muted tabular-nums">{number} · {project.year}</p>
     <div class="flex items-baseline justify-between gap-3">
@@ -51,7 +53,6 @@ const number = String(index + 1).padStart(2, "0");
   </div>
 
   <div class="shot">
-    <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="shot-view">
       {
         project.image ? (
@@ -89,16 +90,33 @@ const number = String(index + 1).padStart(2, "0");
 </article>
 
 <style>
+  /* The site's one window (.tile in global.css): paper tint, hairline, 6px corners, no shadow; the story on the left
+     and the screenshot as the right pane. */
   .stack-card {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
-    gap: clamp(20px, 3vw, 36px);
+    grid-template-rows: auto minmax(0, 1fr);
     height: 100%;
-    padding: clamp(16px, 2vw, 24px);
+    overflow: hidden;
     border: 1px solid var(--color-line);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--color-paper) 40%, white);
-    box-shadow: 0 -12px 34px -20px rgb(0 0 0 / 0.35);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-ink) 2.5%, var(--color-paper));
+  }
+  .card-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    height: 40px;
+    padding-inline: 12px;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-ink) 6%, var(--color-paper));
+  }
+  .card-bar i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-ink) 18%, var(--color-paper));
   }
   /* Darkens the card as later ones stack over it (its opacity is set in Projects.astro). A real element, so a change
      restyles only it, not the whole card. */
@@ -111,17 +129,15 @@ const number = String(index + 1).padStart(2, "0");
     opacity: 0;
     pointer-events: none;
   }
-  :global([data-theme="dark"]) .stack-card {
-    background: color-mix(in srgb, var(--color-paper) 92%, white);
-  }
   .info {
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    padding: clamp(16px, 2vw, 22px);
   }
   .name {
-    font-size: clamp(20px, 2.2vw, 26px);
+    font-size: var(--text-heading);
     font-weight: 400;
     line-height: 1.2;
   }
@@ -141,8 +157,8 @@ const number = String(index + 1).padStart(2, "0");
   }
   .tags li {
     padding: 1px 7px;
+    border: 1px solid var(--color-line);
     border-radius: 2px;
-    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
     color: var(--color-ink-soft);
     font-size: 11px;
   }
@@ -153,31 +169,14 @@ const number = String(index + 1).padStart(2, "0");
     margin-left: -8px;
     color: var(--color-ink);
   }
-  /* The screenshot in a small browser frame. */
+  /* The screenshot: the window's right pane. */
   .shot {
     display: flex;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
+    border-left: 1px solid var(--color-line);
     background: var(--color-ph);
-  }
-  .shot-bar {
-    display: flex;
-    flex: none;
-    gap: 5px;
-    align-items: center;
-    height: 22px;
-    padding-inline: 9px;
-    border-bottom: 1px solid var(--color-line);
-    background: color-mix(in srgb, var(--color-ink) 4%, var(--color-paper));
-  }
-  .shot-bar i {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--color-ink) 18%, var(--color-paper));
   }
   .shot-view {
     position: relative;
@@ -209,10 +208,15 @@ const number = String(index + 1).padStart(2, "0");
   @media (max-width: 767px) {
     .stack-card {
       grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
     .shot {
       order: -1;
+      border-left: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .card-bar {
+      order: -2;
     }
   }
 </style>
