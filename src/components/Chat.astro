@@ -789,12 +789,23 @@ import Icon from "./Icon.astro";
     try {
       // The server accepts at most 12 messages. History alternates and ends with the visitor,
       // so the last 11 always start with a user turn.
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history.slice(-11) }),
-        signal,
+      // A dropped connection or a server hiccup gets one quiet retry before the visitor sees an error.
+      const post = () =>
+        fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history.slice(-11) }),
+          signal,
+        });
+      let res = await post().catch(async (error) => {
+        if (signal.aborted) throw error;
+        await wait(800, signal);
+        return post();
       });
+      if (res.status >= 500 && !signal.aborted) {
+        await wait(800, signal);
+        res = await post();
+      }
       const down = "Chat's down right now. Try again later.";
       if (!res.ok || !res.body) {
         const data: { error?: string } = await res.json().catch(() => ({}));

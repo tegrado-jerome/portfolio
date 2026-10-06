@@ -39,7 +39,7 @@ The "Chat with me" panel talks to `POST /api/chat`, served by the Cloudflare Wor
 2. Local testing: copy `.dev.vars.example` to `.dev.vars`, add your key, run `npm run dev:worker` and open http://localhost:8787.
 3. Production: `npx wrangler secret put GEMINI_API_KEY`, set `ALLOWED_ORIGINS` in `wrangler.jsonc` to your domain, then `npm run deploy`.
 
-The model is set by `GEMINI_MODEL` in `wrangler.jsonc`. Guardrails (system prompt rules, input limits, per-IP rate limit, safety settings) live in `worker/`.
+The models are set by `GEMINI_MODELS` in `wrangler.jsonc` (tried in order, with Workers AI as the last resort). Guardrails (system prompt rules, input limits, per-IP rate limit, safety settings) live in `worker/`.
 
 ## SEO / AEO / GEO
 

@@ -12,10 +12,15 @@
     "run_worker_first": ["/api/*"]
   },
   "vars": {
-    "GEMINI_MODEL": "gemini-3.1-flash-lite",
+    // Tried in order; each has its own quota, so a busy or used-up one hands over to the next.
+    "GEMINI_MODELS": "gemini-3.1-flash-lite,gemini-3.5-flash-lite",
     // Only this site may call the chat API. Add your own domain here too if you move to one.
     "ALLOWED_ORIGINS": "https://jerome-tegrado-portfolio.tegradojeromebrent.workers.dev"
   },
+  // Workers AI: the chat's last resort when no Gemini model answers.
+  "ai": { "binding": "AI" },
+  // Keeps the Worker's logs (a failed model, a cut-off reply) to read later in the Cloudflare dashboard.
+  "observability": { "enabled": true },
   // 10 chat messages per visitor IP per minute.
   "ratelimits": [
     {
