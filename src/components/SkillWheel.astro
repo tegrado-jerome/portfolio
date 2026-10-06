@@ -207,10 +207,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
     touch-action: none;
     cursor: grab;
   }
-  /* On phones it fills the column, so a touch smaller there leaves it some air. */
+  /* On phones it fills the column, so a touch smaller there leaves it a little air. */
   @media (max-width: 767px) {
     .dial-wrap {
-      width: min(88%, 420px);
+      width: min(94%, 420px);
     }
   }
   .dial-wrap.is-dragging {
