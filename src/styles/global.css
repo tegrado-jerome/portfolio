@@ -278,24 +278,6 @@
   object-fit: cover;
   object-position: top;
 }
-/* The status line: dark in both themes, like a terminal's (in dark mode a shade deeper than the card). */
-.tile-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 14px;
-  background: var(--color-night);
-  color: #e6e9ee;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-.tile-meta > span:first-child {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .tile-live {
   margin-right: 6px;
   color: #5cc493;

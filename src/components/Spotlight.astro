@@ -1,9 +1,9 @@
 ---
-// A credentials section (Awards, Certifications) as a spotlight: one entry at a time in the site's window, the photo
-// on the left and the text on the right, with small thumbnails in the dark status line to jump between entries.
-// Small dots on the photo (like Airbnb's listing photos) say there are more; a swipe or drag on the window, the arrow
-// keys or a thumbnail turns to another one; a pill under it shows how, and leaves once the visitor has. A click on the entry opens it in full in the modal (with the link to
-// proof). Without JS every entry shows, one under the other.
+// A credentials section (Awards, Certifications) as a deck: each entry is its own small window (title bar, photo,
+// text), stacked straight, with the next two tucked behind it and peeking out on the right. A swipe or drag slides
+// the top card straight off to the left and the next steps forward; a swipe the other way brings it back. The arrow
+// keys do the same, and a pill under the deck shows how, leaving once the visitor has. A click on the top card opens
+// it in full in the modal (with the link to proof). Without JS every entry shows, one under the other.
 import { isSet } from "../data/placeholders";
 import { slug as toSlug } from "../data/slug";
 import Detail from "./Detail.astro";
@@ -15,7 +15,7 @@ export interface Credential {
   caption: string;
   /** Full name of who gave it, shown in the modal. */
   issuer: string;
-  /** Extra lines for the modal (e.g. "GWA 1.36", "Credential ID: …"); the first one also shows in the spotlight. */
+  /** Extra lines for the modal (e.g. "GWA 1.36", "Credential ID: …"); the first one also shows on the card. */
   details?: string[];
   href?: string;
   image?: string;
@@ -50,66 +50,48 @@ const name = (e: Credential) => toSlug(e.title) || slug;
           <span aria-hidden="true"><span class="text-accent">~/</span>{slug}</span>
         </h2>
 
-        <div class="tile" data-spotlight data-reveal>
-          <div class="tile-top">
-            <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="tile-title"><strong data-spot-name>{name(entries[0])}</strong></span>
-            <span class="tile-badge" data-spot-year>{entries[0].year}</span>
-          </div>
-          <ol class="slides" aria-live="polite">
-            {entries.map((e, i) => (
-              <li class="card slide relative" data-active={i === 0 ? "" : undefined} data-name={name(e)} data-year={e.year}>
-                <div class="media photo">
-                  {e.image ? (
-                    <img src={e.image} alt={e.imageAlt ?? ""} loading="lazy" decoding="async" />
-                  ) : (
-                    <span class="eyebrow text-muted">[{placeholder}]</span>
-                  )}
-                  {n > 1 && (
-                    <span class="dots hidden in-[.js]:flex" aria-hidden="true">
-                      {entries.map((_, k) => <i class:list={{ on: k === i, far: Math.abs(k - i) > 1 }}></i>)}
-                    </span>
-                  )}
-                </div>
-                <div class="text">
-                  <p class="eyebrow text-muted">{[e.caption, e.year].filter(isSet).join(" · ")}</p>
-                  <h3 class="mt-2 text-heading font-normal">
-                    <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
-                      {e.title}
-                    </button>
-                  </h3>
-                  {line(e) && <p class="mt-2 text-small text-ink-soft">{line(e)}</p>}
-                </div>
-                <Detail
-                  path={`${slug}/${name(e)}`}
-                  title={e.title}
-                  meta={[e.year, e.issuer]}
-                  image={e.image}
-                  imageAlt={e.imageAlt}
-                  placeholder={placeholder}
-                  text={(e.details ?? []).filter(isSet)}
-                  link={isSet(e.href) ? { href: e.href, label: linkLabel } : undefined}
-                />
-              </li>
-            ))}
-          </ol>
-          {n > 1 && (
-            <div class="tile-meta">
-              <span class="hidden gap-1.5 in-[.js]:flex">
-                {entries.map((e, i) => (
-                  <button type="button" class="thumb" data-spot-thumb={i} aria-current={i === 0 ? "true" : undefined} aria-label={`Show ${e.title}`}>
-                    {e.image && <img src={e.image} alt="" loading="lazy" decoding="async" />}
+        <ol class="deck" data-deck data-reveal aria-live="polite">
+          {entries.map((e, i) => (
+            <li class="card tile deck-card relative" style={`--k:${i}`}>
+              <div class="tile-top">
+                <span class="tile-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="tile-title"><strong>{name(e)}</strong></span>
+                <span class="tile-badge">{e.year}</span>
+              </div>
+              <div class="photo">
+                {e.image ? (
+                  <img src={e.image} alt={e.imageAlt ?? ""} loading="lazy" decoding="async" />
+                ) : (
+                  <span class="eyebrow text-muted">[{placeholder}]</span>
+                )}
+              </div>
+              <div class="text">
+                <p class="eyebrow text-muted">{[e.caption, e.year].filter(isSet).join(" · ")}</p>
+                <h3 class="mt-2 text-heading font-normal">
+                  <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
+                    {e.title}
                   </button>
-                ))}
-              </span>
-              <span class="shrink-0 whitespace-nowrap tabular-nums" aria-hidden="true"><span data-spot-count>01</span> / {pad(n)}</span>
-            </div>
-          )}
-        </div>
+                </h3>
+                {line(e) && <p class="mt-2 text-small text-ink-soft">{line(e)}</p>}
+              </div>
+              <span class="dim" aria-hidden="true"></span>
+              <Detail
+                path={`${slug}/${name(e)}`}
+                title={e.title}
+                meta={[e.year, e.issuer]}
+                image={e.image}
+                imageAlt={e.imageAlt}
+                placeholder={placeholder}
+                text={(e.details ?? []).filter(isSet)}
+                link={isSet(e.href) ? { href: e.href, label: linkLabel } : undefined}
+              />
+            </li>
+          ))}
+        </ol>
         {n > 1 && (
-          <p class="hint-pill mt-6" data-spot-hint data-pause-offscreen aria-hidden="true">
+          <p class="hint-pill mt-8" data-deck-hint data-pause-offscreen aria-hidden="true">
             <span class="hint-icon pad"><i></i></span>
-            <span><span class="tabular-nums"><span data-spot-count>01</span>/{pad(n)}</span> · swipe</span>
+            <span><span class="tabular-nums"><span data-deck-count>01</span>/{pad(n)}</span> · swipe</span>
           </p>
         )}
       </div>
@@ -118,47 +100,31 @@ const name = (e: Credential) => toSlug(e.title) || slug;
 }
 
 <style>
-  /* One entry: the photo pane on the left, the text on the right. */
-  .slide {
+  .deck {
+    --w: 420px; /* card width */
+    --step: 22px; /* how far each card behind peeks out */
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 16px;
+    width: min(var(--w), 100%);
+    margin-inline: auto;
   }
-  .slide + .slide {
-    border-top: 1px solid var(--color-line);
-  }
-  /* With JS every entry sits in the same spot and only the picked one shows, easing in, so the window keeps the
-     height of the tallest entry and never jumps between them. Hidden entries can't be clicked or focused. */
-  :global(.js) .slides {
-    display: grid;
-  }
-  :global(.js) .slide {
-    grid-area: 1 / 1;
-  }
-  :global(.js) .slide:not([data-active]) {
-    visibility: hidden;
-  }
-  :global(.js) .slide + .slide {
-    border-top: 0;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    :global(.js) .slide[data-active] {
-      animation: slide-in 0.45s var(--ease-out-soft);
+  @media (max-width: 767px) {
+    .deck {
+      --w: 290px;
+      --step: 12px;
     }
   }
-  @keyframes slide-in {
-    from {
-      opacity: 0;
-    }
+  .deck-card {
+    background: color-mix(in srgb, var(--color-ink) 2.5%, var(--color-paper));
   }
   .photo {
     position: relative;
     display: grid;
     place-items: center;
-    min-height: 340px;
+    height: clamp(220px, 40svh, 360px);
     overflow: hidden;
-    border-right: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
     background: var(--color-ph);
-    touch-action: pan-y;
   }
   .photo img {
     position: absolute;
@@ -167,83 +133,62 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     height: 100%;
     object-fit: cover;
   }
-  /* The dots: a small dim pill at the foot of the photo, this entry's dot bright, ones two or more away smaller. */
-  .dots {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    translate: -50% 0;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 8px;
-    border-radius: 999px;
-    background: rgb(27 33 48 / 0.35);
-  }
-  .dots i {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 0.55);
-  }
-  .dots i.on {
-    background: #fff;
-  }
-  .dots i.far {
-    width: 4px;
-    height: 4px;
-  }
   .text {
+    flex: 1;
     min-width: 0;
-    padding: 24px;
+    padding: 18px 20px 20px;
   }
-  /* The thumbnails ride in the dark status line: each entry's own picture, small; the picked one bright with a light
-     edge, the rest dimmed. An entry without a picture yet shows a plain light block. */
-  .thumb {
-    position: relative;
-    z-index: 2;
-    width: 32px;
-    height: 22px;
-    overflow: hidden;
-    border-radius: 2px;
-    background: rgb(255 255 255 / 0.18);
-    opacity: 0.55;
+  /* Cards behind the top one fade toward the page, more the deeper they sit. */
+  .dim {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--color-paper);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The deck (with JS): every card in the same spot, as tall as the tallest, the deck as wide as a card plus the
+     two that peek out. The script sets each card's --k: 0 on top, 1 and 2 behind it, more hidden behind those, below
+     0 already swiped off to the left. */
+  :global(.js) .deck {
+    width: min(calc(var(--w) + 2 * var(--step)), 100%);
+    padding-right: calc(2 * var(--step));
+    touch-action: pan-y;
+    user-select: none;
+  }
+  :global(.js) .deck-card {
+    --d: clamp(0, var(--k), 2);
+    grid-area: 1 / 1;
+    z-index: calc(10 - var(--k));
+    transform: translateX(calc(var(--d) * var(--step) + var(--drag, 0px))) scale(calc(1 - var(--d) * 0.05));
+    transform-origin: 100% 50%;
+    box-shadow: 0 18px 40px -22px rgb(27 36 48 / 0.3);
     transition:
-      opacity 0.2s ease,
-      background-color 0.2s ease;
+      transform 0.45s var(--ease-out-soft),
+      opacity 0.45s var(--ease-out-soft),
+      visibility 0.45s;
   }
-  .thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  :global(.js) .deck-card .dim {
+    opacity: calc(var(--d) * 0.2);
+    transition: opacity 0.45s var(--ease-out-soft);
   }
-  /* The picked one: full strength, with a light ring drawn inside its own edge (a ring outside it left a dark gap). */
-  .thumb[aria-current="true"] {
-    background: #e6e9ee;
-    opacity: 1;
-    box-shadow: inset 0 0 0 1px #e6e9ee;
+  /* Deeper than two behind: waiting, out of sight. */
+  :global(.js) .deck-card[data-hidden] {
+    opacity: 0;
+    visibility: hidden;
   }
-  .thumb img {
-    display: block;
+  /* Swiped off: slid straight out to the left and gone. */
+  :global(.js) .deck-card[data-gone] {
+    transform: translateX(calc(-100% - 40px));
+    opacity: 0;
+    visibility: hidden;
   }
-  .thumb[aria-current="true"] img {
-    box-shadow: inset 0 0 0 1px #e6e9ee;
-    outline: 1px solid #e6e9ee;
-    outline-offset: -1px;
-  }
-  @media (hover: hover) {
-    .thumb:not([aria-current="true"]):hover {
-      opacity: 0.85;
-    }
+  /* While a finger or the mouse holds the top card, it follows without easing. */
+  :global(.js) .deck.is-dragging .deck-card {
+    transition: none;
   }
   @media (max-width: 767px) {
-    .slide {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .photo {
-      min-height: 220px;
-      border-right: 0;
-      border-bottom: 1px solid var(--color-line);
-    }
     .text {
       padding: 16px;
     }
@@ -251,57 +196,89 @@ const name = (e: Credential) => toSlug(e.title) || slug;
 </style>
 
 <script>
-  document.querySelectorAll<HTMLElement>("[data-spotlight]").forEach((win) => {
-    const pane = win.closest<HTMLElement>(".pane")!;
-    const slides = [...win.querySelectorAll<HTMLElement>(".slide")];
-    const thumbs = [...win.querySelectorAll<HTMLButtonElement>("[data-spot-thumb]")];
-    const counts = pane.querySelectorAll<HTMLElement>("[data-spot-count]");
-    const nameEl = win.querySelector<HTMLElement>("[data-spot-name]")!;
-    const yearEl = win.querySelector<HTMLElement>("[data-spot-year]")!;
-    const hint = pane.querySelector<HTMLElement>("[data-spot-hint]");
-    const n = slides.length;
+  document.querySelectorAll<HTMLElement>("[data-deck]").forEach((deck) => {
+    const pane = deck.closest<HTMLElement>(".pane")!;
+    const cards = [...deck.querySelectorAll<HTMLElement>(".deck-card")];
+    const counts = pane.querySelectorAll<HTMLElement>("[data-deck-count]");
+    const hint = pane.querySelector<HTMLElement>("[data-deck-hint]");
+    const n = cards.length;
     let current = 0;
+
+    // Each card's place in the deck; only the top one can be clicked or focused.
+    function place() {
+      cards.forEach((card, i) => {
+        const k = i - current;
+        card.style.setProperty("--k", String(k));
+        card.toggleAttribute("data-gone", k < 0);
+        card.toggleAttribute("data-hidden", k > 2);
+        card.inert = k !== 0;
+      });
+      counts.forEach((c) => (c.textContent = String(current + 1).padStart(2, "0")));
+    }
 
     function show(i: number) {
       const to = Math.min(n - 1, Math.max(0, i));
       if (to === current) return;
       current = to;
-      slides.forEach((s, k) => s.toggleAttribute("data-active", k === to));
-      thumbs.forEach((t, k) => (k === to ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current")));
-      counts.forEach((c) => (c.textContent = String(to + 1).padStart(2, "0")));
-      nameEl.textContent = slides[to].dataset.name ?? "";
-      yearEl.textContent = slides[to].dataset.year ?? "";
+      place();
       hint?.classList.add("is-done");
     }
+    place();
 
-    thumbs.forEach((t, k) => t.addEventListener("click", () => show(k)));
     pane.addEventListener("keydown", (e) => {
       if ((e.target as HTMLElement).closest("input, textarea")) return;
       if (e.key === "ArrowRight") (e.preventDefault(), show(current + 1));
       if (e.key === "ArrowLeft") (e.preventDefault(), show(current - 1));
     });
 
-    // A sideways swipe or mouse drag on the window turns to the next or previous entry; a tap still opens it.
+    // The top card follows a sideways drag and, let go far enough, slides off (left) or the last one comes back
+    // (right); a short drag springs back. A tap still opens it.
     let x0 = 0;
     let y0 = 0;
-    win.addEventListener("pointerdown", (e) => ((x0 = e.clientX), (y0 = e.clientY)));
-    win.addEventListener("pointerup", (e) => {
-      const dx = e.clientX - x0;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - y0) * 1.5) show(current + (dx < 0 ? 1 : -1));
+    let dx = 0;
+    let held = false;
+    const top = () => cards[current];
+    deck.addEventListener("pointerdown", (e) => {
+      if (n < 2) return;
+      held = true;
+      x0 = e.clientX;
+      y0 = e.clientY;
+      dx = 0;
     });
-    win.addEventListener(
+    deck.addEventListener("pointermove", (e) => {
+      if (!held) return;
+      dx = e.clientX - x0;
+      if (!deck.classList.contains("is-dragging")) {
+        if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(e.clientY - y0)) return;
+        deck.classList.add("is-dragging");
+        deck.setPointerCapture(e.pointerId);
+      }
+      // Past either end the card only gives a little.
+      const end = (dx < 0 && current === n - 1) || (dx > 0 && current === 0);
+      top().style.setProperty("--drag", `${end ? dx / 4 : Math.min(dx, 0)}px`);
+    });
+    const release = () => {
+      if (!held) return;
+      held = false;
+      deck.classList.remove("is-dragging");
+      top().style.removeProperty("--drag");
+      if (dx < -60) show(current + 1);
+      else if (dx > 60) show(current - 1);
+    };
+    deck.addEventListener("pointerup", release);
+    deck.addEventListener("pointercancel", release);
+    deck.addEventListener(
       "click",
       (e) => {
-        if (Math.abs(e.clientX - x0) > 10) (e.stopPropagation(), e.preventDefault());
+        if (Math.abs(dx) > 10) (e.stopPropagation(), e.preventDefault());
       },
       { capture: true },
     );
 
-    // The chat or the hero's `cd` pointing at one entry (src/scripts/point.ts) brings it forward first.
-    win.addEventListener("point", (e) => {
-      const slide = (e.target as HTMLElement).closest<HTMLElement>(".slide");
-      if (slide) show(slides.indexOf(slide));
+    // The chat or the hero's `cd` pointing at one entry (src/scripts/point.ts) brings it to the top first.
+    deck.addEventListener("point", (e) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>(".deck-card");
+      if (card) show(cards.indexOf(card));
     });
-
   });
 </script>
