@@ -9,6 +9,7 @@ const entries = certifications.map((c) => ({
   href: c.href,
   image: c.image,
   imageAlt: c.imageAlt,
+  document: true,
   caption: c.issuer,
   issuer: c.issuer,
   details: isSet(c.credentialId) ? [`Credential ID: ${c.credentialId}`] : [],

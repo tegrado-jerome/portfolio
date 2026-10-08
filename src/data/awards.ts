@@ -1,4 +1,4 @@
-// Awards and honours, newest first, shown as photo cards. Real ones only; a link to proof (certificate,
+// Awards and honours, in the order they should show, as photo cards. Real ones only; a link to proof (certificate,
 // announcement) makes one credible. Remove all entries to hide the section.
 
 export interface Award {
@@ -9,19 +9,40 @@ export interface Award {
   /** Short name for the card caption (e.g. "TUP Manila"); the full issuer still goes to search engines and the chat. */
   short?: string;
   href?: string;
-  /** Photo in public/images/awards, e.g. "/images/awards/magna-cum-laude.webp" (4:5 portrait: the medal, ceremony or certificate). */
+  /** Photo in public/images/awards, e.g. "/images/awards/magna-cum-laude.webp" (the medal, ceremony or certificate). */
   image?: string;
   imageAlt?: string;
+  /** A certificate or letter rather than a photo: shown whole instead of cropped to fill. */
+  document?: boolean;
 }
 
 export const awards: Award[] = [
+  {
+    title: "Thesis Award",
+    issuer: "Technological University of the Philippines, Manila",
+    year: "2026",
+    detail: "4th Annual Research Colloquium",
+    short: "TUP Manila",
+    image: "/images/awards/thesis-award.webp",
+    imageAlt: "Jerome and his thesis team holding their bound theses and medals at TUP's 4th Annual Research Colloquium",
+  },
   {
     title: "Magna Cum Laude",
     issuer: "Technological University of the Philippines, Manila",
     year: "2026",
     detail: "GWA 1.36 · Rank 14 of 2,800+",
     short: "TUP Manila",
+    image: "/images/awards/magna-cum-laude.webp",
+    imageAlt: "TUP diploma for a BS in Information Systems, Magna Cum Laude, with the university medal",
   },
-  { title: "[AWARD]", issuer: "[ORGANISATION]", year: "[YEAR]", href: "" },
-  { title: "[AWARD]", issuer: "[ORGANISATION]", year: "[YEAR]", href: "" },
+  {
+    title: "DOST-SEI Merit Scholar",
+    issuer: "Department of Science and Technology – Science Education Institute",
+    year: "2022",
+    detail: "S&T Undergraduate Scholarship, MERIT program",
+    short: "DOST-SEI",
+    image: "/images/awards/dost-scholarship.webp",
+    imageAlt: "DOST-SEI letter congratulating Jerome on qualifying for the 2022 S&T Undergraduate Scholarship",
+    document: true,
+  },
 ];

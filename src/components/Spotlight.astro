@@ -20,6 +20,8 @@ export interface Credential {
   href?: string;
   image?: string;
   imageAlt?: string;
+  /** A certificate or letter: shown whole on a mat instead of filling (and cropping) the photo box. */
+  document?: boolean;
 }
 
 interface Props {
@@ -58,7 +60,7 @@ const name = (e: Credential) => toSlug(e.title) || slug;
                 <span class="tile-title"><strong>{name(e)}</strong></span>
                 <span class="tile-badge">{e.year}</span>
               </div>
-              <div class="photo">
+              <div class:list={["photo", { doc: e.document }]}>
                 {e.image ? (
                   <img src={e.image} alt={e.imageAlt ?? ""} loading="lazy" decoding="async" />
                 ) : (
@@ -132,6 +134,20 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  .doc img {
+    position: static;
+    width: auto;
+    height: auto;
+    max-width: calc(100% - 40px);
+    max-height: calc(100% - 40px);
+    border: 1px solid var(--color-line);
+    box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.35);
+  }
+  @media (max-width: 767px) {
+    .doc img {
+      max-width: calc(100% - 20px);
+    }
   }
   .text {
     flex: 1;
