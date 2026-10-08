@@ -4,10 +4,10 @@ import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 export const site = {
   name: "Jerome Tegrado",
   // What search engines and link previews show. Title ≤ 60 characters, description ≤ 155.
-  title: "Jerome Tegrado | Web Developer, SEO & AI Automation",
+  title: "Jerome Tegrado | AI-Native Builder: Web, SEO & Automation",
   description:
-    "Jerome Tegrado builds websites, SEO and AI automations. Magna Cum Laude graduate of the Technological University of the Philippines, Manila (2026).",
-  headline: "Web Developer, SEO & AI Automation",
+    "Jerome Tegrado is an AI-native builder: websites, tools and automations that make a business easier to run. Magna Cum Laude, TUP Manila (2026).",
+  headline: "AI-Native Builder",
   intro: "I f*cking love learning new things!",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
@@ -15,7 +15,7 @@ export const site = {
   email: "tegradojeromebrent@gmail.com",
   // The status line at the top of the contact pane, with a green dot. Empty availability hides it.
   availability: "open to work",
-  lookingFor: "web dev, seo, ai automation",
+  lookingFor: "remote startup roles, ops, web, ai automation",
   // Resume link shown in the footer (a PDF in public/ or a Google Drive link).
   resume: "[RESUME URL]",
 
