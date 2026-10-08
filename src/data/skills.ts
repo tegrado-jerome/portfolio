@@ -19,6 +19,30 @@ export const skillGroups: SkillGroup[] = [
     skills: [
       { name: "VS Code", logo: "/images/skills/vscode.png" },
       { name: "Claude Code", logo: "/images/skills/claude-code.svg" },
+      { name: "React", logo: "/images/skills/react.svg" },
+      { name: "Astro", logo: "/images/skills/astro.svg" },
+      { name: "TypeScript", logo: "/images/skills/typescript.svg" },
+      { name: "Tailwind CSS", logo: "/images/skills/tailwindcss.svg" },
+      { name: "GSAP", logo: "/images/skills/gsap.svg" },
+      { name: "WordPress", logo: "/images/skills/wordpress.svg" },
+      { name: "Elementor", logo: "/images/skills/elementor.svg" },
+      { name: "MapLibre", logo: "/images/skills/maplibre.svg" },
+    ],
+  },
+  {
+    name: "AI",
+    skills: [
+      { name: "Gemini", logo: "/images/skills/gemini.svg" },
+      { name: "Groq", logo: "/images/skills/groq.svg" },
+    ],
+  },
+  {
+    name: "Cloud & Data",
+    skills: [
+      { name: "Cloudflare Workers", logo: "/images/skills/cloudflare-workers.svg" },
+      { name: "Azure", logo: "/images/skills/azure.svg" },
+      { name: "Supabase", logo: "/images/skills/supabase.svg" },
+      { name: "Redis", logo: "/images/skills/redis.svg" },
     ],
   },
   {
