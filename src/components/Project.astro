@@ -24,7 +24,7 @@ const number = String(index + 1).padStart(2, "0");
   <!-- The same terminal window as every other card: a title bar with three dots across the top. -->
   <div class="card-bar" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="info">
-    <p class="text-small text-muted tabular-nums">{number} · {project.year}</p>
+    <p class="text-small text-muted tabular-nums">{[number, project.year].filter(isSet).join(" · ")}</p>
     <div class="flex items-baseline justify-between gap-3">
       <h3 class="name">
         <button type="button" data-detail-open class="cursor-pointer text-left after:absolute after:inset-0 after:z-[1] after:content-['']">
@@ -56,7 +56,10 @@ const number = String(index + 1).padStart(2, "0");
     <div class="shot-view">
       {
         project.image ? (
-          <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
+          <picture>
+            {project.imageMobile && <source media="(max-width: 767px)" srcset={project.imageMobile} />}
+            <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
+          </picture>
         ) : (
           <span class="eyebrow text-muted">[PROJECT IMAGE]</span>
         )
@@ -77,7 +80,7 @@ const number = String(index + 1).padStart(2, "0");
   <Detail
     path={`projects/${slug}`}
     title={project.title}
-    meta={[project.category, project.year]}
+    meta={[project.category, project.year ?? ""]}
     image={project.image}
     imageAlt={project.imageAlt}
     placeholder="PROJECT IMAGE"
