@@ -77,6 +77,10 @@
   --color-online: #5cc493;
   color-scheme: dark;
 }
+/* Black brand logos (ChatGPT, MCP) would vanish on the dark paper. */
+[data-theme="dark"] .mono-logo {
+  filter: invert(1);
+}
 /* Set for the one frame a theme changes (src/scripts/theme.ts): everything takes its new colours at once, instead of
    borders and text easing over at different speeds. */
 .theme-switching,

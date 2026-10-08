@@ -6,6 +6,8 @@ import { faBullhorn, type IconDefinition } from "@fortawesome/free-solid-svg-ico
 export interface Skill {
   name: string;
   logo: string | IconDefinition;
+  /** A black logo, turned white in the dark theme. */
+  mono?: boolean;
 }
 
 export interface SkillGroup {
@@ -13,55 +15,63 @@ export interface SkillGroup {
   skills: Skill[];
 }
 
+const logo = (file: string) => `/images/skills/${file}`;
+
 export const skillGroups: SkillGroup[] = [
-  {
-    name: "Website Development",
-    skills: [
-      { name: "VS Code", logo: "/images/skills/vscode.png" },
-      { name: "Claude Code", logo: "/images/skills/claude-code.svg" },
-      { name: "React", logo: "/images/skills/react.svg" },
-      { name: "Astro", logo: "/images/skills/astro.svg" },
-      { name: "TypeScript", logo: "/images/skills/typescript.svg" },
-      { name: "Tailwind CSS", logo: "/images/skills/tailwindcss.svg" },
-      { name: "GSAP", logo: "/images/skills/gsap.svg" },
-      { name: "WordPress", logo: "/images/skills/wordpress.svg" },
-      { name: "Elementor", logo: "/images/skills/elementor.svg" },
-      { name: "MapLibre", logo: "/images/skills/maplibre.svg" },
-    ],
-  },
   {
     name: "AI",
     skills: [
-      { name: "Gemini", logo: "/images/skills/gemini.svg" },
-      { name: "Groq", logo: "/images/skills/groq.svg" },
+      { name: "Claude Code", logo: logo("claude-code.svg") },
+      { name: "Codex", logo: logo("codex.png") },
+      { name: "OpenCode", logo: logo("opencode.png") },
+      { name: "Claude", logo: logo("claude.svg") },
+      { name: "ChatGPT", logo: logo("chatgpt.svg"), mono: true },
+      { name: "Gemini", logo: logo("gemini.svg") },
+      { name: "DeepSeek", logo: logo("deepseek.svg") },
+      { name: "Manus", logo: logo("manus.png") },
+      { name: "Groq", logo: logo("groq.svg") },
+      { name: "MCP", logo: logo("mcp.svg"), mono: true },
     ],
   },
   {
-    name: "Cloud & Data",
+    name: "Website Development",
     skills: [
-      { name: "Cloudflare Workers", logo: "/images/skills/cloudflare-workers.svg" },
-      { name: "Azure", logo: "/images/skills/azure.svg" },
-      { name: "Supabase", logo: "/images/skills/supabase.svg" },
-      { name: "Redis", logo: "/images/skills/redis.svg" },
+      { name: "VS Code", logo: logo("vscode.png") },
+      { name: "React", logo: logo("react.svg") },
+      { name: "Astro", logo: logo("astro.svg") },
+      { name: "TypeScript", logo: logo("typescript.svg") },
+      { name: "Tailwind CSS", logo: logo("tailwindcss.svg") },
+      { name: "GSAP", logo: logo("gsap.svg") },
+      { name: "WordPress", logo: logo("wordpress.svg") },
+      { name: "Elementor", logo: logo("elementor.svg") },
+      { name: "MapLibre", logo: logo("maplibre.svg") },
+      { name: "Playwright", logo: logo("playwright.svg") },
+    ],
+  },
+  {
+    name: "Cloud & DevOps",
+    skills: [
+      { name: "Cloudflare Workers", logo: logo("cloudflare-workers.svg") },
+      { name: "Azure", logo: logo("azure.svg") },
+      { name: "Supabase", logo: logo("supabase.svg") },
+      { name: "Redis", logo: logo("redis.svg") },
+      { name: "GitHub Actions", logo: logo("github-actions.svg") },
     ],
   },
   {
     name: "SEO",
     skills: [
-      { name: "Google Search Console", logo: "/images/skills/google-search-console.svg" },
-      { name: "Google Analytics 4", logo: "/images/skills/google-analytics.svg" },
-      { name: "Yoast SEO", logo: "/images/skills/yoast.svg" },
-      { name: "Rank Math SEO", logo: "/images/skills/rank-math.png" },
+      { name: "Google Search Console", logo: logo("google-search-console.svg") },
+      { name: "Google Analytics 4", logo: logo("google-analytics.svg") },
+      { name: "Yoast SEO", logo: logo("yoast.svg") },
+      { name: "Rank Math SEO", logo: logo("rank-math.png") },
+      { name: "Ahrefs", logo: logo("ahrefs.png") },
+      { name: "Semrush", logo: logo("semrush.svg") },
     ],
   },
   {
     name: "Automations",
-    skills: [
-      { name: "Botcake", logo: "/images/skills/botcake.png" },
-      { name: "Messenger", logo: "/images/skills/messenger.svg" },
-      { name: "GitHub Actions", logo: "/images/skills/github-actions.svg" },
-      { name: "Playwright", logo: "/images/skills/playwright.svg" },
-    ],
+    skills: [{ name: "Botcake", logo: logo("botcake.png") }],
   },
   {
     name: "Digital Marketing",

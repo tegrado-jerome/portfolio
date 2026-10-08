@@ -12,7 +12,7 @@ const { skill, class: className } = Astro.props;
 
 {
   typeof skill.logo === "string" ? (
-    <img src={skill.logo} alt="" width="96" height="96" loading="lazy" class:list={["object-contain", className]} />
+    <img src={skill.logo} alt="" width="96" height="96" loading="lazy" class:list={["object-contain", skill.mono && "mono-logo", className]} />
   ) : (
     <Icon icon={skill.logo} class:list={["text-accent", className]} />
   )
