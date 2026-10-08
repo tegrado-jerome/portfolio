@@ -172,6 +172,11 @@ const number = String(index + 1).padStart(2, "0");
     margin-left: -8px;
     color: var(--color-ink);
   }
+  /* Its ink colour would otherwise beat the tui-btn hover and vanish on the inverted block. */
+  .visit:hover,
+  .visit:focus-visible {
+    color: var(--color-paper);
+  }
   /* The screenshot: the window's right pane. */
   .shot {
     display: flex;
