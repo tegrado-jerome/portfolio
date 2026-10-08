@@ -1,7 +1,7 @@
 // Skills grouped by category; each category is a tab with its own turning wheel of logos.
 // A logo is an image in public/images/skills (square, transparent background) or a Font Awesome icon.
 // Remove all categories to hide the section.
-import { faBullhorn, faMagnifyingGlassChart, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { faBullhorn, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
 
 export interface Skill {
   name: string;
@@ -47,11 +47,21 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     name: "SEO",
-    skills: [{ name: "[SEO TOOL]", logo: faMagnifyingGlassChart }],
+    skills: [
+      { name: "Google Search Console", logo: "/images/skills/google-search-console.svg" },
+      { name: "Google Analytics 4", logo: "/images/skills/google-analytics.svg" },
+      { name: "Yoast SEO", logo: "/images/skills/yoast.svg" },
+      { name: "Rank Math SEO", logo: "/images/skills/rank-math.png" },
+    ],
   },
   {
     name: "Automations",
-    skills: [{ name: "Botcake", logo: "/images/skills/botcake.png" }],
+    skills: [
+      { name: "Botcake", logo: "/images/skills/botcake.png" },
+      { name: "Messenger", logo: "/images/skills/messenger.svg" },
+      { name: "GitHub Actions", logo: "/images/skills/github-actions.svg" },
+      { name: "Playwright", logo: "/images/skills/playwright.svg" },
+    ],
   },
   {
     name: "Digital Marketing",
