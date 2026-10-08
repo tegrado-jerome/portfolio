@@ -3,11 +3,12 @@
 // said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every 3 seconds,
 // to the right, without stopping. A swipe or a click on a company jumps there. With reduced motion it never moves on its
 // own. Without JS every quote shows, one under the other.
-import { testimonials } from "../data/testimonials";
+import { testimonials as all } from "../data/testimonials";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
 
+const testimonials = all.filter((t) => t.quote);
 const n = testimonials.length;
 ---
 
