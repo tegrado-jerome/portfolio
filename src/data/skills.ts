@@ -35,6 +35,8 @@ export const skillGroups: SkillGroup[] = [
       { name: "ChatGPT", logo: logo("chatgpt.svg"), mono: true },
       { name: "Gemini", logo: logo("gemini.svg") },
       { name: "DeepSeek", logo: logo("deepseek.svg") },
+      { name: "GLM", logo: logo("glm.svg"), mono: true },
+      { name: "Kimi", logo: logo("kimi.svg"), mono: true },
       { name: "Groq", logo: logo("groq.svg") },
     ],
   },
