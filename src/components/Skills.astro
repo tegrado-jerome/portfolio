@@ -122,6 +122,20 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   .sheet-head {
     display: none;
   }
+  /* The guide pill hangs below the dial without adding to its height, so the dial's centre lines up with the middle
+     of the category list. */
+  @media (min-width: 768px) {
+    .sheet {
+      position: relative;
+    }
+    .sheet > [data-skills-hint] {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-top: 24px;
+      translate: -50% 0;
+    }
+  }
   /* Phones: hairline rows with a peek of each category's logos; tapping one slides its dial up as a sheet. */
   @media (max-width: 767px) {
     .thumb,
