@@ -17,7 +17,7 @@ export const site = {
   availability: "open to work",
   lookingFor: "remote startup roles, ops, web, ai automation",
   // Resume link shown in the footer (a PDF in public/ or a Google Drive link).
-  resume: "[RESUME URL]",
+  resume: "/Jerome-Tegrado-Resume.pdf",
 
   // Honor shown over the hero portrait. Remove to hide the caption.
   honor: {
@@ -46,5 +46,5 @@ export const contactHref = site.email.includes("@")
   : "#contact";
 
 export const socials = [
-  { label: "LinkedIn", href: "[LINKEDIN URL]", icon: faLinkedin },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/jerome-brent-tegrado", icon: faLinkedin },
 ];

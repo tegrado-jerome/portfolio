@@ -17,6 +17,6 @@ export const assistant = {
     "During my DOST internship, I built a semi-automated QA documentation system with Python and an AI chatbot (Feb–Mar 2026): it turns user stories into test plans and test cases, cutting the writing from 1–2 hours to 10–20 minutes, with structured prompts and output validation.",
     "I graduated Magna Cum Laude (GWA 1.36) from the Technological University of the Philippines (TUP) Manila, Batch 2026.",
     "I ranked 14th out of 2,800+ students in my batch.",
-    "[LINKEDIN PROFILE URL]",
+    "My LinkedIn: https://www.linkedin.com/in/jerome-brent-tegrado",
   ],
 };
