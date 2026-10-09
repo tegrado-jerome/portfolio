@@ -46,7 +46,7 @@ export const experience: Experience[] = [
     type: "Internship",
     year: "Feb — May 2026",
     description:
-      "Project lead in the League of Developers Initiative at the DOST Central Office IT Division. Built a QA documentation system with Python and an AI chatbot that turns user stories into test plans and test cases: 1–2 hours down to 10–20 minutes.",
+      "Project lead in the League of Developers Initiative at the DOST Central Office IT Division.",
     tags: ["DOST", "Project LODI", "Python", "AI chatbot"],
     shots: [
       { name: "DOST Central Office", image: "/images/experience/dost-office.webp" },
