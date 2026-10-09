@@ -36,7 +36,7 @@ export const testimonials: Testimonial[] = [
     quote: "Jerome and I went through Lean Six Sigma certification together. He thinks in processes and always looks for the simpler, cleaner way to do things.",
     name: "Von Harl Rian",
     role: "Aeronautical Engineering Graduate",
-    company: "PATTS College of Aeronautics",
+    company: "PATTS",
     year: "",
     href: "",
     avatar: "/images/testimonials/von.webp",
