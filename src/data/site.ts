@@ -8,7 +8,7 @@ export const site = {
   description:
     "Jerome Tegrado is an AI-native builder: websites, tools and automations that make a business easier to run. Magna Cum Laude, TUP Manila (2026).",
   headline: "AI-Native Builder",
-  intro: "I f*cking love learning new things!",
+  intro: "I love learning new things!",
   // Optional: put a photo in public/images and set e.g. "/images/portrait.webp". Leave empty for a placeholder.
   // An ASCII lens follows the mouse over it on hover.
   portrait: "/images/portrait.webp",
