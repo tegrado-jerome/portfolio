@@ -11,6 +11,8 @@ export interface Certification {
   /** Picture of the certificate in public/images/certifications, e.g. "/images/certifications/google-ads.webp" (shown whole). */
   image?: string;
   imageAlt?: string;
+  /** Extra lines shown when the card is opened, e.g. the project behind it. */
+  notes?: string[];
 }
 
 export const certifications: Certification[] = [
@@ -19,6 +21,9 @@ export const certifications: Certification[] = [
     issuer: "Microsoft",
     year: "2026",
     credentialId: "86D0F00E82F670F",
+    notes: [
+      "Hands-on: six Azure labs on network security and troubleshooting (VNets, NSGs, ASGs, VMs), with 8+ real-world scenarios and costs kept under $1.",
+    ],
     image: "/images/certifications/azure-fundamentals.webp",
     imageAlt: "Microsoft Certified: Azure Fundamentals certificate",
   },
@@ -26,6 +31,9 @@ export const certifications: Certification[] = [
     name: "Lean Six Sigma Green Belt",
     issuer: "Council for Six Sigma Certification",
     year: "2026",
+    notes: [
+      "Case study: a DMAIC project on cutting employee onboarding time, using ChatGPT, Claude, Gemini and Manus to grow a 500-record dataset from 2 columns to 30+ variables. Scored 95%.",
+    ],
     credentialId: "CSS-LSSGB-00922",
     image: "/images/certifications/lean-six-sigma-green-belt.webp",
     imageAlt: "Certified Lean Six Sigma Green Belt certificate",

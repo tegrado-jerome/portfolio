@@ -12,7 +12,7 @@ const entries = certifications.map((c) => ({
   document: true,
   caption: c.issuer,
   issuer: c.issuer,
-  details: isSet(c.credentialId) ? [`Credential ID: ${c.credentialId}`] : [],
+  details: [...(isSet(c.credentialId) ? [`Credential ID: ${c.credentialId}`] : []), ...(c.notes ?? [])],
 }));
 ---
 

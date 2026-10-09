@@ -50,7 +50,7 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
   const certs = certifications.filter((c) => isSet(c.name));
   if (certs.length) {
     lines.push("## Certifications", "");
-    certs.forEach((c) => lines.push(`- ${onlySet([c.name, c.issuer, c.year]).join(", ")}`));
+    certs.forEach((c) => lines.push(`- ${onlySet([c.name, c.issuer, c.year, ...(c.notes ?? [])]).join(", ")}`));
     lines.push("");
   }
 

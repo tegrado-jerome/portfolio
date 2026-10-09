@@ -46,7 +46,7 @@ function knowledge() {
   }
 
   for (const c of certifications.filter((c) => isSet(c.name))) {
-    lines.push(`Certification: ${onlySet([c.name, c.issuer, c.year]).join(", ")}`);
+    lines.push(`Certification: ${onlySet([c.name, c.issuer, c.year, ...(c.notes ?? [])]).join(", ")}`);
   }
 
   if (isSet(site.email)) lines.push(`Email: ${site.email}`);
