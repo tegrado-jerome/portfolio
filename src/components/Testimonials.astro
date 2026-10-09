@@ -1,6 +1,6 @@
 ---
 // Quotes one at a time, centred, with no box (after Stripe's customer quotes): the person's photo above, the quote, who
-// said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every 3 seconds,
+// said it. Under it the companies sit on one short bar that fills as the quotes move on by themselves, every 8 seconds,
 // to the right, without stopping. A swipe or a click on a company jumps there. With reduced motion it never moves on its
 // own. Without JS every quote shows, one under the other.
 import { testimonials as all } from "../data/testimonials";
@@ -25,9 +25,9 @@ const n = testimonials.length;
                   <figure class="m-0 flex flex-col items-center gap-5 text-center">
                     <span class="avatar">
                       {t.avatar ? (
-                        <img src={t.avatar} alt="" width="96" height="96" loading="lazy" decoding="async" class="size-full object-cover" />
+                        <img src={t.avatar} alt="" width="144" height="144" loading="lazy" decoding="async" class="size-full object-cover" />
                       ) : (
-                        <Icon icon={faUser} class="text-[14px]" />
+                        <Icon icon={faUser} class="text-[20px]" />
                       )}
                     </span>
                     <blockquote class="quote">
@@ -72,8 +72,8 @@ const n = testimonials.length;
   .avatar {
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 48px;
+    width: 72px;
+    height: 72px;
     overflow: hidden;
     border: 1px solid var(--color-line);
     border-radius: 50%;
@@ -172,7 +172,7 @@ const n = testimonials.length;
   const root = document.querySelector<HTMLElement>("[data-quotes]");
   const fill = root?.querySelector<HTMLElement>("[data-quotes-fill]");
   if (root && fill) {
-    const DURATION = 3000; // ms per quote
+    const DURATION = 8000; // ms per quote: about 25 words at a relaxed reading pace, plus a beat to take in the face
     const track = root.querySelector<HTMLElement>("[data-quotes-track]")!;
     const viewport = root.querySelector<HTMLElement>("[data-quotes-viewport]")!;
     const slides = [...track.children] as HTMLElement[];
