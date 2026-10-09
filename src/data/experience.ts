@@ -41,13 +41,13 @@ export const experience: Experience[] = [
     ],
   },
   {
-    title: "Intern Project Lead",
+    title: "QA Engineer Intern · Interim Project Lead",
     org: "DOST · Project LODI",
     type: "Internship",
     year: "3 mos",
     description:
-      "Project lead in the League of Developers Initiative at the DOST Central Office IT Division.",
-    tags: ["DOST", "Project LODI", "Python", "AI chatbot"],
+      "QA for web apps in the League of Developers Initiative at the DOST Central Office IT Division: test plans, manual testing and Playwright automation, and QA lead for one sprint.",
+    tags: ["DOST", "QA", "Playwright", "Python", "AI chatbot"],
     shots: [
       { name: "DOST Central Office", image: "/images/experience/dost-office.webp" },
       { name: "QA docs system", image: "/images/experience/qa-docs.webp" },
