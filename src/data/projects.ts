@@ -73,12 +73,12 @@ export const projects: Project[] = [
   },
   {
     title: "UpSpace",
-    description: "Marketplace for booking coworking spaces, with tools for space partners and admins. Team capstone, ranked #1 in BSIS.",
+    description: "Marketplace for booking coworking spaces, with tools for space partners and admins.",
     category: "Capstone · team",
     technologies: ["Next.js","TypeScript","Supabase","Prisma","Redis","Gemini"],
     href: "https://upspaceph.com/",
-    image: "/images/projects/upspace.webp",
-    imageMobile: "/images/projects/upspace-mobile.webp",
-    imageAlt: "UpSpace sign-in page: find the perfect space for meaningful work",
+    image: "/images/projects/upspace-marketplace.webp",
+    imageMobile: "/images/projects/upspace-marketplace-mobile.webp",
+    imageAlt: "UpSpace marketplace page for Mind Zone Recto, a coworking space in Sampaloc, with its uploaded photos",
   },
 ];
