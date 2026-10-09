@@ -173,7 +173,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     }
     .sheet-head {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 32px;
       touch-action: none;
     }
     .grab {
@@ -196,10 +196,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
   const thumb = document.querySelector<HTMLElement>("#skills .thumb");
 
-  // The guide pill leaves once the visitor has spun a dial themselves.
-  document.getElementById("skills")?.addEventListener("spin", () =>
-    document.querySelector("[data-skills-hint]")?.classList.add("is-done"),
-  );
+  // The guide pill leaves once the visitor has spun a dial, and comes back each time a dial is opened.
+  const hint = document.querySelector("[data-skills-hint]");
+  document.getElementById("skills")?.addEventListener("spin", () => hint?.classList.add("is-done"));
 
   // Sit the raised tile exactly on the picked tab.
   function moveThumb() {
@@ -268,6 +267,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       t.tabIndex = selected ? 0 : -1;
       document.getElementById(t.getAttribute("aria-controls")!)!.hidden = !selected;
     }
+    hint?.classList.remove("is-done");
     moveThumb();
   }
 
