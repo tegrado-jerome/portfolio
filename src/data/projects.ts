@@ -76,7 +76,7 @@ export const projects: Project[] = [
     description: "Marketplace for booking coworking spaces, with tools for space partners and admins.",
     category: "Capstone · team",
     technologies: ["Next.js","TypeScript","Supabase","Prisma","Redis","Gemini"],
-    href: "https://upspaceph.com/",
+    href: "https://upspaceph.com/marketplace",
     image: "/images/projects/upspace-marketplace.webp",
     imageMobile: "/images/projects/upspace-marketplace-mobile.webp",
     imageAlt: "UpSpace marketplace page for Mind Zone Recto, a coworking space in Sampaloc, with its uploaded photos",

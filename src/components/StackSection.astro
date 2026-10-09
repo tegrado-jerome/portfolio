@@ -109,6 +109,50 @@ const { id, title, count } = Astro.props;
     backface-visibility: hidden;
   }
 
+  /* Where the browser has scroll-driven animations (Chrome, Edge, Safari 26+, the script adds .is-css), the cards
+     move on the compositor, in step with the scroll even on slow phones; the script then only runs the hint. The
+     timeline starts when the stack pins (its top reaches --top), and card i is on stage from i - 1 cards of scroll
+     (sliding up, the first quarter) to i + 3 (sunk three deep). Same motion as the script's fallback below. */
+  .stack.is-css {
+    view-timeline: --stack block;
+    view-timeline-inset: var(--top) 0px;
+  }
+  .is-css :global(.stack-item > .stack-card) {
+    --rise: calc(100lvh - var(--top) - var(--i) * var(--step));
+    animation: stack-card linear both;
+    animation-range: contain calc((var(--i) - 1) * var(--per)) contain calc((var(--i) + 3) * var(--per));
+  }
+  .is-css :global(.stack-item:first-child > .stack-card) {
+    --rise: 0px;
+  }
+  .is-css :global(.stack-item > .stack-card .dim) {
+    animation: stack-dim linear both;
+    animation-range: contain calc(var(--i) * var(--per)) contain calc((var(--i) + 2) * var(--per));
+  }
+  /* Its own rule: in the same one, the CSS minifier folds the timeline into the animation shorthand, which browsers
+     reject. */
+  .stack.is-css :global(.stack-card),
+  .stack.is-css :global(.stack-card .dim) {
+    animation-timeline: --stack;
+  }
+  @keyframes stack-card {
+    0% {
+      transform: translate3d(0, var(--rise), 0) perspective(1400px) rotateX(0deg) scale(1);
+      animation-timing-function: cubic-bezier(0.5, 1, 0.89, 1); /* ease out: each card settles softly */
+    }
+    25% {
+      transform: translate3d(0, 0px, 0) perspective(1400px) rotateX(0deg) scale(1);
+    }
+    100% {
+      transform: translate3d(0, -18px, 0) perspective(1400px) rotateX(7.5deg) scale(0.85);
+    }
+  }
+  @keyframes stack-dim {
+    to {
+      opacity: 0.4;
+    }
+  }
+
   /* The hint rides at the bottom of the screen while the stack is on it. Same pill on every screen. */
   .stack-hint {
     position: sticky;
@@ -181,7 +225,8 @@ const { id, title, count } = Astro.props;
   // Scroll through the track moves the cards: `arrived[i]` goes 0 → 1 as card i slides up from below the screen onto
   // the stack. A card's depth is how much of the cards after it have arrived; deeper cards shrink, tilt back and dim.
   //
-  // Built to stay smooth on slow phones and in every browser:
+  // Where the browser has scroll-driven animations, CSS moves the cards (see .is-css) and this only runs the hint.
+  // Elsewhere it moves them too, built to stay smooth on slow phones:
   // - each card is one GPU layer, moved with a single transform (slide and depth combined), so the browser only
   //   recombines layers and never repaints a card while it moves;
   // - the dimming changes in small steps, so a card is repainted a handful of times per pass, not every frame;
@@ -205,7 +250,9 @@ const { id, title, count } = Astro.props;
     let lastCount = "";
     let lastDone = false;
     let lastWaiting = false;
+    const css = CSS.supports("animation-timeline: --a") && CSS.supports("view-timeline-inset: 1px 0px");
     stack.classList.add("is-live");
+    if (css) stack.classList.add("is-css");
 
     // Sizes, measured again only when the screen size changes.
     let top = 0; // where the pin sticks
@@ -217,10 +264,10 @@ const { id, title, count } = Astro.props;
       rise = items.map((li) => Math.max(0, innerHeight - top - li.offsetTop));
     };
 
-    // The cards glide toward where the scroll says they should be instead of snapping to it, closing about 63% of
-    // the gap every GLIDE ms: softer with a mouse wheel (a notch jumps ~100px at once), lighter on touch screens,
-    // where the finger already scrolls smoothly, so they trail it a little without feeling slow.
-    const GLIDE = matchMedia("(pointer: fine)").matches ? 150 : 100; // ms
+    // With a mouse wheel (a notch jumps ~100px at once) the script's cards glide toward where the scroll says they
+    // should be, closing about 63% of the gap every GLIDE ms. On touch screens the finger already scrolls smoothly,
+    // so they follow it exactly; trailing it reads as lag.
+    const GLIDE = !css && matchMedia("(pointer: fine)").matches ? 150 : 0; // ms
     let shown = 0; // the progress on screen, in cards
     let lastTime = 0; // 0 while at rest
     let snap = true; // jump straight there (first paint, resize)
@@ -228,7 +275,7 @@ const { id, title, count } = Astro.props;
 
     function render() {
       const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
-      for (let i = 0; i < items.length; i++) {
+      for (let i = 0; i < items.length && !css; i++) {
         // The slide eases out, so each card settles softly onto the stack.
         const slide = i ? (1 - (1 - arrived[i]) ** 2) : 1;
         let depth = 0;
@@ -256,7 +303,7 @@ const { id, title, count } = Astro.props;
       // out of sight.
       const waiting = target < 0;
       if (waiting !== lastWaiting) hint!.classList.toggle("is-waiting", (lastWaiting = waiting));
-      if (snap) {
+      if (snap || !GLIDE) {
         shown = target;
         snap = false;
       } else if (lastTime) {
