@@ -13,6 +13,8 @@ export interface Project {
   /** A phone-sized screenshot, shown instead of `image` on small screens. */
   imageMobile?: string;
   imageAlt?: string;
+  /** Several screenshots instead of one: thumbnails switch them on wide screens, and they fan out on phones. */
+  gallery?: { name: string; image: string; imageMobile?: string }[];
   /** Under NDA: the cover shows a "Classified" overlay on hover and doesn't link anywhere. */
   locked?: boolean;
   lockedNote?: string;

@@ -19,7 +19,7 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
   const journey = experience.filter((e) => isSet(e.description));
   if (journey.length) {
     lines.push("## Experience", "");
-    journey.forEach((e) => lines.push(`- ${onlySet([e.year, e.title]).join(", ")}: ${e.description}`));
+    journey.forEach((e) => lines.push(`- ${onlySet([e.title, e.org, e.year]).join(", ")}: ${e.description}`));
     lines.push("");
   }
 

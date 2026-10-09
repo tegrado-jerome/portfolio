@@ -1,0 +1,30 @@
+---
+import { experience } from "../data/experience";
+import Project from "./Project.astro";
+import StackSection from "./StackSection.astro";
+---
+
+<StackSection id="experience" title="Experience" count={experience.length}>
+  {
+    experience.map((e, i) => (
+      <li class="stack-item" style={`--i:${i}`}>
+        <Project
+          project={{
+            title: e.title,
+            description: e.description,
+            category: [e.type, e.org].join(" · "),
+            technologies: e.tags,
+            year: e.year,
+            image: e.shots[0]?.image,
+            imageMobile: e.shots[0]?.imageMobile,
+            imageAlt: e.shots[0]?.name,
+            gallery: e.shots.length > 1 ? e.shots : undefined,
+          }}
+          index={i}
+          section="experience"
+          visit={false}
+        />
+      </li>
+    ))
+  }
+</StackSection>

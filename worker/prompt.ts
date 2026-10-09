@@ -16,11 +16,12 @@ export const CANARY = "c4n4ry-7Q2xV9";
 /** Parts of the page the chat may scroll to: whole sections, and single cards by their ~/path. */
 export function showTargets() {
   const cards = [
+    ...experience.map((e) => `experience/${slug(e.title)}`),
     ...projects.filter((p) => isSet(p.title)).map((p) => `projects/${slug(p.title)}`),
     ...awards.filter((a) => isSet(a.title)).map((a) => `awards/${slug(a.title)}`),
     ...certifications.filter((c) => isSet(c.name)).map((c) => `certifications/${slug(c.name)}`),
   ];
-  return ["top", "projects", "skills", "awards", "certifications", "contact", ...cards];
+  return ["top", "experience", "projects", "skills", "awards", "certifications", "contact", ...cards];
 }
 
 function knowledge() {
@@ -29,7 +30,7 @@ function knowledge() {
   if (isSet(site.intro)) lines.push(`Intro: ${site.intro}`);
 
   for (const e of experience.filter((e) => isSet(e.description))) {
-    lines.push(`Timeline: ${onlySet([e.year, e.title]).join(", ")}: ${e.description}`);
+    lines.push(`Experience: ${onlySet([e.title, e.org, e.type, e.year]).join(", ")}: ${e.description}`);
   }
   for (const p of projects.filter((p) => isSet(p.title))) {
     const details = onlySet([p.description, p.category, p.year, onlySet(p.technologies).join(", "), p.href]);

@@ -9,9 +9,14 @@ import Icon from "./Icon.astro";
 interface Props {
   project: Project;
   index: number;
+  /** The section it's in, for the modal's ~/path. */
+  section?: string;
+  /** Show the [ visit ] link (or its stand-in). */
+  visit?: boolean;
 }
 
-const { project, index } = Astro.props;
+const { project, index, section = "projects", visit = true } = Astro.props;
+const gallery = project.gallery ?? [];
 const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
 const number = String(index + 1).padStart(2, "0");
@@ -39,7 +44,7 @@ const number = String(index + 1).padStart(2, "0");
     </ul>
     {/* Until a project's real link is set, visit is a quiet stand-in so every card reads the same. */}
     {
-      !project.locked &&
+      visit && !project.locked &&
         (href ? (
           <a href={href} target="_blank" rel="noopener noreferrer" class="visit tui-btn inline-flex">
             [ visit ]
@@ -55,7 +60,25 @@ const number = String(index + 1).padStart(2, "0");
   <div class="shot">
     <div class="shot-view">
       {
-        project.image ? (
+        gallery.length > 1 ? (
+          <div class="gallery" data-gallery style={`--n:${gallery.length}`}>
+            {gallery.map((g, k) => (
+              <picture class:list={["gallery-shot", !g.imageMobile && "is-wide"]} style={`--k:${k}`}>
+                {g.imageMobile && <source media="(max-width: 767px)" srcset={g.imageMobile} />}
+                <img src={g.image} alt={g.name} loading="lazy" decoding="async" class="card-img" />
+                <span class="gallery-name" aria-hidden="true">{g.name}</span>
+              </picture>
+            ))}
+            <div class="thumbs" role="group" aria-label="Screenshots">
+              {gallery.map((g, k) => (
+                <button type="button" class="thumb" aria-pressed={k === 0 ? "true" : "false"} data-thumb={k}>
+                  {g.name}
+                </button>
+              ))}
+            </div>
+            <button type="button" class="fan-next" data-fan-next aria-label="Next screenshot"></button>
+          </div>
+        ) : project.image ? (
           <picture>
             {project.imageMobile && <source media="(max-width: 767px)" srcset={project.imageMobile} />}
             <img src={project.image} alt={project.imageAlt ?? ""} loading="lazy" decoding="async" class="card-img" />
@@ -78,7 +101,7 @@ const number = String(index + 1).padStart(2, "0");
   <span class="dim" aria-hidden="true"></span>
 
   <Detail
-    path={`projects/${slug}`}
+    path={`${section}/${slug}`}
     title={project.title}
     meta={[project.category, project.year ?? ""]}
     image={project.image}
@@ -208,6 +231,53 @@ const number = String(index + 1).padStart(2, "0");
     border-radius: 6px;
     box-shadow: 0 18px 50px -20px rgb(0 0 0 / 0.35);
   }
+  /* Several screenshots: on wide screens one shows at a time and the tabs at the bottom switch them. */
+  .gallery {
+    position: absolute;
+    inset: 0;
+  }
+  .gallery-shot {
+    position: absolute;
+    inset: 0;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .gallery-shot[data-on] {
+    opacity: 1;
+  }
+  .gallery-name {
+    display: none;
+  }
+  .thumbs {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 2;
+    display: flex;
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+    background: var(--color-paper);
+  }
+  .thumb {
+    flex: 1;
+    padding: 6px 4px;
+    color: var(--color-muted);
+    font-size: 11px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .thumb:hover {
+    color: var(--color-ink);
+  }
+  .thumb[aria-pressed="true"] {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .fan-next {
+    display: none;
+  }
   .private {
     position: absolute;
     inset: 0;
@@ -240,5 +310,72 @@ const number = String(index + 1).padStart(2, "0");
       border-radius: 14px;
       transform: translateX(-50%);
     }
+    /* Phones: the screenshots fan out like a hand of cards, the front one upright; a tap brings the next to the front. */
+    .thumbs {
+      display: none;
+    }
+    .gallery-shot {
+      position: absolute;
+      inset: 18px 0 0;
+      z-index: calc(var(--n) - var(--k));
+      opacity: 1;
+      transform: translateX(calc(var(--k) * 9%)) rotate(calc(var(--k) * 4deg)) scale(calc(1 - var(--k) * 0.05));
+      transform-origin: 50% 110%;
+      transition: transform 0.45s var(--ease-out-soft);
+    }
+    .gallery .gallery-shot img {
+      top: 0;
+      width: 62%;
+      border-radius: 14px;
+    }
+    /* A landscape photo (no phone-sized screenshot) fans out wider, so it doesn't shrink to a sliver. */
+    .gallery .gallery-shot.is-wide img {
+      top: 12%;
+      width: 84%;
+      border-radius: 6px;
+    }
+    .gallery-name {
+      position: absolute;
+      top: 10px;
+      left: calc(19% + 10px);
+      display: block;
+      padding: 1px 6px;
+      border-radius: 2px;
+      background: rgb(0 0 0 / 0.6);
+      color: #fff;
+      font-size: 10px;
+      opacity: 0;
+    }
+    .gallery-shot[data-on] .gallery-name {
+      opacity: 1;
+    }
+    .fan-next {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: block;
+      cursor: pointer;
+    }
   }
 </style>
+
+<script>
+  // A card with several screenshots: the tabs (wide screens) or a tap on the fan (phones) pick which one is in front.
+  // --k is each screenshot's place behind the front one, which the fan uses for its spread.
+  for (const gallery of document.querySelectorAll<HTMLElement>("[data-gallery]")) {
+    const shots = [...gallery.querySelectorAll<HTMLElement>(".gallery-shot")];
+    const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>("[data-thumb]")];
+    let on = 0;
+    const show = (i: number) => {
+      on = (i + shots.length) % shots.length;
+      shots.forEach((s, k) => {
+        s.style.setProperty("--k", String((k - on + shots.length) % shots.length));
+        s.toggleAttribute("data-on", k === on);
+      });
+      thumbs.forEach((t, k) => t.setAttribute("aria-pressed", String(k === on)));
+    };
+    thumbs.forEach((t, k) => t.addEventListener("click", () => show(k)));
+    gallery.querySelector("[data-fan-next]")?.addEventListener("click", () => show(on + 1));
+    show(0);
+  }
+</script>
