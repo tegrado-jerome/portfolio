@@ -2,6 +2,7 @@
 // Skills by category: a TUI list of categories, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
 import SectionHead from "./SectionHead.astro";
+import SkillLogo from "./SkillLogo.astro";
 import SkillWheel from "./SkillWheel.astro";
 
 const groups = skillGroups.filter((g) => g.skills.length > 0);
@@ -29,12 +30,27 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
                 tabindex={i === 0 ? 0 : -1}
                 class="relative z-[1] flex items-center justify-between gap-3 px-3 py-3 text-left text-body text-muted transition-colors duration-200 hover:text-ink aria-selected:text-paper"
               >
-                <span><span class="caret-mark" aria-hidden="true">▸ </span>{slug(g.name)}</span>              </button>
+                <span><span class="caret-mark" aria-hidden="true">▸ </span>{slug(g.name)}</span>
+                <span class="peek" aria-hidden="true">
+                  {g.skills.slice(0, 4).map((s) => (
+                    <span class="peek-logo"><SkillLogo skill={s} class="size-full" /></span>
+                  ))}
+                </span>
+              </button>
             ))}
           </div>
         </div>
 
-        <div>
+        <!-- Phones: the dial opens as a sheet from the bottom when a category is tapped (showModal puts it in the top
+             layer). From md up the dialog is just the inline right column. -->
+        <dialog class="sheet" data-skills-sheet aria-labelledby="skills-sheet-title">
+          <div class="sheet-head" data-sheet-grab>
+            <span class="grab" aria-hidden="true"></span>
+            <div class="flex items-center justify-between text-small">
+              <span id="skills-sheet-title">▸ {slug(groups[0].name)}</span>
+              <button type="button" class="tui-btn" data-sheet-close>[ close ]</button>
+            </div>
+          </div>
           {groups.map((g, i) => (
             <div
               id={`skills-${slug(g.name)}`}
@@ -56,7 +72,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             <span class="hint-icon spin"><i></i></span>
             <span>drag to spin</span>
           </p>
-        </div>
+        </dialog>
       </div>
       </div>
     </section>
@@ -85,6 +101,90 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   [aria-selected="true"] .caret-mark {
     visibility: visible;
   }
+  .peek {
+    display: none;
+  }
+  /* The dialog is the plain right column on wider screens. */
+  .sheet {
+    position: static;
+    display: block;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    overflow: visible;
+  }
+  .sheet-head {
+    display: none;
+  }
+  /* Phones: hairline rows with a peek of each category's logos; tapping one slides its dial up as a sheet. */
+  @media (max-width: 767px) {
+    .thumb,
+    .caret-mark {
+      display: none;
+    }
+    .seg {
+      border-top: 1px solid var(--color-line);
+    }
+    .seg [role="tab"] {
+      padding-inline: 4px;
+      border-bottom: 1px solid var(--color-line);
+      color: var(--color-ink);
+    }
+    .peek {
+      display: flex;
+      gap: 6px;
+    }
+    .peek-logo {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+      filter: grayscale(1);
+      opacity: 0.6;
+    }
+    .sheet:not([open]) {
+      display: none;
+    }
+    .sheet[open] {
+      position: fixed;
+      inset: auto 0 0;
+      width: 100%;
+      max-height: 92dvh;
+      padding: 12px 24px calc(28px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+      border-top: 1px solid var(--color-line);
+      border-radius: 10px 10px 0 0;
+      background: var(--color-paper);
+      translate: 0 0;
+      transition: translate 0.3s var(--ease-out-soft);
+    }
+    @starting-style {
+      .sheet[open] {
+        translate: 0 100%;
+      }
+    }
+    .sheet::backdrop {
+      background: rgb(0 0 0 / 0.35);
+    }
+    .sheet-head {
+      display: block;
+      margin-bottom: 8px;
+      touch-action: none;
+    }
+    .grab {
+      display: block;
+      width: 40px;
+      height: 4px;
+      margin: 0 auto 12px;
+      border-radius: 2px;
+      background: var(--color-line);
+    }
+  }
   /* Without JS there's no sliding bar, so the picked tab paints its own. */
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
@@ -110,6 +210,57 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     thumb.style.height = `${tab.offsetHeight}px`;
   }
 
+  const sheet = document.querySelector<HTMLDialogElement>("[data-skills-sheet]");
+  const sheetTitle = document.getElementById("skills-sheet-title");
+  const phone = matchMedia("(max-width: 767px)");
+  let opener: HTMLButtonElement | null = null;
+
+  function openSheet(tab: HTMLButtonElement) {
+    if (!sheet || !phone.matches || sheet.open) return;
+    opener = tab;
+    if (sheetTitle) sheetTitle.textContent = `▸ ${tab.id.replace("skills-tab-", "")}`;
+    sheet.showModal();
+    document.documentElement.style.overflow = "hidden";
+  }
+
+  function closeSheet() {
+    if (!sheet?.open) return;
+    sheet.style.translate = "";
+    sheet.close();
+  }
+
+  sheet?.addEventListener("close", () => {
+    document.documentElement.style.overflow = "";
+    opener?.focus();
+  });
+  sheet?.querySelector("[data-sheet-close]")?.addEventListener("click", closeSheet);
+  // A tap on the dimmed page outside the sheet closes it.
+  sheet?.addEventListener("click", (e) => {
+    const r = sheet.getBoundingClientRect();
+    if (e.clientY < r.top) closeSheet();
+  });
+  // Dragging the handle down past 80px closes it, like a native sheet.
+  const grab = sheet?.querySelector<HTMLElement>("[data-sheet-grab]");
+  let startY: number | null = null;
+  grab?.addEventListener("pointerdown", (e) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    startY = e.clientY;
+    grab.setPointerCapture(e.pointerId);
+    sheet!.style.transition = "none";
+  });
+  grab?.addEventListener("pointermove", (e) => {
+    if (startY !== null) sheet!.style.translate = `0 ${Math.max(0, e.clientY - startY)}px`;
+  });
+  grab?.addEventListener("pointerup", (e) => {
+    if (startY === null) return;
+    const moved = e.clientY - startY;
+    startY = null;
+    sheet!.style.transition = "";
+    if (moved > 80) closeSheet();
+    else sheet!.style.translate = "";
+  });
+  phone.addEventListener("change", () => !phone.matches && closeSheet());
+
   function select(tab: HTMLButtonElement) {
     for (const t of tabs) {
       const selected = t === tab;
@@ -130,7 +281,10 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   }
 
   tabs.forEach((tab, i) => {
-    tab.addEventListener("click", () => select(tab));
+    tab.addEventListener("click", () => {
+      select(tab);
+      openSheet(tab);
+    });
     tab.addEventListener("keydown", (e) => {
       const d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
       if (!d) return;
