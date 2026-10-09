@@ -41,7 +41,8 @@ export const awards: Award[] = [
     year: "2022",
     detail: "S&T Undergraduate Scholarship, MERIT program",
     short: "DOST-SEI",
-    image: "/images/awards/dost-office.webp",
-    imageAlt: "The DOST Central Office building in Bicutan, Taguig",
+    image: "/images/awards/dost-sei-qualifiers-2022.webp",
+    imageAlt: "DOST graphic congratulating the 10,487 qualifiers of the 2022 DOST-SEI S&T Undergraduate Scholarships",
+    document: true,
   },
 ];

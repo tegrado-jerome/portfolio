@@ -137,18 +137,23 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     height: 100%;
     object-fit: cover;
   }
+  /* Sized in the box's own units: a percentage height has nothing to resolve against here, so a square or tall
+     picture would spill out of the bottom. */
+  .doc {
+    container-type: size;
+  }
   .doc img {
     position: static;
     width: auto;
     height: auto;
-    max-width: calc(100% - 40px);
-    max-height: calc(100% - 40px);
+    max-width: calc(100cqw - 40px);
+    max-height: calc(100cqh - 40px);
     border: 1px solid var(--color-line);
     box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.35);
   }
   @media (max-width: 767px) {
     .doc img {
-      max-width: calc(100% - 20px);
+      max-width: calc(100cqw - 20px);
     }
   }
   /* The photo box takes the pictures' shape, so they fill it: 4:3 for the award photos, 16:9 for certificates (most
@@ -161,8 +166,8 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     aspect-ratio: 16 / 9;
   }
   .docs .doc img {
-    max-width: calc(100% - 16px);
-    max-height: calc(100% - 16px);
+    max-width: calc(100cqw - 16px);
+    max-height: calc(100cqh - 16px);
   }
   .text {
     flex: 1;
