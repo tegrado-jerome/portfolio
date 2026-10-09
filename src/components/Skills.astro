@@ -1,6 +1,8 @@
 ---
 // Skills by category: a TUI list of categories, each with its own turning wheel of logos.
 import { skillGroups } from "../data/skills";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import Icon from "./Icon.astro";
 import SectionHead from "./SectionHead.astro";
 import SkillLogo from "./SkillLogo.astro";
 import SkillWheel from "./SkillWheel.astro";
@@ -35,6 +37,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
                   {g.skills.slice(0, 4).map((s) => (
                     <span class="peek-logo"><SkillLogo skill={s} class="size-full" /></span>
                   ))}
+                  <Icon icon={faChevronRight} class="chev" />
                 </span>
               </button>
             ))}
@@ -145,14 +148,25 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     .seg {
       border-top: 1px solid var(--color-line);
     }
+    /* A chevron on every row and a tint while pressed, so the rows read as things to tap. */
     .seg [role="tab"] {
       padding-inline: 4px;
       border-bottom: 1px solid var(--color-line);
       color: var(--color-ink);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .seg [role="tab"]:active {
+      background: color-mix(in srgb, var(--color-ink) 6%, transparent);
     }
     .peek {
       display: flex;
       gap: 6px;
+      align-items: center;
+    }
+    .peek :global(.chev) {
+      margin-left: 6px;
+      color: var(--color-muted);
+      font-size: 11px;
     }
     .peek-logo {
       display: inline-flex;
