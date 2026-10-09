@@ -5,7 +5,7 @@ export interface Experience {
   title: string;
   org: string;
   type: string;
-  /** When, as shown, e.g. "Feb — May 2026" or "2 yrs". */
+  /** How long, as shown, e.g. "3 mos" or "2 yrs". */
   year: string;
   description: string;
   tags: string[];
@@ -44,7 +44,7 @@ export const experience: Experience[] = [
     title: "Intern Project Lead",
     org: "DOST · Project LODI",
     type: "Internship",
-    year: "Feb — May 2026",
+    year: "3 mos",
     description:
       "Project lead in the League of Developers Initiative at the DOST Central Office IT Division.",
     tags: ["DOST", "Project LODI", "Python", "AI chatbot"],
