@@ -27,9 +27,9 @@ export const projects: Project[] = [
     category: "Web app",
     technologies: ["React", "TypeScript", "Azure Functions", "Supabase", "Redis", "Gemini", "Groq", "Leaflet"],
     href: "https://galatayo.app/",
-    image: "/images/projects/galatayo.webp",
+    image: "/images/projects/galatayo-tour-a.webp",
     imageMobile: "/images/projects/galatayo-tour-a-mobile.webp",
-    imageAlt: "GalaTayo home page with a search bar and photos of Philippine spots",
+    imageAlt: "GalaTayo place page for the El Nido Tour A lagoons, with photos, the title and the price",
   },
   {
     title: "Hey George",
