@@ -28,7 +28,7 @@ export const projects: Project[] = [
     technologies: ["React", "TypeScript", "Azure Functions", "Supabase", "Redis", "Gemini", "Groq", "Leaflet"],
     href: "https://galatayo.app/",
     image: "/images/projects/galatayo.webp",
-    imageMobile: "/images/projects/galatayo-mobile.webp",
+    imageMobile: "/images/projects/galatayo-tour-a-mobile.webp",
     imageAlt: "GalaTayo home page with a search bar and photos of Philippine spots",
   },
   {

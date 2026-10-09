@@ -50,7 +50,7 @@ export const experience: Experience[] = [
     tags: ["DOST", "QA", "Playwright", "Python", "AI chatbot"],
     shots: [
       { name: "DOST Central Office", image: "/images/experience/dost-office.webp" },
-      { name: "QA docs system", image: "/images/experience/qa-docs.webp" },
+      { name: "QA docs system", image: "/images/experience/qa-docs-code.webp" },
     ],
   },
 ];
