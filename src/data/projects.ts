@@ -76,7 +76,6 @@ export const projects: Project[] = [
     description: "Marketplace for booking coworking spaces, with tools for space partners and admins. Team capstone, ranked #1 in BSIS.",
     category: "Capstone · team",
     technologies: ["Next.js","TypeScript","Supabase","Prisma","Redis","Gemini"],
-    year: "2025–2026",
     href: "https://upspaceph.com/",
     image: "/images/projects/upspace.webp",
     imageMobile: "/images/projects/upspace-mobile.webp",
