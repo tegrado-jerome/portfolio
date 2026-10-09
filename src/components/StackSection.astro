@@ -13,9 +13,9 @@ const { id, title, count } = Astro.props;
 ---
 
 <!-- Sticky stack (after the stacking-cards demos on scroll-driven-animations.style and CodyHouse): the stack pins near
-     the top, and each scroll of about two thirds of the screen slides the next card up from below onto it, while the
+     the top, and the next card scrolls up with the page, exactly as fast as the finger, until it lands on it, while the
      ones behind sink back, tilt a touch and dim, a light fake 3D. Every card lands whole, and the scroll it takes is
-     set by --per, not by the card's height, so it never drags. A "keep scrolling" pill counts the cards and leaves once
+     the same as a plain list's, so nothing ever darts up or drags. A "keep scrolling" pill counts the cards and leaves once
      the last one lands. Without JS, or with reduced motion, the cards are a plain list. -->
 <section id={id} class="shell section" aria-labelledby={`${id}-title`}>
   <div class="pane" data-pane={id}>
@@ -47,7 +47,9 @@ const { id, title, count } = Astro.props;
     --card-h: min(calc(43.48cqw + 41px), calc(100svh - 150px));
     --top: 24px;
     --step: 14px;
-    --per: 65svh; /* scroll it takes to bring in the next card: enough that it never darts up */
+    /* Scroll it takes to bring in the next card, and how far below its spot it waits: just under the card before it,
+       as in a plain list, so it moves 1:1 with the scroll. */
+    --per: calc(var(--card-h) + 16px - var(--step));
   }
   /* Tablets stack the card (picture on top), so it gets taller. */
   @media (min-width: 768px) and (max-width: 1023px) {
@@ -110,19 +112,24 @@ const { id, title, count } = Astro.props;
 
   /* Where the browser has scroll-driven animations (Chrome, Edge, Safari 26+, the script adds .is-css), the cards
      move on the compositor, in step with the scroll even on slow phones; the script then only runs the hint. The
-     timeline starts when the stack pins (its top reaches --top), and card i is on stage from i - 1 cards of scroll
-     (sliding up, the first quarter) to i + 3 (sunk three deep). Same motion as the script's fallback below. */
+     timeline starts when the stack pins (its top reaches --top). Until then the cards wait in line below it, one card's
+     scroll apart like a plain list, and card i scrolls up 1:1 with the page until it lands at i cards of scroll
+     (stack-slide, on `translate`); then it sinks as the next three land (stack-sink, on `transform`). Same motion as
+     the script's fallback below. */
   .stack.is-css {
     view-timeline: --stack block;
     view-timeline-inset: var(--top) 0px;
   }
   .is-css :global(.stack-item > .stack-card) {
-    --rise: calc(100lvh - var(--top) - var(--i) * var(--step));
-    animation: stack-card linear both;
-    animation-range: contain calc((var(--i) - 1) * var(--per)) contain calc((var(--i) + 3) * var(--per));
-  }
-  .is-css :global(.stack-item:first-child > .stack-card) {
-    --rise: 0px;
+    --land: calc(var(--i) * var(--per));
+    translate: 0 var(--land); /* in line below, also before the timeline starts */
+    will-change: translate, transform;
+    animation:
+      stack-slide linear both,
+      stack-sink linear both;
+    animation-range:
+      contain 0px contain var(--land),
+      contain var(--land) contain calc(var(--land) + 3 * var(--per));
   }
   .is-css :global(.stack-item > .stack-card .dim) {
     animation: stack-dim linear both;
@@ -134,15 +141,19 @@ const { id, title, count } = Astro.props;
   .stack.is-css :global(.stack-card .dim) {
     animation-timeline: --stack;
   }
-  @keyframes stack-card {
-    0% {
-      transform: translate3d(0, var(--rise), 0) perspective(1400px) rotateX(0deg) scale(1);
-      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* starts gently, settles softly */
+  @keyframes stack-slide {
+    from {
+      translate: 0 var(--land);
     }
-    25% {
+    to {
+      translate: 0 0;
+    }
+  }
+  @keyframes stack-sink {
+    from {
       transform: translate3d(0, 0px, 0) perspective(1400px) rotateX(0deg) scale(1);
     }
-    100% {
+    to {
       transform: translate3d(0, -18px, 0) perspective(1400px) rotateX(7.5deg) scale(0.85);
     }
   }
@@ -221,8 +232,8 @@ const { id, title, count } = Astro.props;
 </style>
 
 <script>
-  // Scroll through the track moves the cards: `arrived[i]` goes 0 → 1 as card i slides up from below the screen onto
-  // the stack. A card's depth is how much of the cards after it have arrived; deeper cards shrink, tilt back and dim.
+  // Scroll through the track moves the cards: `arrived[i]` goes 0 → 1 as card i scrolls up from just under the card
+  // before it onto the stack. A card's depth is how much of the cards after it have arrived; deeper cards shrink, tilt back and dim.
   //
   // Where the browser has scroll-driven animations, CSS moves the cards (see .is-css) and this only runs the hint.
   // Elsewhere it moves them too, built to stay smooth on slow phones:
@@ -256,11 +267,9 @@ const { id, title, count } = Astro.props;
     // Sizes, measured again only when the screen size changes.
     let top = 0; // where the pin sticks
     let per = 1; // scroll per card
-    let rise: number[] = []; // how far below its spot each card waits: just off the bottom of the screen
     const measure = () => {
       top = parseFloat(getComputedStyle(pin).top);
       per = Math.max(1, (stack.offsetHeight - pin.offsetHeight) / Math.max(1, items.length - 1));
-      rise = items.map((li) => Math.max(0, innerHeight - top - li.offsetTop));
     };
 
     // With a mouse wheel (a notch jumps ~100px at once) the script's cards glide toward where the scroll says they
@@ -275,12 +284,12 @@ const { id, title, count } = Astro.props;
     function render() {
       const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
       for (let i = 0; i < items.length && !css; i++) {
-        // The slide eases in and out, so each card starts gently and settles softly onto the stack.
-        const slide = i ? arrived[i] ** 2 * (3 - 2 * arrived[i]) : 1;
+        // Cards wait in line below the stack, one card's scroll apart, and rise 1:1 with the scroll until they land.
+        const wait = Math.min(i, Math.max(0, i - shown));
         let depth = 0;
         for (let j = i + 1; j < items.length; j++) depth += arrived[j];
         depth = Math.min(depth, 3);
-        const y = (1 - slide) * rise[i] - depth * 6;
+        const y = wait * per - depth * 6;
         const transform =
           y || depth
             ? `translate3d(0, ${y.toFixed(1)}px, 0) perspective(1400px) rotateX(${(depth * 2.5).toFixed(2)}deg) scale(${(1 - depth * 0.05).toFixed(4)})`
