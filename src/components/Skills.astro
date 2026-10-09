@@ -77,6 +77,12 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
           </p>
         </dialog>
       </div>
+
+      <!-- Phones: rides at the bottom of the screen while the list is on it, until the first category is tapped. -->
+      <p class="tap-hint hint-pill" data-skills-tap-hint data-pause-offscreen aria-hidden="true">
+        <span class="hint-icon tap"><i></i></span>
+        <span>tap a category</span>
+      </p>
       </div>
     </section>
   )
@@ -213,6 +219,22 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       background: var(--color-line);
     }
   }
+  .tap-hint {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    :global(.js) .tap-hint {
+      position: sticky;
+      bottom: 24px;
+      z-index: 5;
+      display: flex;
+      margin-top: 32px;
+      box-shadow: 0 6px 20px -8px rgb(0 0 0 / 0.3);
+    }
+    .tap-hint.is-done {
+      opacity: 0;
+    }
+  }
   /* Without JS there's no sliding bar, so the picked tab paints its own. */
   :global(html:not(.js)) .seg [aria-selected="true"] {
     background: var(--tile);
@@ -312,6 +334,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     tab.addEventListener("click", () => {
       select(tab);
       openSheet(tab);
+      document.querySelector("[data-skills-tap-hint]")?.classList.add("is-done");
     });
     tab.addEventListener("keydown", (e) => {
       const d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
