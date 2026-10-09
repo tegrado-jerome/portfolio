@@ -41,7 +41,7 @@ export const awards: Award[] = [
     year: "2022",
     detail: "S&T Undergraduate Scholarship, MERIT program",
     short: "DOST-SEI",
-    image: "/images/awards/dost-building.webp",
-    imageAlt: "The DOST building in Bicutan, Taguig, with the Philippine flag out front",
+    image: "/images/awards/dost-office.webp",
+    imageAlt: "The DOST Central Office building in Bicutan, Taguig",
   },
 ];

@@ -49,7 +49,7 @@ export const experience: Experience[] = [
       "QA for web apps in the League of Developers Initiative at the DOST Central Office IT Division.",
     tags: ["DOST", "QA", "Playwright", "Python", "AI chatbot"],
     shots: [
-      { name: "DOST Central Office", image: "/images/experience/dost-office.webp" },
+      { name: "DOST Central Office", image: "/images/experience/dost-building.webp", imageMobile: "/images/experience/dost-building-mobile.webp" },
       { name: "QA docs system", image: "/images/experience/qa-docs-code.webp" },
     ],
   },
