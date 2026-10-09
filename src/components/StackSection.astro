@@ -20,11 +20,13 @@ const { id, title, count } = Astro.props;
 <section id={id} class="shell section" aria-labelledby={`${id}-title`}>
   <div class="pane" data-pane={id}>
     <SectionHead id={`${id}-title`} title={title} />
-    <div class="stack" data-stack style={`--n:${count}`}>
-      <div class="stack-pin">
-        <ol class="stack-list">
-          <slot />
-        </ol>
+    <div class="stack-wrap">
+      <div class="stack" data-stack style={`--n:${count}`}>
+        <div class="stack-pin">
+          <ol class="stack-list">
+            <slot />
+          </ol>
+        </div>
       </div>
     </div>
     <p class="stack-hint is-waiting" data-stack-hint data-pause-offscreen aria-hidden="true">
@@ -35,11 +37,24 @@ const { id, title, count } = Astro.props;
 </section>
 
 <style>
+  /* The cards' width, for sizing their height from it. */
+  .stack-wrap {
+    container-type: inline-size;
+  }
   .stack {
-    --card-h: min(520px, calc(100svh - 190px));
+    /* Wide screens: the picture pane takes 1.6 of the card's 2.3 parts of width and is 16:10, so the card is that
+       pane's height (0.4348 of the card's width) plus the title bar. Capped to fit the screen. */
+    --card-h: min(calc(43.48cqw + 41px), calc(100svh - 150px));
     --top: 24px;
     --step: 14px;
     --per: 36svh; /* scroll it takes to bring in the next card */
+  }
+  /* Tablets stack the card (picture on top), so it gets taller. */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .stack {
+      /* A full-width 16:10 picture (62.5% of the width tall) plus the title bar and the story under it. */
+      --card-h: min(calc(62.5cqw + 250px), calc(100svh - 160px));
+    }
   }
   @media (max-width: 767px) {
     .stack {

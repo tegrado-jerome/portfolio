@@ -38,6 +38,8 @@ const { id, title, entries, placeholder, linkLabel } = Astro.props;
 const slug = toSlug(title);
 const n = entries.length;
 const pad = (i: number) => String(i).padStart(2, "0");
+// A deck of certificates (all documents, all landscape) gets a landscape photo box so each one shows big.
+const allDocs = entries.length > 0 && entries.every((e) => e.document);
 // The line under a title: its first detail, or the full issuer when that says more than the short caption.
 const line = (e: Credential) => (e.details ?? []).find(isSet) ?? (e.issuer !== e.caption ? e.issuer : "");
 const name = (e: Credential) => toSlug(e.title) || slug;
@@ -52,7 +54,7 @@ const name = (e: Credential) => toSlug(e.title) || slug;
           <span aria-hidden="true"><span class="text-accent">~/</span>{slug}</span>
         </h2>
 
-        <ol class="deck" data-deck data-reveal aria-live="polite">
+        <ol class:list={["deck", allDocs && "docs"]} data-deck data-reveal aria-live="polite">
           {entries.map((e, i) => (
             <li class="card tile deck-card relative" style={`--k:${i}`}>
               <div class="tile-top">
@@ -148,6 +150,19 @@ const name = (e: Credential) => toSlug(e.title) || slug;
     .doc img {
       max-width: calc(100% - 20px);
     }
+  }
+  /* The photo box takes the pictures' shape, so they fill it: 4:3 for the award photos, 16:9 for certificates (most
+     are about that wide; each still shows whole). */
+  .photo {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .docs .photo {
+    aspect-ratio: 16 / 9;
+  }
+  .docs .doc img {
+    max-width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
   }
   .text {
     flex: 1;

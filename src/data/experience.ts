@@ -15,7 +15,7 @@ export interface Experience {
 const shot = (name: string, file: string) => ({
   name,
   image: `/images/experience/${file}.webp`,
-  imageMobile: `/images/experience/${file}-mobile.webp`,
+  imageMobile: `/images/experience/${file}-screen-mobile.webp`,
 });
 
 export const experience: Experience[] = [

@@ -41,7 +41,7 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
       </h3>
       {project.locked && <span class="nda">nda</span>}
     </div>
-    <p class="text-small text-muted">{project.description}</p>
+    <p class="desc text-small text-muted">{project.description}</p>
     <ul class="tags">
       {project.technologies.filter(Boolean).map((t) => <li>{t}</li>)}
     </ul>
@@ -66,10 +66,9 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
         gallery.length > 1 ? (
           <div class="gallery" data-gallery style={`--n:${gallery.length}`}>
             {gallery.map((g, k) => (
-              <picture class:list={["gallery-shot", !g.imageMobile && "is-wide"]} style={`--k:${k}`}>
+              <picture class="gallery-shot">
                 {g.imageMobile && <source media="(max-width: 767px)" srcset={g.imageMobile} />}
                 <img src={g.image} alt={g.name} loading="lazy" decoding="async" class="card-img" />
-                <span class="gallery-name" aria-hidden="true">{g.name}</span>
               </picture>
             ))}
             <div class="thumbs" role="group" aria-label="Screenshots">
@@ -79,7 +78,6 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
                 </button>
               ))}
             </div>
-            <button type="button" class="fan-next" data-fan-next aria-label="Next screenshot"></button>
           </div>
         ) : project.image ? (
           <picture>
@@ -123,7 +121,9 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
      and the screenshot as the right pane. */
   .stack-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    /* The picture pane is 16:10 like the screenshots (StackSection sets the card's height from its width), so the
+       picture fills it edge to edge with no empty space. */
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.6fr);
     grid-template-rows: auto minmax(0, 1fr);
     height: 100%;
     overflow: hidden;
@@ -254,38 +254,30 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
   .visit:focus-visible {
     color: var(--color-paper);
   }
-  /* The screenshot: the window's right pane. */
+  /* The screenshot fills its pane edge to edge, top first if the pane's shape ever differs from the picture's. */
   .shot {
-    display: flex;
-    flex-direction: column;
+    position: relative;
     min-height: 0;
     overflow: hidden;
     border-left: 1px solid var(--color-line);
     background: var(--color-ph);
   }
   .shot-view {
-    position: relative;
+    position: absolute;
+    inset: 0;
     display: grid;
-    flex: 1;
     place-items: center;
-    overflow: hidden;
-    container-type: size;
-    background: color-mix(in srgb, var(--color-ink) 5%, var(--color-paper));
   }
-  /* The screenshot sits whole inside the pane as its own window, running off the right edge (or, on phones, centred and
-     running off the bottom), so the pane's shape never crops away a site's headline. */
   .shot-view img {
     position: absolute;
-    /* Centred top to bottom when the pane is tall enough (the 16:10 image is 62.5% of the pane's width tall). */
-    top: max(9cqh, 50cqh - 31.25cqw);
-    left: 7%;
+    inset: 0;
     width: 100%;
-    height: auto;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    box-shadow: 0 18px 50px -20px rgb(0 0 0 / 0.35);
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: top;
   }
-  /* Several screenshots: on wide screens one shows at a time and the tabs at the bottom switch them. */
+  /* Several pictures: one shows at a time and the tabs at the bottom switch them. */
   .gallery {
     position: absolute;
     inset: 0;
@@ -293,15 +285,11 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
   .gallery-shot {
     position: absolute;
     inset: 0;
-    display: block;
     opacity: 0;
     transition: opacity 0.3s ease;
   }
   .gallery-shot[data-on] {
     opacity: 1;
-  }
-  .gallery-name {
-    display: none;
   }
   .thumbs {
     position: absolute;
@@ -317,8 +305,10 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
   .thumb {
     flex: 1;
     padding: 6px 4px;
+    overflow: hidden;
     color: var(--color-muted);
     font-size: 11px;
+    text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
   }
@@ -328,9 +318,6 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
   .thumb[aria-pressed="true"] {
     background: var(--color-ink);
     color: var(--color-paper);
-  }
-  .fan-next {
-    display: none;
   }
   .private {
     position: absolute;
@@ -343,8 +330,8 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
     color: #fff;
     font-size: var(--text-small);
   }
-  /* Phones: screenshot on top, the story under it. */
-  @media (max-width: 767px) {
+  /* Tablets and phones: the picture on top, full width, filling everything above the story. */
+  @media (max-width: 1023px) {
     .stack-card {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto minmax(0, 1fr) auto;
@@ -357,79 +344,49 @@ const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
     .card-bar {
       order: -2;
     }
+    /* If the pane comes out taller than the picture, keep its top left (logo and headline) in view. */
     .shot-view img {
-      top: 20px;
-      left: 50%;
-      width: 80%;
-      border-radius: 14px;
-      transform: translateX(-50%);
+      object-position: left top;
     }
-    /* Phones: the screenshots fan out like a hand of cards, the front one upright; a tap brings the next to the front. */
-    .thumbs {
-      display: none;
+  }
+  /* Phones: the story stays short (two lines, one row of tags fading out; all of it is in the modal) so the picture
+     gets most of the card. */
+  @media (max-width: 767px) {
+    .info {
+      gap: 8px;
     }
-    .gallery-shot {
-      position: absolute;
-      inset: 18px 0 0;
-      z-index: calc(var(--n) - var(--k));
-      opacity: 1;
-      transform: translateX(calc(var(--k) * 9%)) rotate(calc(var(--k) * 4deg)) scale(calc(1 - var(--k) * 0.05));
-      transform-origin: 50% 110%;
-      transition: transform 0.45s var(--ease-out-soft);
+    .desc {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
-    .gallery .gallery-shot img {
-      top: 0;
-      width: 62%;
-      border-radius: 14px;
+    .tags {
+      flex-wrap: nowrap;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, #000 85%, transparent);
     }
-    /* A landscape photo (no phone-sized screenshot) fans out wider, so it doesn't shrink to a sliver. */
-    .gallery .gallery-shot.is-wide img {
-      top: 12%;
-      width: 84%;
-      border-radius: 6px;
+    .tags li {
+      flex: none;
     }
-    .gallery-name {
-      position: absolute;
-      top: 10px;
-      left: calc(19% + 10px);
-      display: block;
-      padding: 1px 6px;
-      border-radius: 2px;
-      background: rgb(0 0 0 / 0.6);
-      color: #fff;
+    .thumb {
       font-size: 10px;
-      opacity: 0;
-    }
-    .gallery-shot[data-on] .gallery-name {
-      opacity: 1;
-    }
-    .fan-next {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      display: block;
-      cursor: pointer;
     }
   }
 </style>
 
 <script>
-  // A card with several screenshots: the tabs (wide screens) or a tap on the fan (phones) pick which one is in front.
-  // --k is each screenshot's place behind the front one, which the fan uses for its spread.
+  // A card with several pictures: the tabs pick which one shows.
   for (const gallery of document.querySelectorAll<HTMLElement>("[data-gallery]")) {
     const shots = [...gallery.querySelectorAll<HTMLElement>(".gallery-shot")];
     const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>("[data-thumb]")];
     let on = 0;
     const show = (i: number) => {
       on = (i + shots.length) % shots.length;
-      shots.forEach((s, k) => {
-        s.style.setProperty("--k", String((k - on + shots.length) % shots.length));
-        s.toggleAttribute("data-on", k === on);
-      });
+      shots.forEach((s, k) => s.toggleAttribute("data-on", k === on));
       thumbs.forEach((t, k) => t.setAttribute("aria-pressed", String(k === on)));
     };
     thumbs.forEach((t, k) => t.addEventListener("click", () => show(k)));
-    gallery.querySelector("[data-fan-next]")?.addEventListener("click", () => show(on + 1));
     show(0);
   }
 </script>
