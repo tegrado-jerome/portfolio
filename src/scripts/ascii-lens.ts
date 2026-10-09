@@ -99,7 +99,9 @@ export function asciiLens(host: HTMLElement, { cell, radius, alpha, image, class
     }
   }
 
-  window.addEventListener("resize", () => (ready = false));
+  // Rebuilt only when the picture's own size changes: phones fire window resizes all through a scroll as the address
+  // bar slides, and rebuilding (a new canvas and a pixel read-back) on each would stutter the scroll.
+  new ResizeObserver(() => (ready = false)).observe(host);
   image.addEventListener("load", () => (ready = false));
 
   if (autoplay && !isLowEnd()) {

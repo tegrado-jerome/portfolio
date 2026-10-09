@@ -268,9 +268,13 @@ const { id, title, count } = Astro.props;
       render();
     }
     const queue = () => (frame ||= requestAnimationFrame(update));
+    // Phones fire resize all through a scroll as the address bar slides in and out, changing only the height. Those
+    // re-measure but keep gliding; jumping straight to the target there would make the cards skip mid-scroll.
+    let width = 0;
     const resized = () => {
       measure();
-      snap = true;
+      if (innerWidth !== width) snap = true;
+      width = innerWidth;
       queue();
     };
     resized();
