@@ -12,6 +12,7 @@ export const assistant = {
     "I'm based in the Philippines and work remotely.",
     "Main skills: AI-assisted development, React and TypeScript, WordPress, APIs and databases, SEO and analytics, research, business analysis and process improvement, and practical automation.",
     "I've done freelance WordPress website development, and I built and launched my own web app, GalaTayo (galatayo.app).",
+    "GalaTayo (galatayo.app) is my travel app: 230+ hand-picked places across 15 regions of the Philippines, 18 trip guides, an AI guide called Tara that answers in English or Taglish, and group trip plans with RSVPs, polls and per-person budgets.",
     "I'm looking for a fully remote role at a small international startup, ideally working directly with the founder: startup generalist, operations, web or WordPress, or practical AI automation.",
     "During my DOST internship, I built a semi-automated QA documentation system with Python and an AI chatbot (Feb–Mar 2026): it turns user stories into test plans and test cases, cutting the writing from 1–2 hours to 10–20 minutes, with structured prompts and output validation.",
     "I graduated Magna Cum Laude (GWA 1.36) from the Technological University of the Philippines (TUP) Manila, Batch 2026.",

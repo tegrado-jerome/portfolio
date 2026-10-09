@@ -23,9 +23,9 @@ export interface Project {
 export const projects: Project[] = [
   {
     title: "GalaTayo",
-    description: "Find places around the Philippines and plan trips with friends.",
+    description: "230+ hand-picked places across the Philippines, an AI guide that speaks Taglish, and group trip plans with polls.",
     category: "Web app",
-    technologies: ["React", "Azure Functions", "Supabase", "Redis", "Gemini", "Groq"],
+    technologies: ["React", "TypeScript", "Azure Functions", "Supabase", "Redis", "Gemini", "Groq", "Leaflet"],
     href: "https://galatayo.app/",
     image: "/images/projects/galatayo.webp",
     imageMobile: "/images/projects/galatayo-mobile.webp",
