@@ -41,8 +41,7 @@ export const awards: Award[] = [
     year: "2022",
     detail: "S&T Undergraduate Scholarship, MERIT program",
     short: "DOST-SEI",
-    image: "/images/awards/dost-scholarship.webp",
-    imageAlt: "DOST-SEI letter congratulating Jerome on qualifying for the 2022 S&T Undergraduate Scholarship",
-    document: true,
+    image: "/images/awards/dost-building.webp",
+    imageAlt: "The DOST building in Bicutan, Taguig, with the Philippine flag out front",
   },
 ];
