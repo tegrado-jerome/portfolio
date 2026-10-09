@@ -98,8 +98,14 @@ const n = testimonials.length;
     display: flex;
     transition: transform 0.7s var(--ease-out-soft);
   }
-  /* Every quote is as tall as the longest one, and each starts from the top: the photo, the quote and the name always
-     sit the same distance apart, and a shorter quote just leaves more room under the name. */
+  /* Each quote keeps its own height, and the window eases to the height of the one in view (set by the script), so the
+     companies always sit just under the name instead of under a gap left by a longer quote. */
+  :global(.js) .viewport {
+    transition: height 0.5s var(--ease-out-soft);
+  }
+  :global(.js) .track {
+    align-items: flex-start;
+  }
   :global(.js) .slide {
     display: flex;
     flex: 0 0 100%;
@@ -186,6 +192,7 @@ const n = testimonials.length;
       current = (i + n) % n;
       elapsed = 0;
       track.style.transform = `translateX(${-current * 100}%)`;
+      viewport.style.height = `${slides[current].offsetHeight}px`;
       slides.forEach((s, k) => (k === current ? s.removeAttribute("aria-hidden") : s.setAttribute("aria-hidden", "true")));
       buttons.forEach((b, k) => (k === current ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
       draw();
@@ -221,6 +228,9 @@ const n = testimonials.length;
       const dx = e.clientX - x0;
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - y0) * 1.5) go(current + (dx < 0 ? 1 : -1));
     });
+
+    // Rewrapped text changes a quote's height, so match the window again when the width changes.
+    new ResizeObserver(() => (viewport.style.height = `${slides[current].offsetHeight}px`)).observe(track);
 
     go(0);
   }
