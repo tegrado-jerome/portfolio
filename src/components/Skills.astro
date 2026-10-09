@@ -246,7 +246,7 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
   const thumb = document.querySelector<HTMLElement>("#skills .thumb");
 
-  // The guide pill leaves once the visitor has spun a dial, and comes back each time a dial is opened.
+  // The guide pill leaves for good once the visitor has spun any dial.
   const hint = document.querySelector("[data-skills-hint]");
   document.getElementById("skills")?.addEventListener("spin", () => hint?.classList.add("is-done"));
 
@@ -317,7 +317,6 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       t.tabIndex = selected ? 0 : -1;
       document.getElementById(t.getAttribute("aria-controls")!)!.hidden = !selected;
     }
-    hint?.classList.remove("is-done");
     moveThumb();
   }
 
