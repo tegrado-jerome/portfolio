@@ -15,7 +15,7 @@ export interface Testimonial {
 
 export const testimonials: Testimonial[] = [
   {
-    quote: "",
+    quote: "Jerome and I worked side by side at Vite SEO on site builds, blog content and SEO. He's quick to learn, careful with details, and easy to work with.",
     name: "Mark Rainier Armas",
     role: "QA Engineer",
     company: "Fuseable",
@@ -24,7 +24,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/testimonials/mark.webp",
   },
   {
-    quote: "",
+    quote: "I led Jerome at Vite SEO. He picked up our SEO work fast, delivered on time, and took ownership of the websites and content he handled.",
     name: "Ferdinand Cadorna",
     role: "SEO Team Lead",
     company: "Vite SEO",
@@ -33,7 +33,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/testimonials/ferdinand.webp",
   },
   {
-    quote: "",
+    quote: "Jerome and I went through Lean Six Sigma certification together. He thinks in processes and always looks for the simpler, cleaner way to do things.",
     name: "Von Harl Rian",
     role: "Aeronautical Engineering Graduate",
     company: "PATTS College of Aeronautics",
@@ -42,7 +42,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/testimonials/von.webp",
   },
   {
-    quote: "",
+    quote: "We freelanced together for car agents, setting up their Facebook pages with Botcake chat automation. Jerome made the bots work smoothly and the clients happy.",
     name: "Benz Bautista",
     role: "Freelancer",
     company: "484 Media",
@@ -51,7 +51,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/testimonials/benz.webp",
   },
   {
-    quote: "",
+    quote: "Jerome and I built the Citimotors and RS Carson websites. He's a clear communicator and handled the client side as well as the code.",
     name: "Macko Buenviaje",
     role: "BSIT Graduate",
     company: "NU MOA",
