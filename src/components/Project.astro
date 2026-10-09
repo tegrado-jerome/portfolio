@@ -20,6 +20,9 @@ const gallery = project.gallery ?? [];
 const slug = toSlug(project.title) || "project";
 const href = !project.locked && isSet(project.href) ? project.href : undefined;
 const number = String(index + 1).padStart(2, "0");
+// The visit link names the site it opens; a long workers.dev address just says "site".
+const host = href ? new URL(href).hostname.replace(/^www./, "") : "";
+const visitLabel = host && !host.endsWith(".workers.dev") ? host : "site";
 ---
 
 <!-- One card of the sticky stack (see Projects.astro): the story on the left (number and year, name, one line, stack,
@@ -46,8 +49,8 @@ const number = String(index + 1).padStart(2, "0");
     {
       visit && !project.locked &&
         (href ? (
-          <a href={href} target="_blank" rel="noopener noreferrer" class="visit tui-btn inline-flex">
-            [ visit ]
+          <a href={href} target="_blank" rel="noopener noreferrer" class="visit is-live tui-btn inline-flex">
+            <span class="draw">visit {visitLabel}</span><span class="arr" aria-hidden="true">↗</span>
           </a>
         ) : (
           <span class="visit tui-btn pointer-events-none inline-flex opacity-60" aria-hidden="true">
@@ -194,6 +197,57 @@ const number = String(index + 1).padStart(2, "0");
     align-self: flex-start;
     margin-left: -8px;
     color: var(--color-ink);
+  }
+  /* A live link: an underline draws under it, rests, and draws again, and the arrow nudges toward the site, so it
+     reads as clickable at a glance. Still under reduced motion: a plain underline. */
+  .visit.is-live {
+    gap: 4px;
+  }
+  .draw {
+    padding-bottom: 2px;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+  }
+  .arr {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .draw {
+      animation: draw 3.2s ease-in-out infinite;
+    }
+    .arr {
+      animation: nudge 3.2s ease-in-out infinite;
+    }
+  }
+  @keyframes draw {
+    0% {
+      background-size: 0 1px;
+      background-position: 0 100%;
+    }
+    40%,
+    60% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
+    }
+    61% {
+      background-position: 100% 100%;
+    }
+    100% {
+      background-size: 0 1px;
+      background-position: 100% 100%;
+    }
+  }
+  @keyframes nudge {
+    0%,
+    70%,
+    100% {
+      translate: 0 0;
+    }
+    80% {
+      translate: 3px -3px;
+    }
+    90% {
+      translate: 0 0;
+    }
   }
   /* Its ink colour would otherwise beat the tui-btn hover and vanish on the inverted block. */
   .visit:hover,
