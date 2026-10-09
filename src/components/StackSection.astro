@@ -13,7 +13,7 @@ const { id, title, count } = Astro.props;
 ---
 
 <!-- Sticky stack (after the stacking-cards demos on scroll-driven-animations.style and CodyHouse): the stack pins near
-     the top, and each scroll of about a third of the screen slides the next card up from below onto it, while the
+     the top, and each scroll of about two thirds of the screen slides the next card up from below onto it, while the
      ones behind sink back, tilt a touch and dim, a light fake 3D. Every card lands whole, and the scroll it takes is
      set by --per, not by the card's height, so it never drags. A "keep scrolling" pill counts the cards and leaves once
      the last one lands. Without JS, or with reduced motion, the cards are a plain list. -->
@@ -47,7 +47,7 @@ const { id, title, count } = Astro.props;
     --card-h: min(calc(43.48cqw + 41px), calc(100svh - 150px));
     --top: 24px;
     --step: 14px;
-    --per: 36svh; /* scroll it takes to bring in the next card */
+    --per: 65svh; /* scroll it takes to bring in the next card: enough that it never darts up */
   }
   /* Tablets stack the card (picture on top), so it gets taller. */
   @media (min-width: 768px) and (max-width: 1023px) {
@@ -61,7 +61,6 @@ const { id, title, count } = Astro.props;
       --card-h: min(700px, calc(100svh - 140px));
       --top: 16px;
       --step: 10px;
-      --per: 34svh;
     }
   }
   /* Plain list: no JS, or reduced motion. */
@@ -138,7 +137,7 @@ const { id, title, count } = Astro.props;
   @keyframes stack-card {
     0% {
       transform: translate3d(0, var(--rise), 0) perspective(1400px) rotateX(0deg) scale(1);
-      animation-timing-function: cubic-bezier(0.5, 1, 0.89, 1); /* ease out: each card settles softly */
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* starts gently, settles softly */
     }
     25% {
       transform: translate3d(0, 0px, 0) perspective(1400px) rotateX(0deg) scale(1);
@@ -276,8 +275,8 @@ const { id, title, count } = Astro.props;
     function render() {
       const arrived = items.map((_, i) => (i === 0 ? 1 : Math.min(1, Math.max(0, shown - (i - 1)))));
       for (let i = 0; i < items.length && !css; i++) {
-        // The slide eases out, so each card settles softly onto the stack.
-        const slide = i ? (1 - (1 - arrived[i]) ** 2) : 1;
+        // The slide eases in and out, so each card starts gently and settles softly onto the stack.
+        const slide = i ? arrived[i] ** 2 * (3 - 2 * arrived[i]) : 1;
         let depth = 0;
         for (let j = i + 1; j < items.length; j++) depth += arrived[j];
         depth = Math.min(depth, 3);
