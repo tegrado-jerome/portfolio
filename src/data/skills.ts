@@ -34,9 +34,6 @@ export const skillGroups: SkillGroup[] = [
       { name: "Claude", logo: logo("claude.svg") },
       { name: "ChatGPT", logo: logo("chatgpt.svg"), mono: true },
       { name: "Gemini", logo: logo("gemini.svg") },
-      { name: "DeepSeek", logo: logo("deepseek.svg") },
-      { name: "GLM", logo: logo("glm.svg"), mono: true },
-      { name: "Kimi", logo: logo("kimi.svg"), mono: true },
       { name: "Groq", logo: logo("groq.svg") },
     ],
   },
@@ -52,42 +49,34 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    name: "CMS",
-    skills: [
-      { name: "WordPress", logo: logo("wordpress.svg") },
-      { name: "Elementor", logo: logo("elementor.svg") },
-    ],
-  },
-  {
-    name: "Cloud & Backend",
+    name: "Cloud & Domains",
     skills: [
       { name: "Cloudflare Workers", logo: logo("cloudflare-workers.svg") },
       { name: "Azure", logo: logo("azure.svg") },
       { name: "Supabase", logo: logo("supabase.svg") },
       { name: "Redis", logo: logo("redis.svg") },
+      { name: "Namecheap", logo: logo("namecheap.svg") },
+      { name: "GoDaddy", logo: logo("godaddy.svg") },
+    ],
+  },
+  {
+    name: "WordPress & Marketing",
+    skills: [
+      { name: "WordPress", logo: logo("wordpress.svg") },
+      { name: "Elementor", logo: logo("elementor.svg") },
+      { name: "Rank Math SEO", logo: logo("rank-math.png") },
+      { name: "Google Search Console", logo: logo("google-search-console.svg") },
+      { name: "Google Analytics 4", logo: logo("google-analytics.svg") },
+      { name: "Ahrefs", logo: logo("ahrefs.png") },
+      { name: "Botcake", logo: logo("botcake.png") },
     ],
   },
   {
     name: "Dev Tools",
     skills: [
-      { name: "VS Code", logo: logo("vscode.png") },
-      { name: "GitHub Actions", logo: logo("github-actions.svg") },
+      { name: "GitHub", logo: logo("github.svg"), mono: true },
+      { name: "Postman", logo: logo("postman.svg") },
       { name: "Playwright", logo: logo("playwright.svg") },
     ],
-  },
-  {
-    name: "SEO & Analytics",
-    skills: [
-      { name: "Google Search Console", logo: logo("google-search-console.svg") },
-      { name: "Google Analytics 4", logo: logo("google-analytics.svg") },
-      { name: "Yoast SEO", logo: logo("yoast.svg") },
-      { name: "Rank Math SEO", logo: logo("rank-math.png") },
-      { name: "Ahrefs", logo: logo("ahrefs.png") },
-      { name: "Semrush", logo: logo("semrush.svg") },
-    ],
-  },
-  {
-    name: "Chatbot Automation",
-    skills: [{ name: "Botcake", logo: logo("botcake.png") }],
   },
 ];
