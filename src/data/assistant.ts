@@ -11,6 +11,7 @@ export const assistant = {
     "I build with AI coding agents like Claude Code and Codex. I'm not a senior software engineer, but I learn fast and ship working things.",
     "I'm based in the Philippines and work remotely.",
     "Main skills: AI-assisted development, React and TypeScript, WordPress, APIs and databases, SEO and analytics, research, business analysis and process improvement, and practical automation.",
+    "Dev tools I use: GitHub, Postman for testing APIs, and Playwright for automated browser tests.",
     "I've done freelance WordPress website development, and I built and launched my own web app, GalaTayo (galatayo.app).",
     "GalaTayo (galatayo.app) is my travel app: 230+ hand-picked places across 15 regions of the Philippines, 18 trip guides, an AI guide called Tara that answers in English or Taglish, and group trip plans with RSVPs, polls and per-person budgets.",
     "I'm looking for a fully remote role at a small international startup, ideally working directly with the founder: startup generalist, operations, web or WordPress, or practical AI automation.",
